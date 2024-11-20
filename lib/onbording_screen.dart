@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'login.dart';
 
+int _pageIndex = 0;
 class OnboardingScreen extends StatefulWidget {
   final Locale locale;
   final Function(String) changeLanguage;
@@ -14,7 +15,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   late PageController _pageController;
-  int _pageIndex = 0;
+
 
   @override
   void initState() {
@@ -48,25 +49,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final String languageCode = widget.locale.languageCode;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(languageCode == 'en' ? 'Onboarding' : 'الشاشة التوجيهية'),
-        actions: [
-          // Language selection icon
-          PopupMenuButton<String>(
-            onSelected: widget.changeLanguage, // استخدام الدالة الممررة
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'en',
-                child: Text('English'),
-              ),
-              PopupMenuItem<String>(
-                value: 'ar',
-                child: Text('عربي'),
-              ),
-            ],
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -140,6 +122,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
             ),
+            // PopupMenuButton in the bottom
+            Positioned(
+              bottom: 20.0,
+              left: 20.0,
+              right: 20.0,
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: PopupMenuButton<String>(
+                  onSelected: widget.changeLanguage, // استخدام الدالة الممررة
+                  itemBuilder: (BuildContext context) => [
+                    PopupMenuItem<String>(
+                      value: 'en',
+                      child: Text('English'),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'ar',
+                      child: Text('عربي'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -148,7 +152,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 // باقي الكود كما هو
-
 
 class DotIndicator extends StatelessWidget {
   const DotIndicator({
@@ -236,20 +239,40 @@ class OnboardContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const Spacer(),
+        SizedBox(
+          height: _pageIndex == 0 ? 130.0
+              : _pageIndex == 1 ? 250.0
+              : _pageIndex == 2 ? 280.0
+              : 280.0, // للـ pageIndex 3 وما فوق
+        ),
         Text(
           title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-              fontSize: 30,
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              fontSize: _pageIndex == 0 ? 40
+                  : _pageIndex == 1 ? 30
+                  : _pageIndex == 2 ? 26
+                  : 26,
               color: primaryColor,
-              fontWeight: FontWeight.bold),
+              fontWeight: _pageIndex == 0 ? FontWeight.w900
+                  : _pageIndex == 1 ? FontWeight.w900
+                  : _pageIndex == 2 ? FontWeight.w900
+                  : FontWeight.w900
+          ),
         ),
-        const SizedBox(height: 20),
+         SizedBox(height: _pageIndex == 0 ? 10:40),
         Text(
           description,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 18,
+          textAlign: TextAlign.left,
+          style:  TextStyle(
+            fontSize: _pageIndex == 0 ? 16
+                : _pageIndex == 1 ? 22
+                : _pageIndex == 2 ? 22
+                : 22,
+            fontWeight: _pageIndex == 0 ? FontWeight.w800
+                : _pageIndex == 1 ? FontWeight.w400
+                : _pageIndex == 2 ? FontWeight.w400
+                : FontWeight.w400,
             color: primaryColor,
           ),
         ),
