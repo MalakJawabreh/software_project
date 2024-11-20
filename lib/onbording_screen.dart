@@ -249,7 +249,7 @@ class OnboardContent extends StatelessWidget {
           description,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             color: primaryColor,
           ),
         ),
