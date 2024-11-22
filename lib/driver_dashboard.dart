@@ -14,7 +14,6 @@ class _DriverState extends State<Driver> {
   late String email;
   late String username;
 
-  // نضيف GlobalKey لفتح الـ Drawer
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -35,21 +34,20 @@ class _DriverState extends State<Driver> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,  // تحديد الـ GlobalKey هنا
+      key: _scaffoldKey,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80), // تحديد الارتفاع الجديد لـ AppBar
+        preferredSize: Size.fromHeight(80),
         child: AppBar(
           automaticallyImplyLeading: false,
           title: Padding(
-            padding: const EdgeInsets.only(top: 32), // مسافة رأسية لتحريك النص والصورة للأسفل
+            padding: const EdgeInsets.only(top: 32),
             child: Row(
               children: [
-                // إضافة صورة بجانب النص
                 Image.asset(
-                  'imagess/app_icon.jpg', // مسار الصورة
-                  height: 40, // تحديد ارتفاع الصورة
+                  'imagess/app_icon.jpg',
+                  height: 40,
                 ),
-                SizedBox(width: 0), // مسافة بين الصورة والنص
+                SizedBox(width: 0),
                 Text(
                   "assalni Ma'ak",
                   style: TextStyle(
@@ -62,157 +60,130 @@ class _DriverState extends State<Driver> {
             ),
           ),
           backgroundColor: Color.fromARGB(230, 196, 209, 219),
-
           actions: [
-            // إضافة Padding للأيقونة
             Padding(
-              padding: const EdgeInsets.only(top: 19), // تحديد الـ padding للأيقونة
+              padding: const EdgeInsets.only(top: 19),
               child: IconButton(
-                icon: Icon(Icons.menu, size: 30,color: Color.fromARGB(230, 41, 84, 115)),
+                icon: Icon(Icons.menu, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
                 onPressed: () {
-                  _scaffoldKey.currentState?.openEndDrawer(); // فتح الـ Drawer من الجهة اليمنى
+                  _scaffoldKey.currentState?.openEndDrawer();
                 },
               ),
             ),
           ],
         ),
       ),
-
-      endDrawer: Container(
-        width: 300, // تحديد عرض الـ Drawer
-        child: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              // تعديل DrawerHeader لإضافة صورة البروفايل والنص
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.white, // لون خلفية الهيدر
-                ),
-                child: Row(
-                  children: [
-                    // إضافة صورة البروفايل بشكل دائري
-                    CircleAvatar(
-                      backgroundImage: AssetImage('imagess/signup_icon.png'), // مسار صورة البروفايل
-                      radius: 30, // حجم الصورة (دائري)
-                    ),
-                    SizedBox(width: 10), // مسافة بين الصورة والنص
-                    // إضافة الاسم والبريد الإلكتروني في Column
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center, // محاذاة النص في المنتصف عموديًا بالنسبة للصورة
-                      children: [
-                        Text(
-                          username, // اسم المستخدم
-                          style: TextStyle(
-                            color: Color.fromARGB(230, 41, 84, 115),
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.white),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: AssetImage('imagess/signup_icon.png'),
+                    radius: 30,
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        username,
+                        style: TextStyle(
+                          color: Color.fromARGB(230, 41, 84, 115),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 5), // إضافة مسافة بين الاسم والبريد الإلكتروني
-                        Text(
-                          email, // البريد الإلكتروني
-                          style: TextStyle(
-                            color: Color.fromARGB(230, 41, 84, 115), // لون أخف للبريد الإلكتروني
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        email,
+                        style: TextStyle(
+                          color: Color.fromARGB(230, 41, 84, 115),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // إضافة الخيارات في الـ Drawer
-              ListTile(
-                leading: Icon(Icons.settings,size:30),  // أيقونة الإعدادات
-                title: Text(
-                    'Settings',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(230, 41, 84, 115),
+                      ),
+                    ],
                   ),
-                ),
-                onTap: () {
-                  // منطق لفتح خيار معين
-                },
+                ],
               ),
-              //Privacy  Reviews  Support  Logout
-              ListTile(
-                leading: Icon(Icons.privacy_tip,size:30),  // أيقونة الإعدادات
-                title: Text(
-                  'Privacy',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(230, 41, 84, 115),
-                  ),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings, size: 30),
+              title: Text(
+                'Settings',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
                 ),
-                onTap: () {
-                  // منطق لفتح خيار معين
-                },
               ),
-              ListTile(
-                leading: Icon(Icons.reviews,size:30),  // أيقونة الإعدادات
-                title: Text(
-                  'Reviews',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(230, 41, 84, 115),
-                  ),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: Icon(Icons.privacy_tip, size: 30),
+              title: Text(
+                'Privacy',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
                 ),
-                onTap: () {
-                  // منطق لفتح خيار معين
-                },
               ),
-              ListTile(
-                leading: Icon(Icons.contact_support,size:30),  // أيقونة الإعدادات
-                title: Text(
-                  'Support',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(230, 41, 84, 115),
-                  ),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: Icon(Icons.reviews, size: 30),
+              title: Text(
+                'Reviews',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
                 ),
-                onTap: () {
-                  // منطق لفتح خيار معين
-                },
               ),
-              ListTile(
-                leading: Icon(Icons.logout,size:30),  // أيقونة الإعدادات
-                title: Text(
-                  'Logout',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(230, 41, 84, 115),
-                  ),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: Icon(Icons.contact_support, size: 30),
+              title: Text(
+                'Support',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
                 ),
-                onTap: () {
-                  // منطق لفتح خيار معين
-                },
               ),
-            ],
-          ),
+              onTap: () {},
+            ),
+            ListTile(
+              leading: Icon(Icons.logout, size: 30),
+              title: Text(
+                'Logout',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
+                ),
+              ),
+              onTap: logout,
+            ),
+          ],
         ),
       ),
-
-
-
       body: Column(
         children: [
-          // الجزء العلوي الذي يحتوي على صورة الشخص واسم الشخص وأيقونات الإشعارات، الشات، والمنيو
           Padding(
-            padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+            padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
             child: Row(
               children: [
                 CircleAvatar(
                   backgroundImage: AssetImage('imagess/signup_icon.png'),
-                  radius: 20, // تغيير الحجم حسب الحاجة
+                  radius: 20,
                 ),
                 SizedBox(width: 7),
                 Column(
@@ -229,43 +200,91 @@ class _DriverState extends State<Driver> {
                   ],
                 ),
                 Spacer(),
-                // أيقونة الإشعارات
                 IconButton(
                   icon: Icon(Icons.notifications, size: 25),
-                  onPressed: () {
-                    // منطق الإشعارات
-                  },
+                  onPressed: () {},
                 ),
-                // أيقونة الشات
                 IconButton(
                   icon: Icon(Icons.chat, size: 25),
-                  onPressed: () {
-                    // منطق الشات
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
           ),
-
-          SizedBox(height: 20), // إضافة مسافة بين الجزء العلوي وبقية الصفحة
-
-          // المحتوى الرئيسي الذي يحتوي على زر الخروج
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Drivers",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Text(
+                  "My Trips",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.grey[700]),
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: logout,
-                  child: Text("Logout"),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_circle_outline, size: 30, color: Colors.grey[700]),
+                  ],
                 ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Expanded(
+            child: DefaultTabController(
+              length: 3,
+              child: Column(
+                children: [
+                  TabBar(
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.grey[800],
+                    indicator: BoxDecoration(
+                      color: Color.fromARGB(230, 41, 84, 115),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicatorWeight: 0,
+                    labelStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    tabs: [
+                      Tab(
+                        child: Text("UPCOMING"),
+                      ),
+                      Tab(
+                        child: Text("COMPLETED"),
+                      ),
+                      Tab(
+                        child: Text("CANCELED"),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        Center(child: Text("Upcoming Trips")),
+                        Center(child: Text("Completed Trips")),
+                        Center(child: Text("Canceled Trips")),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+
+
+
+
         ],
       ),
     );
