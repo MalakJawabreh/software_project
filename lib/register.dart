@@ -341,19 +341,19 @@ class _RegisterState extends State<Register> {
   Widget _getIconForField(String label) {
     switch (label) {
       case "Full Name":
-        return SvgPicture.asset('imagess/userrrrr.svg', width: 20, height: 20);
+        return Icon(Icons.person, size: 20);  // أيقونة المستخدم
       case "Email":
-        return SvgPicture.asset('imagess/email.svg', width: 20, height: 20);
+        return Icon(Icons.email, size: 20);   // أيقونة البريد الإلكتروني
       case "Password":
-        return SvgPicture.asset('imagess/lock.svg', width: 20, height: 20);
+        return Icon(Icons.lock, size: 20);    // أيقونة القفل
       case "Phone Number":
-        return SvgPicture.asset('imagess/phone.svg', width: 20, height: 20);
+        return Icon(Icons.phone, size: 20);   // أيقونة الهاتف
       case "Car Number":
         return SvgPicture.asset('imagess/car_num.svg', width: 24, height: 40);
       case "Car Type":
-        return SvgPicture.asset('imagess/car.svg', width: 24, height: 40);
+        return Icon(Icons.car_repair, size: 30);   // أيقونة نوع السيارة
       default:
-        return Container();
+        return Container();  // إذا لم يكن هناك تطابق، يتم إرجاع حاوية فارغة
     }
   }
 }

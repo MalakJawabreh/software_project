@@ -251,13 +251,12 @@ class _LoginState extends State<Login> {
   Widget _getIconForField(String label) {
     switch (label) {
       case "Email":
-        return SvgPicture.asset('imagess/email.svg', width: 20, height: 20);
+        return Icon(Icons.email, size: 20); // أيقونة البريد الإلكتروني
       case "Password":
-        return SvgPicture.asset('imagess/lock.svg', width: 20, height: 20);
+        return Icon(Icons.lock, size: 20);  // أيقونة القفل
       default:
-        return Container();
+        return Container();  // إذا لم يكن هناك تطابق، يتم إرجاع حاوية فارغة
     }
   }
+
 }
-
-

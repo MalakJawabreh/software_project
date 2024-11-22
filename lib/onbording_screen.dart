@@ -260,7 +260,7 @@ class OnboardContent extends StatelessWidget {
                   : FontWeight.w900
           ),
         ),
-         SizedBox(height: _pageIndex == 0 ? 10:40),
+        SizedBox(height: _pageIndex == 0 ? 10:40),
         Text(
           description,
           textAlign: TextAlign.left,
