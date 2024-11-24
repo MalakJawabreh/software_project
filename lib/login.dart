@@ -62,6 +62,7 @@ class _LoginState extends State<Login> {
       if (jsonResponse['status']) {
         var myToken = jsonResponse['token'];
         var userRole = jsonResponse['role'];
+
         prefs.setString('token', myToken);
 
         if (userRole == 'Driver') {
