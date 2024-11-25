@@ -93,12 +93,14 @@ class _DriverState extends State<Driver> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              DrawerHeader(
-                decoration: BoxDecoration(color: Colors.white),
+              Container(
+                color: Colors.white,
+                //height: 100, // تحديد ارتفاع مخصص
+                padding: EdgeInsets.only(top: 100),
                 child: Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(left: 10), // إضافة بادينغ من اليسار قبل الصورة
+                      padding: const EdgeInsets.only(left: 25),
                       child: CircleAvatar(
                         backgroundImage: AssetImage('imagess/signup_icon.png'),
                         radius: 30,
@@ -113,10 +115,11 @@ class _DriverState extends State<Driver> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => ProfileDriver(
-                                email: email,
-                                username: username,
-                              ),
+                              MaterialPageRoute(
+                                builder: (context) => ProfileDriver(
+                                  email: email,
+                                  username: username,
+                                ),
                               ),
                             );
                           },
@@ -128,35 +131,13 @@ class _DriverState extends State<Driver> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
                         ),
-                        SizedBox(height: 5),
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(builder: (context) => ProfileDriver(
-                        //         email: email,
-                        //         username: username,
-                        //       ),
-                        //       ), // استبدل بـ الصفحة المطلوبة
-                        //     );
-                        //   },
-                        //   child: Text(
-                        //     email,
-                        //     style: TextStyle(
-                        //       color: Color.fromARGB(230, 41, 84, 115),
-                        //       fontSize: 16,
-                        //       fontWeight: FontWeight.w500,
-                        //     ),
-                        //   ),
-                        // ),
                       ],
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 30,),
               ListTile(
                 leading: Icon(Icons.settings, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
                 title: Text(
@@ -283,8 +264,17 @@ class _DriverState extends State<Driver> {
                 padding: const EdgeInsets.only(right: 20),
                 child: Row(
                   children: [
-                    Icon(Icons.add_circle_outline, size: 30, color: Colors.grey[700]),
+                    IconButton(
+                      icon: Icon(Icons.add_circle_outline, size: 30, color: Colors.grey[700]),
+                      onPressed: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => CreateTripPage()), // اسم الصفحة
+                        // );
+                      },
+                    ),
                   ],
+
                 ),
               ),
             ],
