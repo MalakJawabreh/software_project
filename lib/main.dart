@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:provider/provider.dart';
-=======
->>>>>>> e8bf6cf019488648af2a0ab0bd8063adfcc0ba6b
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme_provider.dart'; // تأكد من استيراد ملف ThemeProvider بشكل صحيح
@@ -10,9 +7,8 @@ import 'onbording_screen.dart'; // تأكد من استيراد ملف Onboardin
 import 'language_provider.dart'; // استيراد الـ LanguageProvider
 
 void main() {
-<<<<<<< HEAD
   runApp(
-
+// neww aya up
     ChangeNotifierProvider(
       create: (context) => LanguageProvider(), // إضافة LanguageProvider
       child: ChangeNotifierProvider(
@@ -22,10 +18,6 @@ void main() {
     ),
 
   );
-=======
-  runApp(MyApp());
-  //aya new commit
->>>>>>> e8bf6cf019488648af2a0ab0bd8063adfcc0ba6b
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
     statusBarColor: Colors.transparent, // شفاف لتقليل التداخل
     statusBarIconBrightness: Brightness.dark, // تغيير الأيقونات لتكون داكنة
