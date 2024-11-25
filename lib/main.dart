@@ -8,7 +8,7 @@ import 'language_provider.dart'; // استيراد الـ LanguageProvider
 
 void main() {
   runApp(
-// neww aya up
+
     ChangeNotifierProvider(
       create: (context) => LanguageProvider(), // إضافة LanguageProvider
       child: ChangeNotifierProvider(
