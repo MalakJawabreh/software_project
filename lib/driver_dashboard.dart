@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:project1/profile_driver.dart';
 import 'login.dart';
 
 class Driver extends StatefulWidget {
@@ -62,128 +63,183 @@ class _DriverState extends State<Driver> {
           backgroundColor: Color.fromARGB(230, 196, 209, 219),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(top: 19),
-              child: IconButton(
-                icon: Icon(Icons.menu, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
-                onPressed: () {
-                  _scaffoldKey.currentState?.openEndDrawer();
-                },
+              padding: const EdgeInsets.only(top: 22),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.chat, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.menu, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
+                    },
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
       endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.white),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('imagess/signup_icon.png'),
-                    radius: 30,
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        username,
-                        style: TextStyle(
-                          color: Color.fromARGB(230, 41, 84, 115),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+        width: 340,
+        child: Container(
+          color: Colors.white,  // تغيير اللون الأبيض كخلفية للـ Drawer بالكامل
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(color: Colors.white),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10), // إضافة بادينغ من اليسار قبل الصورة
+                      child: CircleAvatar(
+                        backgroundImage: AssetImage('imagess/signup_icon.png'),
+                        radius: 30,
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        email,
-                        style: TextStyle(
-                          color: Color.fromARGB(230, 41, 84, 115),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                    ),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ProfileDriver(
+                                email: email,
+                                username: username,
+                              ),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            username,
+                            style: TextStyle(
+                              color: Color.fromARGB(230, 41, 84, 115),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 5),
+                        // GestureDetector(
+                        //   onTap: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(builder: (context) => ProfileDriver(
+                        //         email: email,
+                        //         username: username,
+                        //       ),
+                        //       ), // استبدل بـ الصفحة المطلوبة
+                        //     );
+                        //   },
+                        //   child: Text(
+                        //     email,
+                        //     style: TextStyle(
+                        //       color: Color.fromARGB(230, 41, 84, 115),
+                        //       fontSize: 16,
+                        //       fontWeight: FontWeight.w500,
+                        //     ),
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10,),
+              ListTile(
+                leading: Icon(Icons.settings, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                title: Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
                   ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings, size: 30),
-              title: Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(230, 41, 84, 115),
                 ),
+                contentPadding: EdgeInsets.only(left: 30),  // إضافة بادينغ من اليسار
+                onTap: () {},
               ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(Icons.privacy_tip, size: 30),
-              title: Text(
-                'Privacy',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(230, 41, 84, 115),
+              SizedBox(height: 10,),
+              ListTile(
+                leading: Icon(Icons.privacy_tip, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                title: Text(
+                  'Privacy',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
+                  ),
                 ),
+                contentPadding: EdgeInsets.only(left: 30),
+                onTap: () {},
               ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(Icons.reviews, size: 30),
-              title: Text(
-                'Reviews',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(230, 41, 84, 115),
+              SizedBox(height: 10,),
+              ListTile(
+                leading: Icon(Icons.reviews, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                title: Text(
+                  'Reviews',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
+                  ),
                 ),
+                contentPadding: EdgeInsets.only(left: 30),
+                onTap: () {},
               ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(Icons.contact_support, size: 30),
-              title: Text(
-                'Support',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(230, 41, 84, 115),
+              SizedBox(height: 10,),
+              ListTile(
+                leading: Icon(Icons.contact_support, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                title: Text(
+                  'Support',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
+                  ),
                 ),
+                contentPadding: EdgeInsets.only(left: 30),
+                onTap: () {},
               ),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(Icons.logout, size: 30),
-              title: Text(
-                'Logout',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(230, 41, 84, 115),
+              SizedBox(height: 10,),
+              ListTile(
+                leading: Icon(Icons.logout, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                title: Text(
+                  'Logout',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
+                  ),
                 ),
+                contentPadding: EdgeInsets.only(left: 30),
+                onTap: logout,
               ),
-              onTap: logout,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+            padding: const EdgeInsets.only(top: 15, left: 16, right: 16),
             child: Row(
               children: [
                 CircleAvatar(
                   backgroundImage: AssetImage('imagess/signup_icon.png'),
-                  radius: 20,
+                  radius: 25,
                 ),
                 SizedBox(width: 7),
                 Column(
@@ -197,17 +253,17 @@ class _DriverState extends State<Driver> {
                         color: Color.fromARGB(230, 41, 84, 115),
                       ),
                     ),
+                    Text(
+                      email,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(230, 41, 84, 115),
+                      ),
+                    ),
                   ],
                 ),
                 Spacer(),
-                IconButton(
-                  icon: Icon(Icons.notifications, size: 25),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: Icon(Icons.chat, size: 25),
-                  onPressed: () {},
-                ),
               ],
             ),
           ),
@@ -281,10 +337,6 @@ class _DriverState extends State<Driver> {
               ),
             ),
           ),
-
-
-
-
         ],
       ),
     );
