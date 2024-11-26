@@ -6,6 +6,9 @@ import 'theme_provider.dart';
 import 'language_provider.dart';
 import 'ChangePasswordPage.dart';
 import 'VisibilitySettingsScreen.dart';
+import 'BlockedContactsScreen.dart';
+import 'LiveLocationPage.dart';
+
 class Passenger extends StatefulWidget {
   final String token;
   const Passenger({required this.token, super.key});
@@ -622,6 +625,32 @@ class PrivacyPage extends StatelessWidget {
               onTap: () {
                 // التعامل مع المصادقة هنا
               },
+            ),
+            ListTile(
+              leading: Icon(Icons.block, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'جهات اتصال محظورة' : 'Blocked Contact',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BlockedContactsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.location_on, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'الموقع المباشر' : 'Live Location',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LiveLocationPage()),
+                );
+              }
             ),
           ],
         ),
