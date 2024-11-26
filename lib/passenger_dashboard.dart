@@ -8,6 +8,7 @@ import 'ChangePasswordPage.dart';
 import 'VisibilitySettingsScreen.dart';
 import 'BlockedContactsScreen.dart';
 import 'LiveLocationPage.dart';
+import 'EmailAddressPage.dart';
 
 class Passenger extends StatefulWidget {
   final String token;
@@ -533,6 +534,8 @@ class SettingsPage extends StatelessWidget {
                             Navigator.pop(context); // إغلاق مربع الحوار
                           },
                         ),
+
+
                       ],
                     ),
                   ),
@@ -548,6 +551,19 @@ class SettingsPage extends StatelessWidget {
               onTap: () {
                 // تغيير الثيم
                 Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.email, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'عنوان البريد الإلكتروني' : 'Email address',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EmailAddressPage()),
+                );
               },
             ),
             ListTile(
