@@ -9,6 +9,7 @@ import 'VisibilitySettingsScreen.dart';
 import 'BlockedContactsScreen.dart';
 import 'LiveLocationPage.dart';
 import 'EmailAddressPage.dart';
+import 'TwoStepVerificationPage.dart';
 
 class Passenger extends StatefulWidget {
   final String token;
@@ -563,6 +564,21 @@ class SettingsPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EmailAddressPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.privacy_tip, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'التحقق بخطوتين' : 'Two-step verification',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TwoStepVerificationPage(),
+                  ),
                 );
               },
             ),
