@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/profile_driver.dart';
+import 'package:project1/search.dart';
+import 'creat_trip_page.dart';
 import 'login.dart';
 
 class Driver extends StatefulWidget {
@@ -267,10 +269,10 @@ class _DriverState extends State<Driver> {
                     IconButton(
                       icon: Icon(Icons.add_circle_outline, size: 30, color: Colors.grey[700]),
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => CreateTripPage()), // اسم الصفحة
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SetDestinationPage()), // اسم الصفحة
+                        );
                       },
                     ),
                   ],

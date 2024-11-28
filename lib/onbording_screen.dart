@@ -3,11 +3,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'login.dart';
 
 int _pageIndex = 0;
+
 class OnboardingScreen extends StatefulWidget {
   final Locale locale;
   final Function(String) changeLanguage;
+  final Function() changeTheme; // أضف هذا السطر
 
-  const OnboardingScreen({super.key, required this.locale, required this.changeLanguage});
+  const OnboardingScreen({
+    super.key,
+    required this.locale,
+    required this.changeLanguage,
+    required this.changeTheme, // أضف هذا السطر
+  });
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -15,7 +22,6 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   late PageController _pageController;
-
 
   @override
   void initState() {
@@ -127,21 +133,42 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               bottom: 20.0,
               left: 20.0,
               right: 20.0,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: PopupMenuButton<String>(
-                  onSelected: widget.changeLanguage, // استخدام الدالة الممررة
-                  itemBuilder: (BuildContext context) => [
-                    PopupMenuItem<String>(
-                      value: 'en',
-                      child: Text('English'),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween, // تغيير للمحاذاة
+                children: [
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: PopupMenuButton<String>(
+                      onSelected: widget.changeLanguage, // استخدام الدالة الممررة
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem<String>(
+                          value: 'en',
+                          child: Text('English'),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'ar',
+                          child: Text('عربي'),
+                        ),
+                      ],
                     ),
-                    PopupMenuItem<String>(
-                      value: 'ar',
-                      child: Text('عربي'),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      onPressed: widget.changeTheme, // إضافة زر لتغيير الثيم
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                      ),
+                      child: Text(
+                        languageCode == 'en' ? 'Toggle Theme' : 'تغيير الثيم',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
