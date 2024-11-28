@@ -4,6 +4,12 @@ import 'login.dart';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
 import 'language_provider.dart';
+import 'ChangePasswordPage.dart';
+import 'VisibilitySettingsScreen.dart';
+import 'BlockedContactsScreen.dart';
+import 'LiveLocationPage.dart';
+import 'EmailAddressPage.dart';
+import 'TwoStepVerificationPage.dart';
 
 class Passenger extends StatefulWidget {
   final String token;
@@ -191,7 +197,12 @@ class _PassengerState extends State<Passenger> {
                   color: Color.fromARGB(230, 41, 84, 115),
                 ),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PrivacyPage()),
+                );
+              },
             ),
             ListTile(
               leading: Icon(Icons.reviews, size: 30),
@@ -477,25 +488,37 @@ class SettingsPage extends StatelessWidget {
     final isArabic = languageProvider.isArabic;
 
     return Scaffold(
-      appBar: AppBar(title: Text(isArabic ? 'الإعدادات' : 'Settings')),
+      appBar: AppBar(
+        title: Text(
+          isArabic ? 'الإعدادات' : 'Settings',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: primaryColor, // استخدام اللون الأساسي
+          ),
+        ),
+        backgroundColor: SecondryColor, // تدرج أفتح من اللون الأساسي لــ AppBar
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.language, size: 30),
-              title: Text(isArabic ? 'اختر اللغة' : 'Select Language', style: TextStyle(fontSize: 20)),
+              leading: Icon(Icons.language, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'اختر اللغة' : 'Select Language',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
               onTap: () {
                 // إظهار مربع حوار لاختيار اللغة
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text(isArabic ? "اختر اللغة" : "Select Language"),
+                    title: Text(isArabic ? "اختر اللغة" : "Select Language", style: TextStyle(color: primaryColor)), // تغيير لون النص
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          title: Text(isArabic ? "الإنجليزية" : "English"),
+                          title: Text(isArabic ? "الإنجليزية" : "English", style: TextStyle(color: primaryColor)), // تغيير لون النص
                           onTap: () {
                             // تغيير اللغة إلى الإنجليزية
                             Provider.of<LanguageProvider>(context, listen: false)
@@ -504,7 +527,7 @@ class SettingsPage extends StatelessWidget {
                           },
                         ),
                         ListTile(
-                          title: Text(isArabic ? "العربية" : "Arabic"),
+                          title: Text(isArabic ? "العربية" : "Arabic", style: TextStyle(color: primaryColor)), // تغيير لون النص
                           onTap: () {
                             // تغيير اللغة إلى العربية
                             Provider.of<LanguageProvider>(context, listen: false)
@@ -512,6 +535,8 @@ class SettingsPage extends StatelessWidget {
                             Navigator.pop(context); // إغلاق مربع الحوار
                           },
                         ),
+
+
                       ],
                     ),
                   ),
@@ -519,16 +544,50 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.palette),
-              title: Text(isArabic ? 'تغيير الثيم' : 'Change Theme', style: TextStyle(fontSize: 20)),
+              leading: Icon(Icons.palette, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'تغيير الثيم' : 'Change Theme',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
               onTap: () {
                 // تغيير الثيم
                 Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
               },
             ),
             ListTile(
-              leading: Icon(Icons.notifications, size: 30),
-              title: Text(isArabic ? 'الإشعارات' : 'Notifications', style: TextStyle(fontSize: 20)),
+              leading: Icon(Icons.email, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'عنوان البريد الإلكتروني' : 'Email address',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EmailAddressPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.privacy_tip, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'التحقق بخطوتين' : 'Two-step verification',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TwoStepVerificationPage(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.notifications, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'الإشعارات' : 'Notifications',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
               onTap: () {
                 // التعامل مع الإشعارات هنا
               },
@@ -539,8 +598,98 @@ class SettingsPage extends StatelessWidget {
     );
   }
 }
+class PrivacyPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // الحصول على قيمة isArabic من LanguageProvider
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    final isArabic = languageProvider.isArabic;
 
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          isArabic ? 'الخصوصية' : 'Privacy',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: primaryColor, // استخدام اللون الأساسي للعنوان
+          ),
+        ),
+        backgroundColor: SecondryColor, // تدرج أفتح من اللون الأساسي لــ AppBar
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.lock_outline, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'تغيير كلمة السر' : 'Change password',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                // الانتقال إلى صفحة تغيير كلمة السر
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangePasswordPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.visibility, size: 30, color: primaryColor),
+              title: Text(
+                isArabic ? 'رؤية الحساب' : 'Visibility',
+                style: TextStyle(fontSize: 20, color: primaryColor),
+              ),
+              onTap: () {
+                // الانتقال إلى صفحة إعدادات الرؤية
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => VisibilitySettingsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.security, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'المصادقة' : 'Authentication',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                // التعامل مع المصادقة هنا
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.block, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'جهات اتصال محظورة' : 'Blocked Contact',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BlockedContactsScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.location_on, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'الموقع المباشر' : 'Live Location',
+                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LiveLocationPage()),
+                );
+              }
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
 
-
-
-const Color primaryColor = Color.fromARGB(230, 41, 84, 115); // اللون الرئيسي
+const Color primaryColor = Color.fromARGB(230, 41, 84, 115); // اللون الأساسي

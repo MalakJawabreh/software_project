@@ -128,47 +128,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
             ),
-            // PopupMenuButton in the bottom
+            // أيقونة "تغيير الثيم"
             Positioned(
-              bottom: 20.0,
-              left: 20.0,
-              right: 20.0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // تغيير للمحاذاة
-                children: [
-                  Align(
-                    alignment: Alignment.bottomLeft,
-                    child: PopupMenuButton<String>(
-                      onSelected: widget.changeLanguage, // استخدام الدالة الممررة
-                      itemBuilder: (BuildContext context) => [
-                        PopupMenuItem<String>(
-                          value: 'en',
-                          child: Text('English'),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'ar',
-                          child: Text('عربي'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: ElevatedButton(
-                      onPressed: widget.changeTheme, // إضافة زر لتغيير الثيم
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                      ),
-                      child: Text(
-                        languageCode == 'en' ? 'Toggle Theme' : 'تغيير الثيم',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              top: 20.0,
+              left: 20.0, // موضع الأيقونة في الزاوية العلوية اليسرى
+              child: IconButton(
+                onPressed: widget.changeTheme, // استدعاء الدالة لتغيير الثيم
+                icon: Icon(
+                  Icons.brightness_6, // أيقونة تغيير الثيم
+                  color: primaryColor, // لون الأيقونة
+                  size: 28, // حجم الأيقونة
+                ),
               ),
             ),
           ],
@@ -267,39 +237,42 @@ class OnboardContent extends StatelessWidget {
       children: [
         const Spacer(),
         SizedBox(
-          height: _pageIndex == 0 ? 130.0
-              : _pageIndex == 1 ? 250.0
-              : _pageIndex == 2 ? 280.0
+          height: _pageIndex == 0
+              ? 130.0
+              : _pageIndex == 1
+              ? 250.0
+              : _pageIndex == 2
+              ? 280.0
               : 280.0, // للـ pageIndex 3 وما فوق
         ),
         Text(
           title,
           textAlign: TextAlign.left,
           style: TextStyle(
-              fontSize: _pageIndex == 0 ? 40
-                  : _pageIndex == 1 ? 30
-                  : _pageIndex == 2 ? 26
-                  : 26,
-              color: primaryColor,
-              fontWeight: _pageIndex == 0 ? FontWeight.w900
-                  : _pageIndex == 1 ? FontWeight.w900
-                  : _pageIndex == 2 ? FontWeight.w900
-                  : FontWeight.w900
+            fontSize: _pageIndex == 0
+                ? 40
+                : _pageIndex == 1
+                ? 30
+                : _pageIndex == 2
+                ? 26
+                : 26,
+            color: primaryColor,
+            fontWeight: FontWeight.w900,
           ),
         ),
-        SizedBox(height: _pageIndex == 0 ? 10:40),
+        SizedBox(height: _pageIndex == 0 ? 10 : 40),
         Text(
           description,
           textAlign: TextAlign.left,
-          style:  TextStyle(
-            fontSize: _pageIndex == 0 ? 16
-                : _pageIndex == 1 ? 22
-                : _pageIndex == 2 ? 22
+          style: TextStyle(
+            fontSize: _pageIndex == 0
+                ? 16
+                : _pageIndex == 1
+                ? 22
+                : _pageIndex == 2
+                ? 22
                 : 22,
-            fontWeight: _pageIndex == 0 ? FontWeight.w800
-                : _pageIndex == 1 ? FontWeight.w400
-                : _pageIndex == 2 ? FontWeight.w400
-                : FontWeight.w400,
+            fontWeight: FontWeight.w400,
             color: primaryColor,
           ),
         ),

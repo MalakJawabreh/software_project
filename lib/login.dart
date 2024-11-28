@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:project1/register.dart';
 import 'package:http/http.dart' as http ;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import 'dashboard.dart';
 import 'driver_dashboard.dart';
 import 'passenger_dashboard.dart';
