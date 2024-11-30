@@ -1,31 +1,104 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/profile_driver.dart';
 import 'package:project1/search.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'config.dart';
 import 'creat_trip_page.dart';
+import 'package:http/http.dart' as http;
+import 'get_trips.dart';
 import 'login.dart';
+import 'dart:async';
 
 class Driver extends StatefulWidget {
   final String token;
-  const Driver({required this.token, super.key});
+  Driver({this.token = ''});
 
   @override
   State<Driver> createState() => _DriverState();
 }
 
 class _DriverState extends State<Driver> {
-  late String email;
-  late String username;
+  late String email = '';  // تعيين قيمة افتراضية
+  late String username = '';  // تعيين قيمة افتراضية
+  List<dynamic> upcomingTrips = [];
+
+
+  StreamController<Map<String, dynamic>> dashboardStreamController = StreamController.broadcast();
+
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
-    email = jwtDecodedToken['email'];
-    username = jwtDecodedToken['fullName'];
+    // محاولة استخراج البيانات من التوكن إذا كان موجودًا
+    if (widget.token.isNotEmpty) {
+      try {
+        Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
+        email = jwtDecodedToken['email'];
+        username = jwtDecodedToken['fullName'];
+
+        // حفظ البيانات في SharedPreferences
+        saveUserData(email, username);
+
+        fetchUpcomingTrips();
+      } catch (e) {
+        print("Invalid token: $e");
+      }
+    } else {
+      // إذا لم يكن هناك توكن، نحاول جلب البيانات من SharedPreferences
+      loadUserData().then((_) {
+        // بعد تحميل البيانات من SharedPreferences، استدعاء fetchUpcomingTrips
+        fetchUpcomingTrips();
+      });
+    }
   }
+
+// دالة لحفظ البيانات في SharedPreferences
+  Future<void> saveUserData(String email, String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email', email);
+    await prefs.setString('username', username);
+
+    print('Saved email: $email');
+    print('Saved username: $username');
+  }
+
+// دالة لتحميل البيانات من SharedPreferences
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      email = prefs.getString('email') ?? 'defaultEmail@example.com'; // القيمة الافتراضية في حالة عدم وجود بيانات
+      username = prefs.getString('username') ?? 'defaultUsername'; // القيمة الافتراضية في حالة عدم وجود بيانات
+    });
+    // طباعة البيانات للتحقق منها
+    print('Loaded email: $email');
+    print('Loaded username: $username');
+  }
+
+    Future<void> fetchUpcomingTrips() async {
+
+      try {
+        print('Fetching trips for email: $email');
+        final response = await http.get(Uri.parse('$driver_trips?driverEmail=$email'));
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['status']) {
+            setState(() {
+              upcomingTrips = data['trips'];
+            });
+          }
+        } else {
+          print('Failed to fetch trips: ${response.statusCode}');
+        }
+      } catch (error) {
+        print('Error fetching trips: $error');
+      }
+    }
+
 
   void logout() {
     Navigator.pushReplacement(
@@ -33,6 +106,7 @@ class _DriverState extends State<Driver> {
       MaterialPageRoute(builder: (context) => Login()),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +345,7 @@ class _DriverState extends State<Driver> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SetDestinationPage()), // اسم الصفحة
+                          MaterialPageRoute(builder: (context) => SetDestinationPage(email: email)), // اسم الصفحة
                         );
                       },
                     ),
@@ -319,7 +393,17 @@ class _DriverState extends State<Driver> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        Center(child: Text("Upcoming Trips")),
+                        ListView.builder(
+                          itemCount: upcomingTrips.length,
+                          itemBuilder: (context, index) {
+                            final trip = upcomingTrips[index];
+                            return ListTile(
+                              title: Text("From: ${trip['from']}"),
+                              subtitle: Text("To: ${trip['to']}"),
+                              trailing: Text("Date: ${trip['date']}"),
+                            );
+                          },
+                        ),
                         Center(child: Text("Completed Trips")),
                         Center(child: Text("Canceled Trips")),
                       ],
