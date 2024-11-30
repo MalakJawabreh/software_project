@@ -1,10 +1,18 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:project1/searchinfo.dart';
 import 'package:intl/intl.dart'; // لاستعمال تنسيق التاريخ
+import 'package:http/http.dart' as http ;
+import 'package:numberpicker/numberpicker.dart';
+
+import 'config.dart';
+import 'driver_dashboard.dart';
 
 class SetDestinationPage extends StatefulWidget {
+  final String email;
+  const SetDestinationPage({required this.email, super.key});
   @override
   _SetDestinationPageState createState() => _SetDestinationPageState();
 }
@@ -13,7 +21,63 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
   TextEditingController _fromController = TextEditingController();
   TextEditingController _toController = TextEditingController();
   TextEditingController _dateController = TextEditingController(); // حقل التاريخ
+  TextEditingController _timeController = TextEditingController(); // حقل الوقت
   int maxPassengers = 1; // عدد الركاب الافتراضي
+  TextEditingController _maxPassengersController = TextEditingController();
+  TextEditingController _priceController = TextEditingController(); // حقل السعر
+  String selectedCurrency = 'ILS'; // العملة الافتراضية
+
+  void createTrip() async {
+    if (_fromController.text.isNotEmpty &&
+        _toController.text.isNotEmpty &&
+        _dateController.text.isNotEmpty &&
+        _timeController.text.isNotEmpty &&
+        _maxPassengersController.text.isNotEmpty &&
+        _priceController.text.isNotEmpty) {
+
+      var regbody = {
+        "driverEmail":widget.email,
+        "from": _fromController.text,
+        "to": _toController.text,
+        "price": _priceController.text,
+        "maxPassengers": _maxPassengersController.text,
+        "date": _dateController.text,
+        "time": _timeController.text,
+      };
+
+      var response = await http.post(Uri.parse(create_trip),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(regbody));
+
+      var jsonResponse = jsonDecode(response.body);
+      print(jsonResponse['status']);
+
+      if (jsonResponse['status']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Trip Created Successfully!')),
+        );
+
+        // إعادة تحميل صفحة Driver
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Driver()), // تأكد من أن `Driver` هو اسم صفحة السائق
+        );
+
+      } else {
+        print("Something Error");
+      }
+    }
+    else {
+
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _maxPassengersController.text = maxPassengers.toString(); // تعيين القيمة الأولية في حقل الإدخال
+  }
+
 
   List<Searchinfo> fromItems = [];
   List<Searchinfo> toItems = [];
@@ -63,6 +127,22 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
     if (pickedDate != null && pickedDate != initialDate) {
       setState(() {
         _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        final period = pickedTime.period == DayPeriod.am ? 'AM' : 'PM';
+        _timeController.text =
+        '${pickedTime.hourOfPeriod}:${pickedTime.minute.toString().padLeft(
+            2, '0')} $period';
       });
     }
   }
@@ -137,9 +217,12 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                             width: 3.0,
                           ),
                         ),
-                        prefixIcon: Icon(
-                          Icons.location_on,
-                          color: Color.fromARGB(230, 149, 117, 84),
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Icon(
+                            Icons.location_on,
+                            color: Color.fromARGB(230, 149, 117, 84),
+                          ),
                         ),
                       ),
                     ),
@@ -147,16 +230,19 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                 ],
               ),
               SizedBox(height: 24),
-              ...fromItems.map((e) => ListTile(
-                leading: const Icon(Icons.place),
-                title: Text(e.properties!.name!),
-                onTap: () {
-                  _fromController.text = e.properties!.name!;
-                  setState(() {
-                    fromItems.clear();
-                  });
-                },
-              )).toList(),
+              ...fromItems
+                  .map((e) =>
+                  ListTile(
+                    leading: const Icon(Icons.place),
+                    title: Text(e.properties!.name!),
+                    onTap: () {
+                      _fromController.text = e.properties!.name!;
+                      setState(() {
+                        fromItems.clear();
+                      });
+                    },
+                  ))
+                  .toList(),
               SizedBox(height: 1),
               // حقل To
               Row(
@@ -187,9 +273,12 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                             width: 3.0,
                           ),
                         ),
-                        prefixIcon: Icon(
-                          Icons.location_on,
-                          color: Color.fromARGB(230, 149, 117, 84),
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Icon(
+                            Icons.location_on,
+                            color: Color.fromARGB(230, 149, 117, 84),
+                          ),
                         ),
                       ),
                     ),
@@ -197,58 +286,20 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                 ],
               ),
               SizedBox(height: 24),
-              ...toItems.map((e) => ListTile(
-                leading: const Icon(Icons.place),
-                title: Text(e.properties!.name!),
-                onTap: () {
-                  _toController.text = e.properties!.name!;
-                  setState(() {
-                    toItems.clear();
-                  });
-                },
-              )).toList(),
-              SizedBox(height: 24),
-              // حقل Max Passengers مع أزرار زيادة ونقصان
-              Row(
-                children: [
-                  Text(
-                    'Max Passengers',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(230, 12, 46, 78),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Text(
-                    maxPassengers.toString(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(230, 12, 46, 78),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.remove, color: Color.fromARGB(230, 12, 46, 78)),
-                    onPressed: () {
-                      if (maxPassengers > 1) {
-                        setState(() {
-                          maxPassengers--;
-                        });
-                      }
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.add, color: Color.fromARGB(230, 12, 46, 78)),
-                    onPressed: () {
+              ...toItems
+                  .map((e) =>
+                  ListTile(
+                    leading: const Icon(Icons.place),
+                    title: Text(e.properties!.name!),
+                    onTap: () {
+                      _toController.text = e.properties!.name!;
                       setState(() {
-                        maxPassengers++;
+                        toItems.clear();
                       });
                     },
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
+                  ))
+                  .toList(),
+              SizedBox(height: 1),
               // حقل Date
               Row(
                 children: [
@@ -258,6 +309,122 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                       controller: _dateController,
                       decoration: InputDecoration(
                         hintText: 'Select Date',
+                        border: InputBorder.none, // إزالة الخط السفلي
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Icon(
+                            Icons.calendar_today,
+                            color: Color.fromARGB(230, 149, 117, 84),
+                          ),
+                        ),
+                      ),
+                      onTap: () => _selectDate(context),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 5),
+              // حقل Time
+              Row(
+                children: [
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _timeController,
+                      decoration: InputDecoration(
+                        hintText: 'Select Time',
+                        border: InputBorder.none,
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Icon(
+                            Icons.access_time,
+                            color: Color.fromARGB(230, 149, 117, 84),
+                          ),
+                        ),
+                      ),
+                      onTap: () => _selectTime(context),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 5),
+
+              Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.0), // إضافة مسافة من اليسار
+                    child: Text(
+                      'Maximum Passengers: ',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color:Color.fromARGB(230, 12, 46, 78),),
+                    ),
+                  ),
+                  SizedBox(width: 2),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove,color: Color.fromARGB(230, 149, 117, 84)),
+                          onPressed: () {
+                            setState(() {
+                              if (maxPassengers > 1) {
+                                maxPassengers--;
+                                _maxPassengersController.text = maxPassengers.toString(); // تحديث القيمة في الحقل
+                              }
+                            });
+                          },
+                        ),
+                        Container(
+                          width: 30,
+                          child: TextField(
+                            controller: _maxPassengersController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(vertical: 5.0),
+                            ),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 22,// جعل النص بولد
+                              color: Color.fromARGB(230, 12, 46, 78),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                maxPassengers = int.tryParse(value) ?? 1; // إذا كانت القيمة غير صحيحة تعود للقيمة الافتراضية 1
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add,color: Color.fromARGB(230, 149, 117, 84),),
+                          onPressed: () {
+                            setState(() {
+                              if (maxPassengers < 100) {
+                                maxPassengers++;
+                                _maxPassengersController.text = maxPassengers.toString(); // تحديث القيمة في الحقل
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Enter Price per Passenger',
                         border: UnderlineInputBorder(
                           borderSide: BorderSide(
                             color: Colors.grey,
@@ -270,16 +437,104 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                             width: 3.0,
                           ),
                         ),
-                        prefixIcon: Icon(
-                          Icons.calendar_today,
-                          color: Color.fromARGB(230, 149, 117, 84),
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Icon(
+                            Icons.attach_money,
+                            color: Color.fromARGB(230, 149, 117, 84),
+                          ),
                         ),
                       ),
-                      onTap: () => _selectDate(context),
                     ),
+                  ),
+                  SizedBox(width: 8),
+                  DropdownButton<String>(
+                    value: selectedCurrency,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedCurrency = newValue!;
+                      });
+                    },
+                    items: <String>['JOD', 'ILS']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
+              SizedBox(height: 26),
+              Center(
+                child:ElevatedButton(
+                  onPressed: () async {
+                    // تأخير صغير لمحاكاة عملية إنشاء الرحلة
+                    await Future.delayed(Duration(seconds: 1));
+
+                    // عرض حوار التأكيد
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor:Color.fromARGB(230, 221, 232, 246), // لون خلفية أزرق فاتح
+                          title: Text(
+                            'Confirm Trip Creation',
+                            style: TextStyle(color:Color.fromARGB(230, 12, 46, 78),fontSize: 20,fontWeight: FontWeight.bold), // تغيير لون الخط إلى أزرق
+                          ),
+                          content: Text(
+                            'Do you want to confirm the creation of this trip?',
+                            style: TextStyle(color:Color.fromARGB(230, 12, 46, 78),fontSize: 18 ), // تغيير لون الخط إلى أخضر
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // إغلاق حوار التأكيد
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                createTrip();
+                                Navigator.pop(context);
+
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Text('Create Trip'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(230, 80, 103, 124), // اللون الخلفي عند الضغط (أزرق فاتح)
+                    foregroundColor: Colors.white, // اللون النص عند الضغط // اللون النص عند الضغط
+                    padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 32.0),
+                    textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    minimumSize: Size(150, 40),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 10,),
+              Center(
+                child:ElevatedButton(
+                  onPressed: () async {
+                    await Future.delayed(Duration(seconds: 1));
+                    Navigator.pop(context); // العودة إلى الصفحة السابقة
+                  },
+                  child: Text('Back'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(230, 80, 103, 124), // اللون الخلفي عند الضغط (أزرق فاتح)
+                    foregroundColor: Colors.white, // اللون النص عند الضغط
+                    padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 33.0),
+                    textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    minimumSize: Size(158, 40),
+                  ),
+                ),
+              )
+
             ],
           ),
         ),
