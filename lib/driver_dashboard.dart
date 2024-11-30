@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/profile_driver.dart';
 import 'package:project1/search.dart';
@@ -8,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'creat_trip_page.dart';
 import 'package:http/http.dart' as http;
-import 'get_trips.dart';
 import 'login.dart';
 import 'dart:async';
 
@@ -24,6 +24,8 @@ class _DriverState extends State<Driver> {
   late String email = '';  // تعيين قيمة افتراضية
   late String username = '';  // تعيين قيمة افتراضية
   List<dynamic> upcomingTrips = [];
+  List<dynamic> completedTrips = [];
+
 
 
   StreamController<Map<String, dynamic>> dashboardStreamController = StreamController.broadcast();
@@ -44,7 +46,9 @@ class _DriverState extends State<Driver> {
         // حفظ البيانات في SharedPreferences
         saveUserData(email, username);
 
-        fetchUpcomingTrips();
+        fetchUpcomingTrips().then((_) {
+          updateTripsBasedOnTime();
+        });
       } catch (e) {
         print("Invalid token: $e");
       }
@@ -52,9 +56,16 @@ class _DriverState extends State<Driver> {
       // إذا لم يكن هناك توكن، نحاول جلب البيانات من SharedPreferences
       loadUserData().then((_) {
         // بعد تحميل البيانات من SharedPreferences، استدعاء fetchUpcomingTrips
-        fetchUpcomingTrips();
+        fetchUpcomingTrips().then((_) {
+          updateTripsBasedOnTime();
+        });
       });
     }
+    // إضافة مؤقت لتحديث البيانات
+    Timer.periodic(Duration(seconds: 30), (timer) {
+      updateTripsBasedOnTime();
+    });
+
   }
 
 // دالة لحفظ البيانات في SharedPreferences
@@ -98,6 +109,30 @@ class _DriverState extends State<Driver> {
         print('Error fetching trips: $error');
       }
     }
+
+
+
+  void updateTripsBasedOnTime() {
+    final now = DateTime.now();
+    final dateFormat = DateFormat("yyyy-MM-ddTHH:mm:ss.SSS'Z' h:mm a");
+
+    setState(() {
+      upcomingTrips.removeWhere((trip) {
+        try {
+          final dateTime = dateFormat.parse(trip['date'] + ' ' + trip['time'], true).toLocal();
+          if (dateTime.isBefore(now)) {
+            completedTrips.add(trip); // نقل الرحلة إلى completed
+            return true; // إزالة من upcoming
+          }
+        } catch (e) {
+          print('Error parsing date: $e');
+        }
+        return false;
+      });
+    });
+  }
+
+
 
 
   void logout() {
@@ -391,7 +426,7 @@ class _DriverState extends State<Driver> {
                     ],
                   ),
                   Expanded(
-                    child: TabBarView(
+                    child:TabBarView(
                       children: [
                         ListView.builder(
                           itemCount: upcomingTrips.length,
@@ -399,15 +434,38 @@ class _DriverState extends State<Driver> {
                             final trip = upcomingTrips[index];
                             return ListTile(
                               title: Text("From: ${trip['from']}"),
-                              subtitle: Text("To: ${trip['to']}"),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("To: ${trip['to']}"),
+                                  Text("Time: ${trip['time']}"),
+                                ],
+                              ),
                               trailing: Text("Date: ${trip['date']}"),
                             );
                           },
                         ),
-                        Center(child: Text("Completed Trips")),
+                        ListView.builder(
+                          itemCount: completedTrips.length,
+                          itemBuilder: (context, index) {
+                            final trip = completedTrips[index];
+                            return ListTile(
+                              title: Text("From: ${trip['from']}"),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("To: ${trip['to']}"),
+                                  Text("Time: ${trip['time']}"),
+                                ],
+                              ),
+                              trailing: Text("Date: ${trip['date']}"),
+                            );
+                          },
+                        ),
                         Center(child: Text("Canceled Trips")),
                       ],
-                    ),
+                    )
+
                   ),
                 ],
               ),
