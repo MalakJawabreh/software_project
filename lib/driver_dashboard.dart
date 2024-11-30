@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/profile_driver.dart';
 import 'package:project1/search.dart';
+import 'package:project1/test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'creat_trip_page.dart';
@@ -21,12 +23,11 @@ class Driver extends StatefulWidget {
 }
 
 class _DriverState extends State<Driver> {
-  late String email = '';  // تعيين قيمة افتراضية
-  late String username = '';  // تعيين قيمة افتراضية
+  late String email = '';
+  late String username = '';
   List<dynamic> upcomingTrips = [];
   List<dynamic> completedTrips = [];
-
-
+  List<dynamic> canceledTrips = [];
 
   StreamController<Map<String, dynamic>> dashboardStreamController = StreamController.broadcast();
 
@@ -36,6 +37,12 @@ class _DriverState extends State<Driver> {
   @override
   void initState() {
     super.initState();
+    // تخصيص لون شريط الحالة فقط
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.black, // جعل شريط الحالة شفافًا
+      statusBarIconBrightness: Brightness.dark, // أيقونات الساعة والشحن داكنة
+    ));
+
     // محاولة استخراج البيانات من التوكن إذا كان موجودًا
     if (widget.token.isNotEmpty) {
       try {
@@ -133,6 +140,21 @@ class _DriverState extends State<Driver> {
   }
 
 
+  String formatDate(String dateTime) {
+    // تحويل النص إلى كائن DateTime
+    final parsedDate = DateTime.parse(dateTime);
+    // تنسيق التاريخ بالشكل المطلوب
+    return DateFormat('dd MMMM yyyy').format(parsedDate); // مثال: 11 ديسمبر 2024
+  }
+
+  void cancelTrip(int index) {
+    final canceledTrip = upcomingTrips.removeAt(index);
+    setState(() {
+      canceledTrips.add(canceledTrip);
+    });
+  }
+
+
 
 
   void logout() {
@@ -152,7 +174,7 @@ class _DriverState extends State<Driver> {
         child: AppBar(
           automaticallyImplyLeading: false,
           title: Padding(
-            padding: const EdgeInsets.only(top: 32),
+            padding: const EdgeInsets.only(top: 25),
             child: Row(
               children: [
                 Image.asset(
@@ -160,18 +182,22 @@ class _DriverState extends State<Driver> {
                   height: 40,
                 ),
                 SizedBox(width: 0),
-                Text(
-                  "assalni Ma'ak",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(230, 41, 84, 115),
+                Padding(
+                  padding: const EdgeInsets.only(top: 13),
+                  child: Text(
+                    "assalni Ma'ak",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(230, 41, 84, 115),
+                    ),
                   ),
-                ),
+                )
               ],
             ),
           ),
           backgroundColor: Color.fromARGB(230, 196, 209, 219),
+
           actions: [
             Padding(
               padding: const EdgeInsets.only(top: 22),
@@ -426,47 +452,595 @@ class _DriverState extends State<Driver> {
                     ],
                   ),
                   Expanded(
-                    child:TabBarView(
+                    child: TabBarView(
                       children: [
+                        // Upcoming Trips
                         ListView.builder(
                           itemCount: upcomingTrips.length,
                           itemBuilder: (context, index) {
                             final trip = upcomingTrips[index];
-                            return ListTile(
-                              title: Text("From: ${trip['from']}"),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("To: ${trip['to']}"),
-                                  Text("Time: ${trip['time']}"),
-                                ],
+                            return Card(
+                              elevation: 4,
+                              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                                side: BorderSide(color:Colors.grey.shade500, width: 1), // إضافة حافة ملونة
                               ),
-                              trailing: Text("Date: ${trip['date']}"),
+                              color:Color.fromARGB(255, 234, 241, 246), // تعيين لون الخلفية
+                              shadowColor:Color.fromARGB(230, 41, 84, 115),
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Details: Time, Date
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // توزيع العناصر بين اليسار واليمين
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_month_outlined, color: Colors.pinkAccent),
+                                            SizedBox(width: 1),
+                                            Text("Date:${formatDate(trip['date'])}",style: TextStyle(fontSize: 15.5,fontWeight: FontWeight.w600,color:Color.fromARGB(230, 41, 84, 115),),),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.access_time, color: Colors.pinkAccent),
+                                            SizedBox(width: 1),
+                                            Text("Time:${trip['time']}",style: TextStyle(fontSize: 15.5,fontWeight: FontWeight.w600,color:Color.fromARGB(230, 41, 84, 115),),),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 1),
+                                    // Header: From and To
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 0.0),  // المسافة من الأعلى
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.my_location, color: Colors.green, size: 22),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              SizedBox(height: 3),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              SizedBox(height: 3),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              Icon(Icons.pin_drop, color: Colors.orange, size: 22),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 1.0),  // المسافة من الأعلى
+                                                child: Row(
+                                                  children: [
+                                                    RichText(
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "From: ",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.green,  // اللون الذي ترغب فيه لكلمة "From"
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: "${trip['from']}",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.black,  // اللون لبقية النص
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Spacer(),  // هذا سيضمن أن الأيقونة تكون في أقصى اليمين
+                                                    IconButton(
+                                                      icon: Icon(Icons.map_outlined, color:Color.fromARGB(230, 41, 84, 115),),  // اختر الأيقونة المناسبة (مثل خريطة)
+                                                      onPressed: () {
+                                                        // أضف هنا الكود الذي سيعرض الخريطة أو يقوم بالإجراء الذي تريده
+                                                        print("Open map from ${trip['from']} to ${trip['to']}");
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 7),
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: "To: ",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.orange,  // اللون الذي ترغب فيه لكلمة "From"
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                      text: "${trip['to']}",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.black,  // اللون لبقية النص
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 1),
+                                    // Number of passengers
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.person, color: Colors.black, size: 25), // الأيقونة
+                                        SizedBox(width: 4),  // المسافة بين الأيقونة والنص
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: "${trip['currentPassengers']} / ${trip['maxPassengers']} ",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color.fromARGB(230, 41, 84, 115),
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: "   Passengers",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color:Color.fromARGB(230, 41, 84, 115), // اللون الجديد لكلمة "passengers"
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 135),
+                                        Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
+
+                                      ],
+                                    ),
+                                    SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton.icon(
+                                          icon: Icon(Icons.edit, color: Colors.white),
+                                          label: Text(
+                                            "Edit",
+                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 17),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:Color.fromARGB(230, 80, 103, 124),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12)),
+                                            padding: EdgeInsets.symmetric(horizontal: 15),  // تقليل العرض بتحديد المسافة الأفقية
+                                          ),
+                                          onPressed: () {
+                                            // Edit action
+                                          },
+                                        ),
+                                        SizedBox(width: 10,),
+                                        ElevatedButton.icon(
+                                          icon: Icon(Icons.delete, color: Colors.white),
+                                          label: Text(
+                                            "Cancel",
+                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 17),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red[500],
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            padding: EdgeInsets.symmetric(horizontal: 10),  // تقليل العرض بتحديد المسافة الأفقية
+                                          ),
+                                          onPressed: () {
+                                            // Cancel action
+                                            cancelTrip(index);
+                                          },
+                                        )
+
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
+
+                        //completed trip
                         ListView.builder(
                           itemCount: completedTrips.length,
                           itemBuilder: (context, index) {
                             final trip = completedTrips[index];
-                            return ListTile(
-                              title: Text("From: ${trip['from']}"),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("To: ${trip['to']}"),
-                                  Text("Time: ${trip['time']}"),
-                                ],
+                            return Card(
+                              elevation: 4,
+                              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color:Colors.grey.shade500, width: 1), // إضافة حافة ملونة
                               ),
-                              trailing: Text("Date: ${trip['date']}"),
+                              color:Color.fromARGB(255, 234, 241, 246),    // تعيين لون الخلفية
+                              shadowColor:Color.fromARGB(230, 41, 84, 115),
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Details: Time, Date
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // توزيع العناصر بين اليسار واليمين
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_month_outlined, color: Colors.pinkAccent),
+                                            SizedBox(width: 1),
+                                            Text("Date:${formatDate(trip['date'])}",style: TextStyle(fontSize: 15.5,fontWeight: FontWeight.w600,color:Color.fromARGB(230, 41, 84, 115),),),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.access_time, color: Colors.pinkAccent),
+                                            SizedBox(width: 1),
+                                            Text("Time:${trip['time']}",style: TextStyle(fontSize: 15.5,fontWeight: FontWeight.w600,color:Color.fromARGB(230, 41, 84, 115),),),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 1),
+                                    // Header: From and To
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 0.0),  // المسافة من الأعلى
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.my_location, color: Colors.green, size: 22),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              SizedBox(height: 3),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              SizedBox(height: 3),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              Icon(Icons.pin_drop, color: Colors.orange, size: 22),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 1.0),  // المسافة من الأعلى
+                                                child: Row(
+                                                  children: [
+                                                    RichText(
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "From: ",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.green,  // اللون الذي ترغب فيه لكلمة "From"
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: "${trip['from']}",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.black,  // اللون لبقية النص
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Spacer(),  // هذا سيضمن أن الأيقونة تكون في أقصى اليمين
+                                                    IconButton(
+                                                      icon: Icon(Icons.map_outlined, color:Color.fromARGB(230, 41, 84, 115),),  // اختر الأيقونة المناسبة (مثل خريطة)
+                                                      onPressed: () {
+                                                        // أضف هنا الكود الذي سيعرض الخريطة أو يقوم بالإجراء الذي تريده
+                                                        print("Open map from ${trip['from']} to ${trip['to']}");
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 7),
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: "To  : ",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.orange,  // اللون الذي ترغب فيه لكلمة "From"
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                      text: "${trip['to']}",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.black,  // اللون لبقية النص
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 1),
+                                    // Number of passengers
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.person, color: Colors.black, size: 25), // الأيقونة
+                                        SizedBox(width: 4),  // المسافة بين الأيقونة والنص
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: "${trip['currentPassengers']} / ${trip['maxPassengers']} ",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color.fromARGB(230, 41, 84, 115),
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: "   Passengers",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color:Color.fromARGB(230, 41, 84, 115), // اللون الجديد لكلمة "passengers"
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 135),
+                                        Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
+
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
-                        Center(child: Text("Canceled Trips")),
-                      ],
-                    )
+                        // Canceled Trips
+                        ListView.builder(
+                          itemCount: canceledTrips.length,
+                          itemBuilder: (context, index) {
+                            final trip = canceledTrips[index];
+                            return Card(
+                              elevation: 4,
+                              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color:Colors.grey.shade500, width: 1), // إضافة حافة ملونة
+                              ),
+                              color:Color.fromARGB(255, 234, 241, 246),    // تعيين لون الخلفية
+                              shadowColor:Color.fromARGB(230, 41, 84, 115),
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Details: Time, Date
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // توزيع العناصر بين اليسار واليمين
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_month_outlined, color: Colors.pinkAccent),
+                                            SizedBox(width: 1),
+                                            Text("Date:${formatDate(trip['date'])}",style: TextStyle(fontSize: 15.5,fontWeight: FontWeight.w600,color:Color.fromARGB(230, 41, 84, 115),),),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.access_time, color: Colors.pinkAccent),
+                                            SizedBox(width: 1),
+                                            Text("Time:${trip['time']}",style: TextStyle(fontSize: 15.5,fontWeight: FontWeight.w600,color:Color.fromARGB(230, 41, 84, 115),),),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 1),
+                                    // Header: From and To
+                                    Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 0.0),  // المسافة من الأعلى
+                                          child: Column(
+                                            children: [
+                                              Icon(Icons.my_location, color: Colors.green, size: 22),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              SizedBox(height: 3),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              SizedBox(height: 3),
+                                              Container(
+                                                height: 5,
+                                                width: 2,
+                                                color: Colors.grey, // الخط الوهمي
+                                              ),
+                                              Icon(Icons.pin_drop, color: Colors.orange, size: 22),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 1.0),  // المسافة من الأعلى
+                                                child: Row(
+                                                  children: [
+                                                    RichText(
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "From: ",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.green,  // اللون الذي ترغب فيه لكلمة "From"
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: "${trip['from']}",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.black,  // اللون لبقية النص
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Spacer(),  // هذا سيضمن أن الأيقونة تكون في أقصى اليمين
+                                                    IconButton(
+                                                      icon: Icon(Icons.map_outlined, color:Color.fromARGB(230, 41, 84, 115),),  // اختر الأيقونة المناسبة (مثل خريطة)
+                                                      onPressed: () {
+                                                        // أضف هنا الكود الذي سيعرض الخريطة أو يقوم بالإجراء الذي تريده
+                                                        print("Open map from ${trip['from']} to ${trip['to']}");
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 7),
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: "To  : ",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.orange,  // اللون الذي ترغب فيه لكلمة "From"
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                      text: "${trip['to']}",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.black,  // اللون لبقية النص
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 1),
+                                    // Number of passengers
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Icon(Icons.person, color: Colors.black, size: 25), // الأيقونة
+                                        SizedBox(width: 4),  // المسافة بين الأيقونة والنص
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: "${trip['currentPassengers']} / ${trip['maxPassengers']} ",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color.fromARGB(230, 41, 84, 115),
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: "   Passengers",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color:Color.fromARGB(230, 41, 84, 115), // اللون الجديد لكلمة "passengers"
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 135),
+                                        Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
 
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
+
                 ],
               ),
             ),
