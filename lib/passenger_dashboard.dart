@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'dart:async';
 import 'login.dart';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
@@ -10,6 +11,8 @@ import 'BlockedContactsScreen.dart';
 import 'LiveLocationPage.dart';
 import 'EmailAddressPage.dart';
 import 'TwoStepVerificationPage.dart';
+import 'profile_driver.dart';
+import 'SearchPassenger.dart';
 
 class Passenger extends StatefulWidget {
   final String token;
@@ -24,13 +27,45 @@ class _PassengerState extends State<Passenger> {
   late String fullName;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final List<String> _images = [
+    'imagess/a11.jpg',
+    'imagess/a2.jpg',
+    'imagess/Jerusalem.jpg',
+
+  ];
+
+  final PageController _pageController = PageController();
+  late Timer _timer;
+  int _currentPage = 0;
+
   @override
   void initState() {
     super.initState();
-    // فك شفرة التوكن لاستخراج البريد الإلكتروني
+    // فك شفرة التوكن لاستخراج البريد الإلكتروني والاسم الكامل
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
     email = jwtDecodedToken['email'];
     fullName = jwtDecodedToken['fullName'];
+
+    // إعداد التايمر للحركة التلقائية للسلايدر
+    _timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      if (_currentPage < _images.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
+      _pageController.animateToPage(
+        _currentPage,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _pageController.dispose();
+    super.dispose();
   }
 
   void logout() {
@@ -39,37 +74,13 @@ class _PassengerState extends State<Passenger> {
       MaterialPageRoute(builder: (context) => Login()),
     );
   }
-
-  Color _buttonColor = primaryColor; // اللون الأساسي كافتراضي للزر
-
-  final TextEditingController _destinationController = TextEditingController();
-  String _selectedFilter = 'Price'; // الفلتر الافتراضي
-  String _selectedTime = 'Any Time';
-
-
-  void navigateToBookings() {
-    // الانتقال إلى شاشة الحجوزات
-    print("Navigating to My Bookings screen...");
-  }
-
-  void searchTrips() {
-    // عملية البحث عن الرحلات
-    print("Searching trips to: ${_destinationController
-        .text} with filter: $_selectedFilter at time: $_selectedTime");
-  }
-
-  void showAds() {
-    // عرض الإعلانات
-    print("Displaying ads...");
-    // يمكنك إضافة دالة لإظهار الإعلانات أو الانتقال إلى شاشة الإعلانات
-  }
+  Color _buttonColor = primaryColor;
 
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
-    final locale = languageProvider.locale.languageCode;
-    final isArabic = languageProvider
-        .isArabic; // الحصول على قيمة isArabic من LanguageProvider
+    final isArabic = languageProvider.isArabic;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: PreferredSize(
@@ -84,13 +95,13 @@ class _PassengerState extends State<Passenger> {
                   'imagess/app_icon.jpg',
                   height: 40,
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: 0),
                 Text(
                   isArabic ? "وصلني معك" : "Assalni Ma'ak",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 25,
                     fontWeight: FontWeight.bold,
-                    color: primaryColor,
+                    color: Color.fromARGB(255, 41, 84, 115),
                   ),
                 ),
               ],
@@ -101,26 +112,20 @@ class _PassengerState extends State<Passenger> {
             Padding(
               padding: const EdgeInsets.only(top: 19),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                // Align items to the right
                 children: [
                   IconButton(
-                    icon: Icon(Icons.notifications, size: 25,
-                        color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {
-                      // Add action for notifications button here
-                    },
+                    icon: Icon(Icons.notifications,
+                        size: 25, color: Color.fromARGB(230, 41, 84, 115)),
+                    onPressed: () {},
                   ),
                   IconButton(
-                    icon: Icon(Icons.chat, size: 25,
-                        color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {
-                      // Add action for chat button here
-                    },
+                    icon: Icon(Icons.chat,
+                        size: 25, color: Color.fromARGB(230, 41, 84, 115)),
+                    onPressed: () {},
                   ),
                   IconButton(
-                    icon: Icon(Icons.menu, size: 25,
-                        color: Color.fromARGB(230, 41, 84, 115)),
+                    icon: Icon(Icons.menu,
+                        size: 25, color: Color.fromARGB(230, 41, 84, 115)),
                     onPressed: () {
                       _scaffoldKey.currentState?.openEndDrawer();
                     },
@@ -147,18 +152,32 @@ class _PassengerState extends State<Passenger> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
+
                     children: [
-                      Text(
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileDriver(
+                                email: email,
+                                username: fullName,
+                              ),
+                            ),
+                          );
+                        },
+                     child:  Text(
                         fullName,
                         style: TextStyle(
                           color: Color.fromARGB(230, 41, 84, 115),
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
+                     ),
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 5), // مسافة بين الاسم والبريد الإلكتروني
                       Text(
-                        email,
+                        email, // عرض البريد الإلكتروني
                         style: TextStyle(
                           color: Color.fromARGB(230, 41, 84, 115),
                           fontSize: 16,
@@ -170,6 +189,8 @@ class _PassengerState extends State<Passenger> {
                 ],
               ),
             ),
+            SizedBox(height: 30,),
+
             ListTile(
               leading: Icon(Icons.settings, size: 30),
               title: Text(
@@ -243,242 +264,150 @@ class _PassengerState extends State<Passenger> {
           ],
         ),
       ),
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // الأيقونة والاسم في أعلى الصفحة
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Color.fromARGB(230, 41, 84, 115),
-                    // لون الخلفية
-                    radius: 25,
-                    child: Icon(
-                      Icons.person, // أيقونة البيرسون
-                      size: 30, // حجم الأيقونة
-                      color: Colors.white, // لون الأيقونة
-                    ),
-                  ),
-                  SizedBox(width: 10), // مسافة بين الأيقونة والاسم
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fullName, // الاسم الكامل
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(230, 41, 84, 115),
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 20), // مسافة بعد الأيقونة والاسم
-
-              // زر البحث عن الرحلات
-              MouseRegion(
-                onEnter: (_) {
-                  setState(() {
-                    _buttonColor = primaryColor.withOpacity(
-                        0.7); // تغيير اللون عند المرور بالماوس
-                  });
-                },
-                onExit: (_) {
-                  setState(() {
-                    _buttonColor = primaryColor; // العودة للون الأساسي
-                  });
-                },
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showSearchDialog(isArabic);
-                  },
-                  child: Text(isArabic ? 'ابحث عن رحلة' : 'Search for Trips'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _buttonColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 100, vertical: 15),
-                    textStyle: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // قسم الحجوزات
-              Card(
-                elevation: 5,
-                color: Colors.grey.shade200,
-                child: ListTile(
-                  title: Text(isArabic ? 'حجوزاتك' : 'Your Active Bookings',
-                      style: TextStyle(color: primaryColor)),
-                  subtitle: Text(isArabic
-                      ? 'إدارة حجوزاتك الحالية'
-                      : 'Manage your current bookings',
-                      style: TextStyle(color: Colors.black87)),
-                  trailing: Icon(Icons.arrow_forward, color: primaryColor),
-                  onTap: navigateToBookings,
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // قسم الإشعارات
-              Card(
-                elevation: 5,
-                color: Colors.grey.shade200,
-                child: ListTile(
-                  title: Text(isArabic ? 'الأشعارات ' : 'Notifications',
-                      style: TextStyle(color: primaryColor)),
-                  subtitle: Text(isArabic
-                      ? 'التحقق من الإشعارات الخاصة بك'
-                      : 'Check your notifications',
-                      style: TextStyle(color: Colors.black87)),
-                  trailing: Icon(Icons.arrow_forward, color: primaryColor),
-                  onTap: () {
-                    // الانتقال إلى شاشة الإشعارات
-                  },
-                ),
-              ),
-              Card(
-                elevation: 5,
-                color: Colors.grey.shade200,
-                child: ListTile(
-                  title: Text(isArabic ? 'الأعلانات' : 'Advertisements',
-                      style: TextStyle(color: primaryColor)),
-                  subtitle: Text(isArabic
-                      ? 'رؤية الأعلانات الجدية الآن'
-                      : 'View new ads now!',
-                      style: TextStyle(color: Colors.black87)),
-                  trailing: Icon(Icons.arrow_forward, color: primaryColor),
-                  onTap: () {
-                    // الانتقال إلى شاشة الإشعارات
-                  },
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context); // الرجوع إلى الشاشة السابقة
-        },
-        backgroundColor: primaryColor,
-        child: Icon(Icons.arrow_back, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation
-          .startDocked, // محاذاة يسار أسفل
-    );
-  }
-
-  // حوار البحث
-  void _showSearchDialog(bool isArabic) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(isArabic ? "ابحث عن رحلات" : "Search for Trips"),
-
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _destinationController,
-                decoration: InputDecoration(
-                  labelText: isArabic ? "أدخل الوجهة" : "Enter destination",
-                ),
-              ),
-              SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: _selectedFilter,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedFilter = newValue!;
-                  });
-                },
-                items: <String>['Price', 'Duration', 'Ratings']
-                    .map((value) =>
-                    DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(isArabic ? translateFilter(value) : value),
-                    ))
-                    .toList(),
-              ),
-              SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: _selectedTime,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedTime = newValue!;
-                  });
-                },
-                items: <String>['Any Time', 'Morning', 'Afternoon', 'Evening']
-                    .map((value) =>
-                    DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(isArabic ? translateTime(value) : value),
-                    ))
-                    .toList(),
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                searchTrips();
-                Navigator.of(context).pop();
+      body: Column(
+        children: [
+          SizedBox(
+            height: 200,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _images.length,
+              itemBuilder: (context, index) {
+                return Image.asset(
+                  _images[index], // تحميل الصورة من الأصول
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                );
               },
-              child: Text(isArabic ? "بحث" : "Search"),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(isArabic ? "إلغاء" : "Cancel"),
+          ),
+         // SizedBox(height: 15),
+
+          // إضافة الكاتلوج
+
+          Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
             ),
-          ],
-        );
-      },
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    primaryColor,
+                    SecondryColor,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+              ),
+              child: ListTile(
+                title: Text(
+                  isArabic ? 'حجوزاتك' : 'Your Active Bookings',
+                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
+                ),
+                subtitle: Text(
+                  isArabic ? 'إدارة حجوزاتك الحالية' : 'Manage your current bookings',
+                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward,
+                  color: primaryColor2, // تغيير لون الأيقونة إلى الأبيض
+                ),
+                onTap: () {
+                  // تنفيذ الإجراء عند النقر
+                },
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    primaryColor,
+                    SecondryColor,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+              ),
+              child: ListTile(
+                title: Text(
+                  isArabic ? 'الأعلانات' : 'Advertisements',
+                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
+                ),
+                subtitle: Text(
+                  isArabic ? 'رؤية الأعلانات الجديدة الآن' : 'View new ads now!',
+                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward,
+                  color:primaryColor2, // تغيير لون الأيقونة إلى الأبيض
+                ),
+                onTap: () {
+                  // الانتقال إلى شاشة الإعلانات
+                },
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    primaryColor,
+                    SecondryColor,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+              ),
+              child: ListTile(
+                title: Text(
+                  isArabic ? 'البحث عن رحلات ' : 'Search Trips',
+                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
+                ),
+                subtitle: Text(
+                  isArabic ? 'ابحث عن وجهتك الآن ' : 'Find your destination now',
+                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward,
+                  color:primaryColor2, // تغيير لون الأيقونة إلى الأبيض
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SearchTripsPage()),
+                  );
+                },
+              ),
+            ),
+          ),
+
+
+
+        ],
+      ),
     );
-  }
-
-// دالة لترجمة الفلاتر حسب اللغة
-  String translateFilter(String value) {
-    switch (value) {
-      case 'Price':
-        return 'السعر';
-      case 'Duration':
-        return 'المدة';
-      case 'Ratings':
-        return 'التقييمات';
-      default:
-        return value;
-    }
-  }
-
-// دالة لترجمة الأوقات حسب اللغة
-  String translateTime(String value) {
-    switch (value) {
-      case 'Any Time':
-        return 'في أي وقت';
-      case 'Morning':
-        return 'الصباح';
-      case 'Afternoon':
-        return 'الظهر';
-      case 'Evening':
-        return 'المساء';
-      default:
-        return value;
-    }
   }
 }
+
+  // حوار البحث
+
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -503,10 +432,10 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.language, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.language, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'اختر اللغة' : 'Select Language',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // إظهار مربع حوار لاختيار اللغة
@@ -544,10 +473,10 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.palette, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.palette, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'تغيير الثيم' : 'Change Theme',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // تغيير الثيم
@@ -555,10 +484,10 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.email, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.email, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'عنوان البريد الإلكتروني' : 'Email address',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 Navigator.push(
@@ -568,10 +497,10 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.privacy_tip, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.privacy_tip, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'التحقق بخطوتين' : 'Two-step verification',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 Navigator.push(
@@ -583,10 +512,10 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.notifications, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.notifications, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'الإشعارات' : 'Notifications',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // التعامل مع الإشعارات هنا
@@ -621,10 +550,10 @@ class PrivacyPage extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.lock_outline, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.lock_outline, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'تغيير كلمة السر' : 'Change password',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // الانتقال إلى صفحة تغيير كلمة السر
@@ -635,10 +564,10 @@ class PrivacyPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.visibility, size: 30, color: primaryColor),
+              leading: Icon(Icons.visibility, size: 30, color: primaryColor2),
               title: Text(
                 isArabic ? 'رؤية الحساب' : 'Visibility',
-                style: TextStyle(fontSize: 20, color: primaryColor),
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold),
               ),
               onTap: () {
                 // الانتقال إلى صفحة إعدادات الرؤية
@@ -649,20 +578,20 @@ class PrivacyPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.security, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.security, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'المصادقة' : 'Authentication',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // التعامل مع المصادقة هنا
               },
             ),
             ListTile(
-              leading: Icon(Icons.block, size: 30, color: primaryColor), // تغيير لون الأيقونة
+              leading: Icon(Icons.block, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'جهات اتصال محظورة' : 'Blocked Contact',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 Navigator.push(
@@ -672,17 +601,17 @@ class PrivacyPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.location_on, size: 30, color: primaryColor), // تغيير لون الأيقونة
-              title: Text(
-                isArabic ? 'الموقع المباشر' : 'Live Location',
-                style: TextStyle(fontSize: 20, color: primaryColor), // تغيير لون النص
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LiveLocationPage()),
-                );
-              }
+                leading: Icon(Icons.location_on, size: 30, color: primaryColor2), // تغيير لون الأيقونة
+                title: Text(
+                  isArabic ? 'الموقع المباشر' : 'Live Location',
+                  style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LiveLocationPage()),
+                  );
+                }
             ),
           ],
         ),
@@ -691,5 +620,14 @@ class PrivacyPage extends StatelessWidget {
   }
 }
 const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
+//const Color SecondryColor2 = Color.fromARGB(230, 95, 190, 200);
+const Color SecondryColor2 = Color.fromARGB(230, 130, 167, 175);
+const Color complementaryPink = Color.fromARGB(230, 255, 153, 180);
+const Color analogousPink = Color.fromARGB(230, 230, 100, 140);
+const Color triadicPink = Color.fromARGB(230, 245, 115, 165);
+const Color softPink = Color.fromARGB(230, 250, 170, 200);
+
+
 
 const Color primaryColor = Color.fromARGB(230, 41, 84, 115); // اللون الأساسي
+const Color primaryColor2 = Color.fromARGB(230, 20, 60, 115); // اللون الأساسي

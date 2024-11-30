@@ -163,7 +163,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
             onTap: () {},
           ),
           SizedBox(height: 15),
-          ListTile(
+         /* ListTile(
             leading: Icon(Icons.notifications, color: Colors.indigo,size: 31,),
             title: Text("Notification",
               style: TextStyle(
@@ -175,7 +175,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {},
           ),
-          SizedBox(height: 15),
+          SizedBox(height: 15),*/
           ListTile(
             leading: Icon(Icons.chat, color: Colors.indigo,size: 31,),
             title: Text("Chat settings",
@@ -189,7 +189,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
             onTap: () {},
           ),
           SizedBox(height: 15),
-          ListTile(
+        /*  ListTile(
             leading: Icon(Icons.lock, color: Colors.indigo,size: 31,),
             title: Text("Privacy and security",
               style: TextStyle(
@@ -201,8 +201,8 @@ class _ProfileDriverState extends State<ProfileDriver> {
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {},
           ),
-          SizedBox(height: 15),
-          ListTile(
+          SizedBox(height: 15),*/
+         /* ListTile(
             leading: Icon(Icons.info, color: Colors.indigo,size: 31,),
             title: Text("About",
               style: TextStyle(
@@ -213,7 +213,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
             ),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {},
-          ),
+          ),*/
         ],
       ),
     );
