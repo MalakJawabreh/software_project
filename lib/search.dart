@@ -12,7 +12,9 @@ import 'driver_dashboard.dart';
 
 class SetDestinationPage extends StatefulWidget {
   final String email;
-  const SetDestinationPage({required this.email, super.key});
+  final String name;
+  final String phone;
+  const SetDestinationPage({required this.email,required this.name,required this.phone, super.key});
   @override
   _SetDestinationPageState createState() => _SetDestinationPageState();
 }
@@ -36,7 +38,9 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
         _priceController.text.isNotEmpty) {
 
       var regbody = {
+        "name":widget.name,
         "driverEmail":widget.email,
+        "phoneNumber":widget.phone,
         "from": _fromController.text,
         "to": _toController.text,
         "price": _priceController.text,

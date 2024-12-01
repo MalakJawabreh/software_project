@@ -1,53 +1,63 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class CompletedTripsPage extends StatelessWidget {
-  final List<dynamic> completedTrips;
+import 'config.dart';
 
-  CompletedTripsPage({required this.completedTrips});
+class TestPage extends StatefulWidget {
+  @override
+  _TestPageState createState() => _TestPageState();
+}
+
+class _TestPageState extends State<TestPage> {
+  List<dynamic> trips = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTrips();
+  }
+  // دالة لجلب جميع الرحلات من الخادم
+  Future<void> fetchTrips() async {
+    try {
+      final response = await http.get(Uri.parse(all_trip));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> tripList = json.decode(response.body)['trips'];
+        setState(() {
+          trips = tripList;
+        });
+      } else {
+        // يمكن معالجة الأخطاء هنا
+        throw Exception('Failed to load trips');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Completed Trips')),
-      body: ListView.builder(
-        itemCount: completedTrips.length,
+      appBar: AppBar(
+        title: Text('All Trips'),
+      ),
+      body: trips.isEmpty
+          ? Center(child: CircularProgressIndicator()) // يعرض مؤشر التحميل إذا كانت الرحلات فارغة
+          : ListView.builder(
+        itemCount: trips.length,
         itemBuilder: (context, index) {
-          final trip = completedTrips[index];
-
-          // افترض أن الرحلة تحتوي على "price" و "from"
-          final price = trip['price'];   // الوصول إلى السعر
-          final fromLocation = trip['from'];  // الوصول إلى نقطة الانطلاق
-
-          return Card(
-            elevation: 4,
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-              side: BorderSide(color: Colors.grey.shade500, width: 1),
-            ),
-            color: Color.fromARGB(255, 234, 241, 246),
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Trip ${index + 1}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'From: $fromLocation',  // عرض مكان الانطلاق
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Price: \$${price.toString()}',  // عرض السعر
-                    style: TextStyle(fontSize: 16, color: Colors.green),
-                  ),
-                ],
-              ),
+          final trip = trips[index];
+          return ListTile(
+            title: Text('Driver: ${trip['name']}'), // عرض اسم السائق
+            subtitle: Text('From: ${trip['from']} To: ${trip['to']}'),
+            trailing: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('Price: ${trip['price']}'),
+                Text('Phone: ${trip['phoneNumber']}'),
+                Text('Date: ${trip['date']}'),
+              ],
             ),
           );
         },

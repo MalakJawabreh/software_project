@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +24,7 @@ class Driver extends StatefulWidget {
 class _DriverState extends State<Driver> {
   late String email = '';
   late String username = '';
+  late String phoneNumber='';
   List<dynamic> upcomingTrips = [];
   List<dynamic> completedTrips = [];
   List<dynamic> canceledTrips = [];
@@ -34,6 +34,7 @@ class _DriverState extends State<Driver> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+
   @override
   void initState() {
     super.initState();
@@ -42,16 +43,15 @@ class _DriverState extends State<Driver> {
       statusBarColor: Colors.black, // جعل شريط الحالة شفافًا
       statusBarIconBrightness: Brightness.dark, // أيقونات الساعة والشحن داكنة
     ));
-
     // محاولة استخراج البيانات من التوكن إذا كان موجودًا
     if (widget.token.isNotEmpty) {
       try {
         Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
         email = jwtDecodedToken['email'];
         username = jwtDecodedToken['fullName'];
-
+        phoneNumber=jwtDecodedToken['phoneNumber'];
         // حفظ البيانات في SharedPreferences
-        saveUserData(email, username);
+        saveUserData(email, username,phoneNumber);
 
         fetchUpcomingTrips().then((_) {
           updateTripsBasedOnTime();
@@ -72,17 +72,18 @@ class _DriverState extends State<Driver> {
     Timer.periodic(Duration(seconds: 30), (timer) {
       updateTripsBasedOnTime();
     });
-
   }
 
 // دالة لحفظ البيانات في SharedPreferences
-  Future<void> saveUserData(String email, String username) async {
+  Future<void> saveUserData(String email, String username,String phone) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', email);
     await prefs.setString('username', username);
+    await prefs.setString('phone', phone);
 
     print('Saved email: $email');
     print('Saved username: $username');
+    print('Saved phone: $phone');
   }
 
 // دالة لتحميل البيانات من SharedPreferences
@@ -90,34 +91,33 @@ class _DriverState extends State<Driver> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       email = prefs.getString('email') ?? 'defaultEmail@example.com'; // القيمة الافتراضية في حالة عدم وجود بيانات
-      username = prefs.getString('username') ?? 'defaultUsername'; // القيمة الافتراضية في حالة عدم وجود بيانات
+      username = prefs.getString('username') ?? 'defaultUsername';
+      phoneNumber = prefs.getString('phone') ?? '0000';
     });
     // طباعة البيانات للتحقق منها
     print('Loaded email: $email');
     print('Loaded username: $username');
   }
 
-    Future<void> fetchUpcomingTrips() async {
+  Future<void> fetchUpcomingTrips() async {
 
-      try {
-        print('Fetching trips for email: $email');
-        final response = await http.get(Uri.parse('$driver_trips?driverEmail=$email'));
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          if (data['status']) {
-            setState(() {
-              upcomingTrips = data['trips'];
-            });
-          }
-        } else {
-          print('Failed to fetch trips: ${response.statusCode}');
+    try {
+      print('Fetching trips for email: $email');
+      final response = await http.get(Uri.parse('$driver_trips?driverEmail=$email'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status']) {
+          setState(() {
+            upcomingTrips = data['trips'];
+          });
         }
-      } catch (error) {
-        print('Error fetching trips: $error');
+      } else {
+        print('Failed to fetch trips: ${response.statusCode}');
       }
+    } catch (error) {
+      print('Error fetching trips: $error');
     }
-
-
+  }
 
   void updateTripsBasedOnTime() {
     final now = DateTime.now();
@@ -147,15 +147,34 @@ class _DriverState extends State<Driver> {
     return DateFormat('dd MMMM yyyy').format(parsedDate); // مثال: 11 ديسمبر 2024
   }
 
-  void cancelTrip(int index) {
-    final canceledTrip = upcomingTrips.removeAt(index);
-    setState(() {
-      canceledTrips.add(canceledTrip);
-    });
+  void cancelTrip(int index) async {
+    final canceledTrip = upcomingTrips[index]; // احصل على الرحلة التي سيتم إلغاؤها
+    final tripId = canceledTrip['_id']; // تأكد من استخدام الحقل الصحيح للـ id
+    try {
+      // إرسال طلب الحذف إلى السيرفر
+      final response = await http.delete(Uri.parse('$delete_trip/$tripId'), headers: {
+        'Content-Type': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status']) {
+          // إذا تم الحذف بنجاح، قم بتحديث القائمة
+          setState(() {
+            upcomingTrips.removeAt(index); // حذف الرحلة من قائمة upcoming
+            canceledTrips.add(canceledTrip); // إضافة الرحلة إلى قائمة canceled
+          });
+          print('Trip canceled successfully.');
+        } else {
+          print('Failed to cancel trip: ${data['error']}');
+        }
+      } else {
+        print('Failed to cancel trip. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error canceling trip: $error');
+    }
   }
-
-
-
 
   void logout() {
     Navigator.pushReplacement(
@@ -205,7 +224,9 @@ class _DriverState extends State<Driver> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {},
+                    onPressed: () {
+
+                    },
                   ),
                   IconButton(
                     icon: Icon(Icons.chat, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
@@ -406,7 +427,7 @@ class _DriverState extends State<Driver> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SetDestinationPage(email: email)), // اسم الصفحة
+                          MaterialPageRoute(builder: (context) => SetDestinationPage(email: email,name:username,phone:phoneNumber)), // اسم الصفحة
                         );
                       },
                     ),
@@ -660,13 +681,36 @@ class _DriverState extends State<Driver> {
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12),
                                             ),
-                                            padding: EdgeInsets.symmetric(horizontal: 10),  // تقليل العرض بتحديد المسافة الأفقية
+                                            padding: EdgeInsets.symmetric(horizontal: 10),
                                           ),
                                           onPressed: () {
-                                            // Cancel action
-                                            cancelTrip(index);
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: Text("Confirm Cancellation"),
+                                                  content: Text("Are you sure you want to cancel this trip?"),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop(); // إغلاق مربع الحوار
+                                                      },
+                                                      child: Text("Cancel", style: TextStyle(color: Colors.red)),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop(); // إغلاق مربع الحوار
+                                                        cancelTrip(index); // استدعاء دالة الإلغاء
+                                                      },
+                                                      child: Text("OK", style: TextStyle(color: Colors.green)),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
                                           },
                                         )
+
 
                                       ],
                                     ),

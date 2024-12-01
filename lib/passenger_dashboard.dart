@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:project1/test.dart';
 import 'dart:async';
 import 'login.dart';
 import 'package:provider/provider.dart';
@@ -352,7 +353,10 @@ class _PassengerState extends State<Passenger> {
                   color:primaryColor2, // تغيير لون الأيقونة إلى الأبيض
                 ),
                 onTap: () {
-                  // الانتقال إلى شاشة الإعلانات
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TestPage()),
+                  );
                 },
               ),
             ),
