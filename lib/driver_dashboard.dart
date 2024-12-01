@@ -13,6 +13,7 @@ import 'creat_trip_page.dart';
 import 'package:http/http.dart' as http;
 import 'login.dart';
 import 'dart:async';
+import 'passenger_dashboard.dart';
 
 class Driver extends StatefulWidget {
   final String token;
@@ -37,6 +38,7 @@ class _DriverState extends State<Driver> {
   @override
   void initState() {
     super.initState();
+
     // تخصيص لون شريط الحالة فقط
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.black, // جعل شريط الحالة شفافًا
@@ -74,6 +76,7 @@ class _DriverState extends State<Driver> {
     });
 
   }
+
 
 // دالة لحفظ البيانات في SharedPreferences
   Future<void> saveUserData(String email, String username) async {
@@ -136,8 +139,12 @@ class _DriverState extends State<Driver> {
         }
         return false;
       });
+
     });
+
+
   }
+
 
 
   String formatDate(String dateTime) {
@@ -1049,4 +1056,5 @@ class _DriverState extends State<Driver> {
       ),
     );
   }
+
 }

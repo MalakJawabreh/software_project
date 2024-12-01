@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 import 'language_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 
@@ -18,8 +20,8 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   final TextEditingController _departureController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _passengerCountController =
-  TextEditingController();
+/*  final TextEditingController _passengerCountController =
+  TextEditingController();*/
   final TextEditingController _driverRatingController =
   TextEditingController();
 
@@ -46,10 +48,10 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   ];
 
 // قائمة الفلاتر المتاحة
-  List<String> _filterOptions = ['Price', 'Car Type', 'Passengers', 'Time', 'Date', 'Driver Rating'];
+  List<String> _filterOptions = ['Price', 'Car Type', 'Time', 'Date', 'Driver Rating'];
 
 // الفلاتر باللغة العربية
-  List<String> _filterOptionsArabic = ['السعر', 'نوع السيارة', 'الركاب', 'الوقت', 'التاريخ', 'تقييم السائق'];
+  List<String> _filterOptionsArabic = ['السعر', 'نوع السيارة', 'الوقت', 'التاريخ', 'تقييم السائق'];
 
 
 
@@ -139,9 +141,9 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     if (_selectedFilters.contains("Car Type") && _selectedCarBrand != null) {
       activeFilters.add("Car Type: $_selectedCarBrand");
     }
-    if (_selectedFilters.contains("Passengers") && _passengerCountController.text.isNotEmpty) {
+   /* if (_selectedFilters.contains("Passengers") && _passengerCountController.text.isNotEmpty) {
       activeFilters.add("Passengers: ${_passengerCountController.text}");
-    }
+    }*/
     if (_selectedFilters.contains("Time") && _selectedTime != null) {
       activeFilters.add("Time: ${_selectedTime!.hour}:${_selectedTime!.minute}");
     }
@@ -178,46 +180,90 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   }
 
   // وظيفة حفظ الفلاتر
-  void _saveFilters() {
-    // يمكنك تخزين الفلاتر هنا
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final isArabic = languageProvider.isArabic;
+  Future<void> _saveFiltersToPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Filters Saved"),
-        content: Text("Filters have been saved successfully."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              isArabic ? "موافق" : "OK", // تغيير النص بناءً على اللغة
-              style: TextStyle(
-                color: analogousPink, // لون النص
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    print("Filters saved: $_selectedFilters");
+    await prefs.setString("departure", _departureController.text);
+    await prefs.setString("destination", _destinationController.text);
+    await prefs.setString("price", _priceController.text);
+    await prefs.setString("carBrand", _selectedCarBrand ?? "");
+    await prefs.setString(
+        "time",
+        _selectedTime != null
+            ? "${_selectedTime!.hour}:${_selectedTime!.minute}"
+            : "");
+    await prefs.setString(
+        "date",
+        _selectedDate != null
+            ? "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}"
+            : "");
+    await prefs.setString("driverRating", _driverRatingController.text);
+    await prefs.setStringList("filters", _selectedFilters);
+
+    _showMessage("Filters saved successfully!");
   }
 
-  // وظيفة إعادة التحميل
-  void _reloadFilters() {
+  Future<void> _loadFiltersFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+
     setState(() {
-      _selectedFilters.clear();
+      _departureController.text = prefs.getString("departure") ?? "";
+      _destinationController.text = prefs.getString("destination") ?? "";
+      _priceController.text = prefs.getString("price") ?? "";
+      _selectedCarBrand = prefs.getString("carBrand");
+
+      final timeString = prefs.getString("time");
+      if (timeString != null && timeString.isNotEmpty) {
+        final timeParts = timeString.split(":");
+        _selectedTime = TimeOfDay(
+            hour: int.parse(timeParts[0]), minute: int.parse(timeParts[1]));
+      } else {
+        _selectedTime = null;
+      }
+
+      final dateString = prefs.getString("date");
+      if (dateString != null && dateString.isNotEmpty) {
+        final dateParts = dateString.split("/");
+        _selectedDate = DateTime(
+          DateTime.now().year,
+          int.parse(dateParts[1]),
+          int.parse(dateParts[0]),
+        );
+      } else {
+        _selectedDate = null;
+      }
+
+      _driverRatingController.text = prefs.getString("driverRating") ?? "";
+      _selectedFilters = prefs.getStringList("filters") ?? [];
+    });
+
+    _showMessage("Filters loaded successfully!");
+  }
+
+  Future<void> _clearFiltersFromPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    setState(() {
       _departureController.clear();
       _destinationController.clear();
       _priceController.clear();
-      _passengerCountController.clear();
-      _driverRatingController.clear();
       _selectedCarBrand = null;
       _selectedTime = null;
       _selectedDate = null;
+      _driverRatingController.clear();
+      _selectedFilters.clear();
     });
+
+    _showMessage("Filters cleared successfully!");
   }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -237,14 +283,20 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
               Icons.save,
               color: Colors.white, // تغيير لون الأيقونة إلى الأبيض
             ),
-            onPressed: _saveFilters, // عند الضغط على زر الحفظ
+            onPressed: _saveFiltersToPreferences,
           ),
           IconButton(
             icon: Icon(
               Icons.restore,
               color: Colors.white, // تغيير لون الأيقونة إلى الأبيض
             ),
-            onPressed: _reloadFilters, // عند الضغط على زر إعادة التحميل
+            onPressed: _loadFiltersFromPreferences,
+          ),
+          IconButton(
+            icon: Icon(Icons.delete,
+                color: Colors.white,
+            ),
+            onPressed: _clearFiltersFromPreferences,
           ),
 
         ],
@@ -327,11 +379,11 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                   ),
 
                 // فلتر عدد الركاب
-                if (_selectedFilters.contains(isArabic ?"الركاب":"Passengers"))
+             /*   if (_selectedFilters.contains(isArabic ?"الركاب":"Passengers"))
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
                     child: _buildTextField(_passengerCountController,isArabic ? "عدد الركاب" : "Number of Passengers", Icons.people),
-                  ),
+                  ),*/
 
                 // فلتر الوقت
                 if (_selectedFilters.contains(isArabic ? "الوقت" :"Time"))
@@ -492,7 +544,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     _departureController.dispose();
     _destinationController.dispose();
     _priceController.dispose();
-    _passengerCountController.dispose();
+    //_passengerCountController.dispose();
     _driverRatingController.dispose();
     _driverRatingController.dispose();
     _scrollController.dispose(); // Dispose the ScrollController
