@@ -13,11 +13,20 @@ import 'LiveLocationPage.dart';
 import 'EmailAddressPage.dart';
 import 'TwoStepVerificationPage.dart';
 import 'profile_driver.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'Upcoming_Passview.dart';
 import 'SearchPassenger.dart';
+import 'driver_dashboard.dart';
 
 class Passenger extends StatefulWidget {
-  final String token;
-  const Passenger({required this.token, super.key});
+  final String? token;
+  final List<dynamic> ?upcomingTrips;
+
+  const Passenger({ this.token,this.upcomingTrips, super.key});
+
 
   @override
   State<Passenger> createState() => _PassengerState();
@@ -42,10 +51,21 @@ class _PassengerState extends State<Passenger> {
   @override
   void initState() {
     super.initState();
-    // فك شفرة التوكن لاستخراج البريد الإلكتروني والاسم الكامل
-    Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
-    email = jwtDecodedToken['email'];
-    fullName = jwtDecodedToken['fullName'];
+    _loadUserData();
+  }
+
+  // Method to decode token and save user data in shared preferences
+  void _loadUserData() async {
+    if (widget.token != null) {
+      Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token!);
+      email = jwtDecodedToken['email'];
+      fullName = jwtDecodedToken['fullName'];
+
+      // Save email and full name in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('email', email);
+      await prefs.setString('fullName', fullName);
+    }
 
     // إعداد التايمر للحركة التلقائية للسلايدر
     _timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
@@ -61,6 +81,8 @@ class _PassengerState extends State<Passenger> {
       );
     });
   }
+
+
 
   @override
   void dispose() {
@@ -353,11 +375,21 @@ class _PassengerState extends State<Passenger> {
                   color:primaryColor2, // تغيير لون الأيقونة إلى الأبيض
                 ),
                 onTap: () {
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => TestPage()),
                   );
+
+                /*  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpcomingTripsPage(upcomingTrips: upcomingTrips),
+                    ),
+                  );*/
+
                 },
+
               ),
             ),
           ),
