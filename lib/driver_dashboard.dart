@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/profile_driver.dart';
+import 'package:project1/regist_driver_1.dart';
+import 'package:project1/regist_driver_3.dart';
 import 'package:project1/search.dart';
 import 'package:project1/test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -225,12 +227,21 @@ class _DriverState extends State<Driver> {
                   IconButton(
                     icon: Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
                     onPressed: () {
-
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DriverRegistrationPage()), // اسم الصفحة
+                      );
                     },
                   ),
                   IconButton(
                     icon: Icon(Icons.chat, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DriverLicenseUpload()), // اسم الصفحة
+                      );
+
+                    },
                   ),
                   IconButton(
                     icon: Icon(Icons.menu, size: 30, color: Color.fromARGB(230, 41, 84, 115)),

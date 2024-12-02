@@ -49,6 +49,8 @@ dependencies:
   lottie: ^2.0.0
   numberpicker: ^2.1.2
   dotted_border:
+  flutter_colorpicker: ^1.0.3
+  image_picker:
 
 
   # The following adds the Cupertino Icons font to your application.
