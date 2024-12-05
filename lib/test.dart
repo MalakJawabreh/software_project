@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:intl/intl.dart';
-
 import 'config.dart';
 
 class TestPage extends StatefulWidget {
   @override
+  final String emailP;
+  final String nameP;
+  final String phoneP;
   _TestPageState createState() => _TestPageState();
+  const TestPage({required this.emailP,required this.nameP,required this.phoneP, super.key});
+
 }
 
 class _TestPageState extends State<TestPage> {
@@ -49,6 +53,40 @@ class _TestPageState extends State<TestPage> {
       print('Error: $e');
     }
   }
+
+  Future<void> bookTrip(int index) async {
+    try {
+      final trip = trips[index];
+      final response = await http.post(
+        Uri.parse(book_trip),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'nameP': widget.nameP, // Replace with actual passenger name
+          'EmailP': widget.emailP, // Replace with actual passenger email
+          'nameD': trip['name'], // Example field from trip
+          'EmailD': trip['driverEmail'], // Example field from trip
+          'phoneNumberP': widget.phoneP, // Replace with actual passenger phone
+          'phoneNumberD': trip['phoneNumber'], // Example field from trip
+          'from': trip['from'],
+          'to': trip['to'],
+          'price': trip['price'],
+          'date': trip['date'],
+          'time': trip['time'],
+          'Note': notes[index], // الملاحظة
+          'seat': selectedSeats[index], // عدد المقاعد المحجوزة
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Trip booked successfully');
+      } else {
+        print('Failed to book trip: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
 
   void updateTripsBasedOnTime() {
     final now = DateTime.now();
@@ -427,6 +465,7 @@ class _TestPageState extends State<TestPage> {
                                 print(
                                     'Booked ${selectedSeats[index]} seat(s) for trip from ${trip['from']} to ${trip['to']}');
                                 print('Notes: ${notes[index]}'); // عرض الملاحظات
+                                bookTrip(index);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primaryColor2,

@@ -35,6 +35,7 @@ class Passenger extends StatefulWidget {
 class _PassengerState extends State<Passenger> {
   late String email;
   late String fullName;
+  late String phoneNumber;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<String> _images = [
@@ -60,11 +61,13 @@ class _PassengerState extends State<Passenger> {
       Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token!);
       email = jwtDecodedToken['email'];
       fullName = jwtDecodedToken['fullName'];
+      phoneNumber = jwtDecodedToken['phoneNumber'];
 
       // Save email and full name in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', email);
       await prefs.setString('fullName', fullName);
+      await prefs.setString('phoneNumber', phoneNumber);
     }
 
     // إعداد التايمر للحركة التلقائية للسلايدر
@@ -378,7 +381,7 @@ class _PassengerState extends State<Passenger> {
 
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => TestPage()),
+                    MaterialPageRoute(builder: (context) => TestPage(emailP:email,nameP: fullName,phoneP: phoneNumber,)),
                   );
 
 
