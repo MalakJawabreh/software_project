@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 
 import 'package:project1/regist_driver_3.dart';
@@ -11,16 +13,122 @@ class VehicleInsuranceUpload extends StatefulWidget {
 
 class _VehicleInsuranceUploadState extends State<VehicleInsuranceUpload> {
   File? _selectedImage;
+  String _expirationDate = '';
+  bool _isExpired = false;
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile =
+    await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
+        _expirationDate = ''; // إعادة تعيين تاريخ الانتهاء
+        _isExpired = false; // إعادة تعيين حالة الانتهاء
       });
+      await _extractTextFromImage(pickedFile.path);
     }
+  }
+
+  Future<void> _extractTextFromImage(String imagePath) async {
+    final inputImage = InputImage.fromFilePath(imagePath);
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+
+    try {
+      final RecognizedText recognizedText =
+      await textRecognizer.processImage(inputImage);
+
+      // طباعة جميع النصوص المستخرجة
+      print("Extracted Text:");
+      for (TextBlock block in recognizedText.blocks) {
+        for (TextLine line in block.lines) {
+          print(line.text); // طباعة النص المستخرج
+        }
+      }
+
+      // البحث عن تاريخ الانتهاء المرتبط بـ "EXP"
+      String expirationText = '';
+      String pattern = r'EXP.*?(\d{2}/\d{2}/\d{4})'; // "EXP" متبوعًا بتاريخ بصيغة MM/DD/YYYY
+      RegExp expRegEx = RegExp(pattern, caseSensitive: false); // غير حساس لحالة الأحرف
+
+      // البحث في النصوص المستخرجة
+      for (TextBlock block in recognizedText.blocks) {
+        for (TextLine line in block.lines) {
+          if (line.text.toUpperCase().contains('EXP')) {
+            final match = expRegEx.firstMatch(line.text);
+            if (match != null) {
+              expirationText = match.group(1)!; // استخراج التاريخ
+              break;
+            }
+          }
+        }
+        if (expirationText.isNotEmpty) break;
+      }
+
+      setState(() {
+        _expirationDate = expirationText.isEmpty
+            ? 'Expiration date not found.'
+            : expirationText;
+      });
+    
+      if (expirationText.isNotEmpty) {
+        try {
+          DateFormat format = DateFormat('MM/dd/yyyy');
+          DateTime expirationDate = format.parse(expirationText);
+          DateTime currentDate = DateTime.now();
+
+          if (expirationDate.isBefore(currentDate)) {
+            setState(() {
+              _isExpired = true;
+            });
+            _showExpirationDialog(); // فتح حوار إذا انتهت صلاحية الرخصة
+          }
+        } catch (e) {
+          print("Error parsing date: $e");
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _expirationDate = 'Error extracting text: $e';
+      });
+      print("Error extracting text: $e");
+    } finally {
+      textRecognizer.close();
+    }
+  }
+
+
+
+  // دالة لعرض حوار التحذير
+  void _showExpirationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor:Color.fromARGB(230, 234, 236, 239), // لون خلفية أزرق فاتح
+          title: Row(
+            children: [
+              Icon(Icons.error_outline_outlined, color: Colors.red,size: 40,), // أيقونة الإكس الأحمر
+              SizedBox(width: 8),
+              Text('License Expired',style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold),),
+            ],
+          ),
+          content: Text(
+            'Your Vehicle Insurance has expired. You cannot proceed with the registration process.',
+            style: TextStyle(color:Colors.black,fontSize: 18,fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -156,7 +264,13 @@ class _VehicleInsuranceUploadState extends State<VehicleInsuranceUpload> {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            SizedBox(height: 180),
+            SizedBox(height: 16),
+            Text(
+              'Expiration Date: $_expirationDate',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 140),
             if (_selectedImage != null) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween, // لتوزيع الأزرار بالتساوي
@@ -187,15 +301,44 @@ class _VehicleInsuranceUploadState extends State<VehicleInsuranceUpload> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle submit action here
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Image submitted successfully!'),
-                        ));
+                        if(_isExpired){
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor:Color.fromARGB(230, 234, 236, 239), // لون خلفية أزرق فاتح
+                                title: Row(
+                                  children: [
+                                    Icon(Icons.close_outlined, color: Colors.red,size: 40,), // أيقونة الإكس الأحمر
+                                  ],
+                                ),
+                                content: Text(
+                                  'Sorry! ,You cannot continue with the registration process.',
+                                  style: TextStyle(color: Colors.black,fontSize: 22,fontWeight: FontWeight.bold),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                        else{
+                          // Handle submit action here
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('Image submitted successfully!'),
+                          ));
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => DriverLicenseUpload()),
-                        );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => DriverLicenseUpload()),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(230, 41, 84, 115), // لون الخلفية

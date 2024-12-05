@@ -51,6 +51,7 @@ dependencies:
   dotted_border:
   flutter_colorpicker: ^1.0.3
   image_picker:
+  google_ml_kit: ^0.19.0
 
 
   # The following adds the Cupertino Icons font to your application.
