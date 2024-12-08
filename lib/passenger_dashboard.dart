@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/test.dart';
 import 'dart:async';
+import 'config.dart';
+import 'dart:typed_data';
 import 'login.dart';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
@@ -36,7 +40,9 @@ class _PassengerState extends State<Passenger> {
   late String email;
   late String fullName;
   late String phoneNumber;
+  late String Picture='';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? profilePicture; // لتخزين رابط صورة الملف الشخصي
 
   final List<String> _images = [
     'imagess/a11.jpg',
@@ -53,6 +59,16 @@ class _PassengerState extends State<Passenger> {
   void initState() {
     super.initState();
     _loadUserData();
+    _fetchProfilePicture(); // استدعاء دالة جلب الصورة
+  }
+
+  Future<void> _fetchProfilePicture() async {
+    final picture = await fetchProfilePicture();
+    if (picture != null) {
+      setState(() {
+        profilePicture = picture; // تحديث رابط الصورة
+      });
+    }
   }
 
   // Method to decode token and save user data in shared preferences
@@ -62,12 +78,14 @@ class _PassengerState extends State<Passenger> {
       email = jwtDecodedToken['email'];
       fullName = jwtDecodedToken['fullName'];
       phoneNumber = jwtDecodedToken['phoneNumber'];
+      Picture=jwtDecodedToken['profilePicture'];
 
       // Save email and full name in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', email);
       await prefs.setString('fullName', fullName);
       await prefs.setString('phoneNumber', phoneNumber);
+      await prefs.setString('profilePicture', Picture);
     }
 
     // إعداد التايمر للحركة التلقائية للسلايدر
@@ -83,6 +101,60 @@ class _PassengerState extends State<Passenger> {
         curve: Curves.easeInOut,
       );
     });
+  }
+
+
+  Future<String?> fetchProfilePicture() async {
+    try {
+      // URL الخاص بالـ API
+      final url = Uri.parse('$profile_picture?email=${email}');
+
+      // إرسال طلب GET
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // فك تشفير الـ JSON
+        final data = json.decode(response.body);
+
+        if (data['status'] == true) {
+          profilePicture = data['profilePicture'];
+          setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+          print("Fetched profile picture URL: $profilePicture");
+          return profilePicture;
+        } else {
+          throw Exception(data['error']);
+        }
+      } else {
+        throw Exception("Failed to fetch profile picture. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching profile picture: $e");
+      return null;
+    }
+  }
+
+  Widget base64ToImage(String base64String) {
+    try {
+      Uint8List imageBytes = base64Decode(base64String);
+      return CircleAvatar(
+        radius: 30, // التحكم في حجم الصورة الدائرية
+        backgroundImage: MemoryImage(imageBytes), // فك تشفير الصورة
+        child: ClipOval( // لتنسيق الصورة لتكون دائرية
+          child: Image.memory(
+            imageBytes,
+            fit: BoxFit.cover,
+            width: 60, // عرض الصورة
+            height: 60, // ارتفاع الصورة
+          ),
+        ),
+      );
+
+    } catch (e) {
+      print("Error decoding Base64: $e");
+      return Center(
+        child: Text("Unable to load image"),
+      );
+    }
   }
 
 
@@ -175,8 +247,11 @@ class _PassengerState extends State<Passenger> {
               decoration: BoxDecoration(color: Colors.white),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('imagess/signup_icon.png'),
+                  profilePicture != null
+                      ? base64ToImage(profilePicture!)
+                      : CircleAvatar(
+                    backgroundImage:
+                    AssetImage('imagess/signup_icon.png'),
                     radius: 30,
                   ),
                   SizedBox(width: 10),

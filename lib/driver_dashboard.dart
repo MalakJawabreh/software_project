@@ -35,7 +35,7 @@ class _DriverState extends State<Driver> {
   List<dynamic> completedTrips = [];
   List<dynamic> canceledTrips = [];
 
-  late String profilepicture="";
+  String? Picture; // لتخزين رابط صورة الملف الشخصي
 
 
   StreamController<Map<String, dynamic>> dashboardStreamController = StreamController.broadcast();
@@ -47,6 +47,7 @@ class _DriverState extends State<Driver> {
   @override
   void initState() {
     super.initState();
+    _fetchProfilePicture();
 
     // تخصيص لون شريط الحالة فقط
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
@@ -64,7 +65,7 @@ class _DriverState extends State<Driver> {
         licensePicture=jwtDecodedToken['licensePicture'];
         profilePicture=jwtDecodedToken['profilePicture'];
 
-        fetchProfilePicture();
+        //fetchProfilePicture();
         // استدعاء دالة التحديث
         // حفظ البيانات في SharedPreferences
         saveUserData(email, username,phoneNumber,licensePicture,profilePicture);
@@ -96,8 +97,8 @@ class _DriverState extends State<Driver> {
     await prefs.setString('email', email);
     await prefs.setString('username', username);
     await prefs.setString('phone', phone);
-    await prefs.setString('phone', licensePicture);
-    await prefs.setString('phone', profilePicture);
+    await prefs.setString('picture', licensePicture);
+    await prefs.setString('picture', profilePicture);
 
 
     print('Saved email: $email');
@@ -111,7 +112,7 @@ class _DriverState extends State<Driver> {
     setState(() {
       email = prefs.getString('email') ?? 'defaultEmail@example.com'; // القيمة الافتراضية في حالة عدم وجود بيانات
       username = prefs.getString('username') ?? 'defaultUsername';
-      phoneNumber = prefs.getString('phone') ?? '0000';
+      phoneNumber = prefs.getString('phone') ?? '000000000';
       licensePicture=prefs.getString('licensePicture') ?? '0000';
       profilePicture=prefs.getString('profilePicture') ?? '0000';
     });
@@ -160,6 +161,15 @@ class _DriverState extends State<Driver> {
     });
   }
 
+  Future<void> _fetchProfilePicture() async {
+    final picture = await fetchProfilePicture();
+    if (picture != null) {
+      setState(() {
+        Picture = picture; // تحديث رابط الصورة
+      });
+    }
+  }
+
   Future<String?> fetchProfilePicture() async {
     try {
       // URL الخاص بالـ API
@@ -173,10 +183,10 @@ class _DriverState extends State<Driver> {
         final data = json.decode(response.body);
 
         if (data['status'] == true) {
-          profilepicture = data['profilePicture'];
+           Picture = data['profilePicture'];
           setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
-          print("Fetched profile picture URL: $profilepicture");
-          return profilepicture;
+          print("Fetched profile picture URL: $Picture");
+          return Picture;
         } else {
           throw Exception(data['error']);
         }
@@ -344,10 +354,13 @@ class _DriverState extends State<Driver> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 25),
-                      // child: CircleAvatar(
-                      //   radius: 35,
-                      //   backgroundImage:FileImage(driverData.profileImage!),
-                      // ),
+                      child: profilePicture != null
+                          ? base64ToImage(profilePicture!)
+                          : CircleAvatar(
+                        backgroundImage:
+                        AssetImage('imagess/signup_icon.png'),
+                        radius: 30,
+                      ),
                     ),
                     SizedBox(width: 10),
                     Column(
@@ -461,12 +474,13 @@ class _DriverState extends State<Driver> {
             padding: const EdgeInsets.only(top: 15, left: 16, right: 16),
             child: Row(
               children: [
-              CircleAvatar(
-              radius: 25,
-              backgroundImage:profilepicture.isNotEmpty
-                  ? MemoryImage(base64Decode(profilepicture))
-                  : null,
-            ),
+                profilePicture != null
+                    ? base64ToImage(profilePicture!)
+                    : CircleAvatar(
+                  backgroundImage:
+                  AssetImage('imagess/signup_icon.png'),
+                  radius: 30,
+                ),
               SizedBox(width: 7),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
