@@ -573,6 +573,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                         );
                       },
                       child: Card(
+                        color:SecondryColor, // تحديد اللون الأسود للكارد
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -660,8 +661,20 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                 if (_trips.isEmpty)
                   Text(
                     isArabic ? "لم يتم العثور على رحلات" : "No trips found.",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 18,  // حجم الخط
+                      fontWeight: FontWeight.bold,  // جعل الخط عريض
+                      color: SecondryColor2,  // لون النص
+                      shadows: [
+                        Shadow(
+                          offset: Offset(1.5, 1.5),  // اتجاه الظل
+                          blurRadius: 3.0,  // تأثير ضبابي للظل
+                          color: Colors.grey.withOpacity(0.5),  // لون الظل
+                        ),
+                      ],
+                    ),
                   )
+
               ],
             ),
           ),
