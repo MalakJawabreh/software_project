@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'config.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/material.dart';
+
 
 class TestPage extends StatefulWidget {
   @override
@@ -35,6 +38,8 @@ class _TestPageState extends State<TestPage> {
     });
   }
 
+
+
   Future<void> fetchTrips() async {
     try {
       final response = await http.get(Uri.parse(all_trip));
@@ -53,39 +58,105 @@ class _TestPageState extends State<TestPage> {
       print('Error: $e');
     }
   }
+  void _showMessage(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // لإعطاء الزوايا شكل دائري
+          ),
+          title: Text(
+            'Notification',
+            style: TextStyle(fontSize: 20, color: analogousPink),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK", style: TextStyle(color:analogousPink)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> bookTrip(int index) async {
     try {
       final trip = trips[index];
+      final bookingData = {
+        'nameP': widget.nameP,
+        'from': trip['from'],
+        'to': trip['to'],
+        'date': trip['date'],
+        'time': trip['time'],
+      };
+
+      // تحقق إذا كان المستخدم قد حجز بالفعل نفس الرحلة
+      final existingBooking = trips.where((t) {
+        return t['from'] == bookingData['from'] &&
+            t['to'] == bookingData['to'] &&
+            t['date'] == bookingData['date'] &&
+            t['time'] == bookingData['time'] &&
+            t['nameP'] == bookingData['nameP'];
+      }).toList();
+
+      if (existingBooking.isNotEmpty) {
+        _showMessage(context, "You have already booked this trip.");
+        return;
+      }
+
+      // تحقق إذا كان هناك تعارض في المواعيد
+      final conflictingBooking = trips.where((t) {
+        return t['date'] == bookingData['date'] &&
+            t['time'] == bookingData['time'] &&
+            t['nameP'] == bookingData['nameP'];
+      }).toList();
+
+      if (conflictingBooking.isNotEmpty) {
+        _showMessage(context, "You cannot book two trips at the same time.");
+        return;
+      }
+
       final response = await http.post(
         Uri.parse(book_trip),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'nameP': widget.nameP, // Replace with actual passenger name
-          'EmailP': widget.emailP, // Replace with actual passenger email
-          'nameD': trip['name'], // Example field from trip
-          'EmailD': trip['driverEmail'], // Example field from trip
-          'phoneNumberP': widget.phoneP, // Replace with actual passenger phone
-          'phoneNumberD': trip['phoneNumber'], // Example field from trip
+          'nameP': widget.nameP,
+          'EmailP': widget.emailP,
+          'nameD': trip['name'],
+          'EmailD': trip['driverEmail'],
+          'phoneNumberP': widget.phoneP,
+          'phoneNumberD': trip['phoneNumber'],
           'from': trip['from'],
           'to': trip['to'],
           'price': trip['price'],
           'date': trip['date'],
           'time': trip['time'],
-          'Note': notes[index], // الملاحظة
-          'seat': selectedSeats[index], // عدد المقاعد المحجوزة
+          'Note': notes[index],
+          'seat': selectedSeats[index],
         }),
       );
 
-      if (response.statusCode == 200) {
+      // إذا كانت الاستجابة ناجحة، عرض رسالة النجاح
+      if (response.statusCode == 201) {
+        _showMessage(context, "Booking successful!");
         print('Trip booked successfully');
       } else {
-        print('Failed to book trip: ${response.body}');
+        _showMessage(context, "Failed to book trip: ${response.body}");
       }
     } catch (e) {
       print('Error: $e');
+      _showMessage(context, "An error occurred. Please try again.");
     }
   }
+
 
 
   void updateTripsBasedOnTime() {
@@ -118,7 +189,7 @@ class _TestPageState extends State<TestPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Advertisements',
+          'All Trips',
           style: TextStyle(
             color: Colors.grey[700],
             fontWeight: FontWeight.bold// لون رمادي غامق
