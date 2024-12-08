@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'TripDetailsScreen.dart';
 class SearchTripsPage extends StatefulWidget {
   @override
   _SearchTripsPageState createState() => _SearchTripsPageState();
@@ -27,17 +28,41 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   TimeOfDay? _selectedTime;
   DateTime? _selectedDate;
   List<String> _cities = [
-    'Nablus', 'Ramallah', 'Jerusalem', 'Hebron', 'Gaza', 'Jenin', 'Tulkarm', 'Bethlehem', 'Qalqilya', 'Nablus',
-    'Tubas', 'Salfit', 'Jericho', 'Ariha', 'Rafah', 'Deir al-Balah', 'Khan Younis', 'Zababdeh', 'Baqa al-Sharqiya',
-    'Balata', 'Saffa', 'Dura', 'Bani Na’im'
+    'Nablus', 'Ramallah', 'Jerusalem', 'Hebron', 'Gaza', 'Jenin', 'Tulkarm', 'Bethlehem', 'Qalqilya', 'Tubas',
+    'Salfit', 'Jericho', 'Rafah', 'Deir al-Balah', 'Khan Younis', 'Zababdeh', 'Baqa al-Sharqiya', 'Balata', 'Saffa',
+    'Dura', 'Bani Na’im', 'Acre', 'Haifa', 'Jaffa', 'Ramla', 'Lod', 'Safed', 'Tiberias', 'Beit Shean',
+    'Nazareth', 'Umm al-Fahm', 'Tayibe', 'Kafr Qasim', 'Kafr Kanna', 'Arraba', 'Sakhnin', 'Deir al-Asad',
+    'Beit Jann', 'Mi’ilya', 'al-Bi’na', 'Yarka', 'Jadeidi-Makr', 'Shefa-Amr', 'Tur’an', 'Arraba al-Batouf',
+    'Kafr Yasif', 'Deir Hanna', 'Eilabun', 'al-Mazra’a', 'Dabburiya', 'al-Maghar', 'Reineh', 'Kuseife',
+    'Tel as-Sabi', 'Hura', 'Ar’arat an-Naqab', 'Shaqib al-Salam', 'Rahat', 'al-Qastal', 'Ein Karem', 'Silwan',
+    'Shuafat', 'al-Issawiya', 'Beit Safafa', 'Sheikh Jarrah', 'Beit Hanina', 'At-Tur', 'Anata', 'Abu Dis',
+    'Al-Eizariya', 'Birzeit', 'al-Mughayyir', 'Sinjil', 'Turmus Ayya', 'Rantis', 'Nabi Saleh', 'Beit Rima',
+    'Deir Ghassaneh', 'al-Ubeidiya', 'Beit Sahour', 'Beit Jala', 'Husan', 'al-Khader', 'al-Arroub', 'al-Fawwar',
+    'Sa’ir', 'Yatta', 'as-Samu’' , 'ash-Shuyukh', 'Bani Suheila', 'Abasan al-Kabira', 'Abasan al-Saghira',
+    'Beit Hanoun', 'Beit Lahiya', 'Jabalia', 'Jabalia Camp', 'Beach Camp (Shati)', 'Nuseirat Camp',
+    'Bureij Camp', 'Maghazi Camp', 'Dheisheh Camp', 'al-Arroub Camp', 'al-Far’a Camp',
+    'Jenin Camp', 'Nur Shams Camp', 'Tulkarm Camp', 'Balata Camp', 'Askar Camp', 'Aqabat Jaber Camp',
+    'Ein as-Sultan Camp','Hebron City Center','Rafidia','Birzeit University'
   ];
 
 // تحويل أسماء المدن للعربية إذا كانت اللغة العربية مفعلة
 
   List<String> _citiesArabic = [
-    'نابلس', 'رام الله', 'القدس', 'الخليل', 'غزة', 'جنين', 'طولكرم', 'بيت لحم', 'قلقيلية', 'نابلس',
-    'طوباس', 'سلفيت', 'أريحا', 'رفح', 'دير البلح', 'خان يونس', 'زببدة', 'باقة الشرقية',
-    'بلعة', 'صفا', 'دورا', 'بني نعيم'
+    'نابلس', 'رام الله', 'القدس', 'الخليل', 'غزة', 'جنين', 'طولكرم', 'بيت لحم', 'قلقيلية', 'طوباس',
+    'سلفيت', 'أريحا', 'رفح', 'دير البلح', 'خانيونس', 'الزبابدة', 'باقا الشرقية', 'بلاطة', 'صفا',
+    'دورا', 'بني نعيم', 'عكا', 'حيفا', 'يافا', 'الرملة', 'اللد', 'صفد', 'طبريا', 'بيسان',
+    'الناصرة', 'أم الفحم', 'الطيبة', 'كفر قاسم', 'كفر كنا', 'عرابة', 'سخنين', 'دير الأسد',
+    'بيت جن', 'معليا', 'البعنة', 'يركا', 'جديدة-المكر', 'شفاعمرو', 'طرعان', 'عرابة البطوف',
+    'كفر ياسيف', 'دير حنا', 'عيلبون', 'المزرعة', 'دبورية', 'المغار', 'الرينة', 'كسيفة',
+    'تل السبع', 'حورة', 'عرعرة النقب', 'شقيب السلام', 'رهط', 'القسطل', 'عين كارم', 'سلوان',
+    'شعفاط', 'العيسوية', 'بيت صفافا', 'الشيخ جراح', 'بيت حنينا', 'الطور', 'عناتا', 'أبو ديس',
+    'العيزرية', 'بير زيت', 'المغير', 'سنجل', 'ترمسعيا', 'رنتيس', 'النبي صالح', 'بيت ريما',
+    'دير غسانة', 'العبيدية', 'بيت ساحور', 'بيت جالا', 'حوسان', 'الخضر', 'العروب', 'الفوار',
+    'سعير', 'يطا', 'السموع', 'الشيوخ', 'بني سهيلا', 'عبسان الكبيرة', 'عبسان الصغيرة',
+    'بيت حانون', 'بيت لاهيا', 'جباليا', 'مخيم جباليا', 'مخيم الشاطئ', 'مخيم النصيرات',
+    'مخيم البريج', 'مخيم المغازي', 'مخيم الدهيشة', 'مخيم العروب', 'مخيم الفارعة',
+    'مخيم جنين', 'مخيم نور شمس', 'مخيم طولكرم', 'مخيم بلاطة', 'مخيم عسكر', 'مخيم عقبة جبر',
+    'مخيم عين السلطان'
   ];
 
   List<String> _carBrands = [
@@ -56,6 +81,11 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   // المتغير لتخزين الفلاتر المختارة
   List<String> _selectedFilters = [];
   List<dynamic> _trips = [];
+
+  String formatTimeWithAMPM(DateTime time) {
+    final format = DateFormat('hh:mm a'); // استخدام تنسيق 12 ساعة مع AM/PM
+    return format.format(time);
+  }
 
   ScrollController _scrollController = ScrollController();  // ScrollController
 
@@ -76,6 +106,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
       if (_departureController.text.isEmpty || _destinationController.text.isEmpty) {
         throw Exception("Both 'from' and 'to' fields must be filled.");
       }
+      final now = DateTime.now();
 
       final Uri url = Uri.parse(filtered_trips).replace(queryParameters: {
         'from': _departureController.text,
@@ -90,11 +121,12 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
         },
         if (_selectedTime != null) ...{
           'filterOption': 'Time',
-          'filterValue': '${_selectedTime!.hour}:${_selectedTime!.minute}',
+          'filterValue': formatTimeWithAMPM(DateTime(now.year, now.month, now.day, _selectedTime!.hour, _selectedTime!.minute)), // إرسال الوقت مع AM/PM
         },
+
         if (_selectedDate != null) ...{
           'filterOption': 'Date',
-          'filterValue': '${_selectedDate!.year}-${_selectedDate!.month}-${_selectedDate!.day}',
+          'filterValue': '${_selectedTime!.hour}:${_selectedTime!.minute} ${_selectedTime!.hour >= 12 ? 'PM' : 'AM'}',
         },
         if (_driverRatingController.text.isNotEmpty) ...{
           'filterOption': 'Driver Rating',
@@ -200,6 +232,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
       });
     }
   }
+
 
 
 
@@ -525,25 +558,110 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                   SizedBox(height: 16),
                 ListView.builder(
                   shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(), // لمنع التمرير داخل القائمة
                   itemCount: _trips.length,
                   itemBuilder: (context, index) {
                     final trip = _trips[index];
-                    return Card(
-                      margin: EdgeInsets.symmetric(vertical: 8.0),
-                      elevation: 5,
-                      child: ListTile(
-                        title: Text('Trip from ${trip['from']} to ${trip['to']}'),
-                        subtitle: Text('Price: ${trip['price']}'),
-                        trailing: Icon(Icons.directions_car),
-                        onTap: () {
-                          // يمكنك إضافة إجراء عند النقر على الرحلة، مثل عرض تفاصيل الرحلة
-                        },
+                    return GestureDetector(
+                      onTap: () {
+                        // تنفيذ الإجراء عند النقر على البطاقة
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TripDetailsScreen(trip: trip),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        margin: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.teal.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.directions_car,
+                                      color: primaryColor2,
+                                      size: 40,
+                                    ),
+                                  ),
+                                  SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Trip from ${trip['from']} to ${trip['to']}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            color: primaryColor2,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Price: ${trip['price']}',
+                                          style: TextStyle(
+                                            color: Colors.grey[700],
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Divider(color: Colors.grey),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calendar_today, color: analogousPink),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        formatDate(trip['date']),
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time, color: analogousPink),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        trip['time'] ?? 'N/A',
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
                 ),
                 if (_trips.isEmpty)
-                  Text(isArabic ? "لم يتم العثور على رحلات" : "No trips found.")
+                  Text(
+                    isArabic ? "لم يتم العثور على رحلات" : "No trips found.",
+                    style: TextStyle(fontSize: 16),
+                  )
               ],
             ),
           ),

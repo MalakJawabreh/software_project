@@ -118,7 +118,7 @@ class _TestPageState extends State<TestPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Advertisements',
+          'All Trips',
           style: TextStyle(
             color: Colors.grey[700],
             fontWeight: FontWeight.bold// لون رمادي غامق
