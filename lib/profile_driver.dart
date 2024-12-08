@@ -1,5 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http ;
+import 'config.dart';
+import 'driver_data_model.dart';
 
 class ProfileDriver extends StatefulWidget {
   final String username;
@@ -16,15 +23,149 @@ class _ProfileDriverState extends State<ProfileDriver> {
   String _bioText = "Enter Your Bio.";
   bool _isEditing = false; // لتحديد إذا كنا في وضع التعديل أم لا
   TextEditingController _controller = TextEditingController();
+  XFile? _profileImage; // لتخزين الصورة التي تم تحميلها
+  String? profilepicture;
+  String? profilepicturedatabase;
+  late String profilePicture="";
 
   @override
   void initState() {
     super.initState();
     _controller.text = _bioText; // تعيين النص الحالي في الـ controller
+    print(widget.email);
+
+      fetchProfilePicture();
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = pickedFile;
+      });
+    }
+
+    if (_profileImage != null) {
+      profilepicture = convertImageToBase64(File(_profileImage!.path));
+    }
+    _updateProfileImage(profilepicture!);
+  }
+
+  void saveProfilepicture() {
+      Provider.of<DriverDataModel>(context, listen: false).setProfileImage(
+        File(_profileImage!.path)
+      );
+  }
+  Future<void> _updateProfileImage(String imagePath) async {
+
+    print('Email: ${widget.email}');
+    if (widget.email == null || widget.email.isEmpty) {
+      print('Email is missing!');
+      return;
+    }
+    try {
+      // Create the request body as JSON
+      final requestBody = {
+        'email': widget.email,
+        'profilePicture': imagePath,
+      };
+
+      // Send the request and get the response
+      final response = await http.post(
+        Uri.parse(update_profile_picture),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully updated the profile picture
+        print('Profile picture updated successfully.');
+        await fetchProfilePicture(); // تحديث الصورة بعد التحديث
+
+      } else {
+        // Handle error
+        print('Failed to update profile picture.');
+      }
+    } catch (e) {
+      print('Error updating profile picture: $e');
+    }
+  }
+
+  String? convertImageToBase64(File? imageFile) {
+    if (imageFile == null) return null;
+
+    try {
+      List<int> imageBytes = imageFile.readAsBytesSync();
+      String base64String = base64Encode(imageBytes);
+      print("Base64 Encoded Image: $base64String");
+      return base64String;
+    } catch (e) {
+      print("Error converting image to Base64: $e");
+      return null;
+    }
+}
+
+  Future<String?> fetchProfilePicture() async {
+
+      try {
+        // URL الخاص بالـ API
+        final url = Uri.parse('$profile_picture?email=${widget.email}');
+
+        // إرسال طلب GET
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          // فك تشفير الـ JSON
+          final data = json.decode(response.body);
+
+          if (data['status'] == true) {
+            profilePicture = data['profilePicture'];
+            setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+            print("Fetched profile picture URL: $profilePicture");
+            return profilePicture;
+          } else {
+            throw Exception(data['error']);
+          }
+        } else {
+          throw Exception(
+              "Failed to fetch profile picture. Status code: ${response
+                  .statusCode}");
+        }
+      } catch (e) {
+        print("Error fetching profile picture: $e");
+        return null;
+      }
+
+  }
+
+  Widget base64ToImage(String base64String) {
+    try {
+      Uint8List imageBytes = base64Decode(base64String);
+      return CircleAvatar(
+        radius: 30, // التحكم في حجم الصورة الدائرية
+        backgroundImage: MemoryImage(imageBytes), // فك تشفير الصورة
+        child: ClipOval( // لتنسيق الصورة لتكون دائرية
+          child: Image.memory(
+            imageBytes,
+            fit: BoxFit.cover,
+            width: 60, // عرض الصورة
+            height: 60, // ارتفاع الصورة
+          ),
+        ),
+      );
+
+    } catch (e) {
+      print("Error decoding Base64: $e");
+      return Center(
+        child: Text("Unable to load image"),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final driverData = Provider.of<DriverDataModel>(context);
     // تغيير إعدادات الـ Status Bar لعرض الأيقونات بشكل صحيح
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
       statusBarColor: Colors.transparent, // شفاف لتقليل التداخل
@@ -62,10 +203,30 @@ class _ProfileDriverState extends State<ProfileDriver> {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundImage: AssetImage('imagess/signup_icon.png'),
-                ),
+                GestureDetector(
+                   onTap: _pickImage,
+                   child: Stack(
+                     children: [
+                           CircleAvatar(
+                             radius: 35,
+                            backgroundImage:profilePicture.isNotEmpty
+                       ? MemoryImage(base64Decode(profilePicture))
+                       : null,
+                          ),
+                     Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Icon(
+                          Icons.add_a_photo,
+                          size: 20,
+                          color: Colors.black,
+                          //backgroundColor: Colors.indigo,
+                          //shape: BoxShape.circle,
+                         ),
+                       ),
+                     ],
+                   ),
+                 ),
                 SizedBox(width: 20),
                 Expanded(
                   child: Column(
@@ -125,8 +286,31 @@ class _ProfileDriverState extends State<ProfileDriver> {
           Divider(),
           SizedBox(height: 20),
           ListTile(
-            leading: Icon(Icons.person, color: Colors.indigo,size: 31,),
-            title: Text("Account",
+            leading: Icon(Icons.person, color: Colors.indigo, size: 31),
+            title: Text(
+              "Account",
+              style: TextStyle(
+                fontSize: 23, // تحديد حجم الخط
+                color: Colors.blueGrey, // تغيير اللون
+                fontWeight: FontWeight.bold, // تغيير سمك الخط
+              ),
+            ),
+            trailing: Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              fetchProfilePicture().then((profilePicture) {
+                if (profilePicture != null) {
+                  print("Profile picture URL: $profilePicture");
+                } else {
+                  print("Failed to fetch profile picture.");
+                }
+              });
+            },
+          ),
+          SizedBox(height: 15),
+          ListTile(
+            leading: Icon(Icons.location_on, color: Colors.indigo, size: 31),
+            title: Text(
+              "Addresses Book",
               style: TextStyle(
                 fontSize: 23, // تحديد حجم الخط
                 color: Colors.blueGrey, // تغيير اللون
@@ -138,8 +322,9 @@ class _ProfileDriverState extends State<ProfileDriver> {
           ),
           SizedBox(height: 15),
           ListTile(
-            leading: Icon(Icons.location_on, color: Colors.indigo,size: 31,),
-            title: Text("Addresses Book",
+            leading: Icon(Icons.lightbulb_circle_rounded, color: Colors.indigo, size: 31),
+            title: Text(
+              "Status",
               style: TextStyle(
                 fontSize: 23, // تحديد حجم الخط
                 color: Colors.blueGrey, // تغيير اللون
@@ -151,8 +336,9 @@ class _ProfileDriverState extends State<ProfileDriver> {
           ),
           SizedBox(height: 15),
           ListTile(
-            leading: Icon(Icons.lightbulb_circle_rounded, color: Colors.indigo,size: 31,),
-            title: Text("Status",
+            leading: Icon(Icons.chat, color: Colors.indigo, size: 31),
+            title: Text(
+              "Chat settings",
               style: TextStyle(
                 fontSize: 23, // تحديد حجم الخط
                 color: Colors.blueGrey, // تغيير اللون
@@ -162,58 +348,9 @@ class _ProfileDriverState extends State<ProfileDriver> {
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {},
           ),
-          SizedBox(height: 15),
-         /* ListTile(
-            leading: Icon(Icons.notifications, color: Colors.indigo,size: 31,),
-            title: Text("Notification",
-              style: TextStyle(
-                fontSize: 23, // تحديد حجم الخط
-                color: Colors.blueGrey, // تغيير اللون
-                fontWeight: FontWeight.bold, // تغيير سمك الخط
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {},
-          ),
-          SizedBox(height: 15),*/
-          ListTile(
-            leading: Icon(Icons.chat, color: Colors.indigo,size: 31,),
-            title: Text("Chat settings",
-              style: TextStyle(
-                fontSize: 23, // تحديد حجم الخط
-                color: Colors.blueGrey, // تغيير اللون
-                fontWeight: FontWeight.bold, // تغيير سمك الخط
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {},
-          ),
-          SizedBox(height: 15),
-        /*  ListTile(
-            leading: Icon(Icons.lock, color: Colors.indigo,size: 31,),
-            title: Text("Privacy and security",
-              style: TextStyle(
-                fontSize: 23, // تحديد حجم الخط
-                color: Colors.blueGrey, // تغيير اللون
-                fontWeight: FontWeight.bold, // تغيير سمك الخط
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {},
-          ),
-          SizedBox(height: 15),*/
-         /* ListTile(
-            leading: Icon(Icons.info, color: Colors.indigo,size: 31,),
-            title: Text("About",
-              style: TextStyle(
-                fontSize: 23, // تحديد حجم الخط
-                color: Colors.blueGrey, // تغيير اللون
-                fontWeight: FontWeight.bold, // تغيير سمك الخط
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {},
-          ),*/
+          // profilePicture.isNotEmpty
+          //     ? base64ToImage(profilePicture) // استدعاء الدالة لعرض الصورة
+          //     : CircularProgressIndicator(),
         ],
       ),
     );

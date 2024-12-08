@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:project1/regist_driver_2.dart';
+import 'package:provider/provider.dart';
+
+import 'driver_data_model.dart';
 
 class DriverRegistrationPage extends StatefulWidget {
   @override
@@ -29,6 +32,15 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
 
   String? selectedColorName;
   Color selectedCustomColor = Colors.black;
+
+  void saveCarDetails() {
+    if (_formKey.currentState!.validate() && selectedCarMake != null) {
+      Provider.of<DriverDataModel>(context, listen: false).setCarDetails(
+        carMake: selectedCarMake!,
+        plateNumber: _plateNumberController.text,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,6 +331,11 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
                         print('Vehicle Year: ${_yearController.text}');
                         print('Vehicle Color: $chosenColor');
                         print('License Plate Number: ${_plateNumberController.text}');
+                        saveCarDetails();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => VehicleInsuranceUpload()),
+                        );
                       }
                       else{
                         Navigator.push(

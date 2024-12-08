@@ -3,21 +3,21 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'driver_dashboard.dart';
+import 'driver_data_model.dart';
 import 'theme_provider.dart'; // تأكد من استيراد ملف ThemeProvider بشكل صحيح
 import 'onbording_screen.dart'; // تأكد من استيراد ملف OnboardingScreen بشكل صحيح
 import 'language_provider.dart'; // استيراد الـ LanguageProvider
 
 void main() {
   runApp(
-
-    ChangeNotifierProvider(
-      create: (context) => LanguageProvider(), // إضافة LanguageProvider
-      child: ChangeNotifierProvider(
-        create: (context) => ThemeProvider(), // ThemeProvider
-        child: MyApp(),
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LanguageProvider()), // LanguageProvider
+        ChangeNotifierProvider(create: (context) => ThemeProvider()), // ThemeProvider
+        ChangeNotifierProvider(create: (context) => DriverDataModel()), // DriverDataModel
+      ],
+      child: MyApp(),
     ),
-
   );
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
     statusBarColor: Colors.transparent, // شفاف لتقليل التداخل

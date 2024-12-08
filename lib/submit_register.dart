@@ -1,8 +1,81 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'driver_data_model.dart';
+import 'package:http/http.dart' as http ;
+import 'config.dart';
+import 'login.dart';
 
 
-class ApplicationSubmittedPage extends StatelessWidget {
+class ApplicationSubmittedPage extends StatefulWidget {
   @override
+  _ApplicationSubmittedPageState createState() => _ApplicationSubmittedPageState();
+}
+
+class _ApplicationSubmittedPageState extends State<ApplicationSubmittedPage> {
+
+  late DriverDataModel driverData;
+  @override
+  void initState() {
+    super.initState();
+    driverData = Provider.of<DriverDataModel>(context, listen: false);
+  }
+
+  void registerDriver() async {
+
+    String? licenseImageBase64 = convertImageToBase64(driverData.licenseImage);
+    String? InsuranceImageBase64 = convertImageToBase64(driverData.InsuranceImage);
+    print(licenseImageBase64);
+
+    var regbody = {
+          "fullName":driverData.fullName,
+          "email": driverData.email,
+          "password": driverData.password,
+          "phoneNumber":driverData.phoneNumber,
+          "gender": driverData.gender,
+          "role": driverData.role,
+          "carNumber":driverData.plateNumber,
+          "carType": driverData.carMake,
+          "licensePicture": licenseImageBase64,
+          "InsurancePicture":InsuranceImageBase64,
+        };
+
+    print("Data sent to server: ${jsonEncode(regbody)}");
+
+
+    var response = await http.post(Uri.parse(registeration),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(regbody));
+
+        var jsonResponse = jsonDecode(response.body);
+        print(jsonResponse['status']);
+
+        if (jsonResponse['status']) {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Login()));
+        } else {
+          print("Something Error");
+        }
+      }
+
+  String? convertImageToBase64(File? imageFile) {
+    if (imageFile == null) return null;
+
+    try {
+      List<int> imageBytes = imageFile.readAsBytesSync();
+      String base64String = base64Encode(imageBytes);
+      print("Base64 Encoded Image: $base64String");
+      return base64String;
+    } catch (e) {
+      print("Error converting image to Base64: $e");
+      return null;
+    }
+  }
+
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -37,13 +110,13 @@ class ApplicationSubmittedPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width:5,),
+                SizedBox(width: 5),
                 Container(
                   width: 100, // تحديد عرض الخط
                   height: 2, // تحديد سمك الخط
                   color: Colors.orange, // لون الخط
                 ),
-                SizedBox(width:5,),
+                SizedBox(width: 5),
                 Container(
                   width: 40, // عرض الدائرة
                   height: 40, // ارتفاع الدائرة
@@ -59,13 +132,13 @@ class ApplicationSubmittedPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width:5,),
+                SizedBox(width: 5),
                 Container(
                   width: 100, // تحديد عرض الخط
                   height: 2, // تحديد سمك الخط
                   color: Colors.orange, // لون الخط
                 ),
-                SizedBox(width:5,),
+                SizedBox(width: 5),
                 Container(
                   width: 40, // عرض الدائرة
                   height: 40, // ارتفاع الدائرة
@@ -83,12 +156,15 @@ class ApplicationSubmittedPage extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 170,),
+            SizedBox(height: 170),
             Icon(
               Icons.check_circle_outline_rounded,
               size: 100,
               color: Colors.green,
             ),
+            SizedBox(height: 20),
+            if (driverData.licenseImage != null)
+              Image.file(driverData.licenseImage!, height: 100, width: 100),
             SizedBox(height: 20),
             Text(
               'Your application is submitted and is under review.',
@@ -99,6 +175,18 @@ class ApplicationSubmittedPage extends StatelessWidget {
                 color: Colors.grey[800],
               ),
             ),
+            // SizedBox(height: 3),
+            // Text('Car Make: ${driverData.carMake}'),
+            // SizedBox(height: 3),
+            // Text('Plate Number: ${driverData.plateNumber}'),
+            // SizedBox(height: 3),
+            // Text('Insurance Expiration: ${driverData.insuranceExpirationDate}'),
+            // SizedBox(height: 3),
+            // Text('License Expiration: ${driverData.licenseExpirationDate}'),
+            // SizedBox(height: 3),
+            // Text('Full Name: ${driverData.fullName}'),
+            // SizedBox(height: 3),
+            // Text('Email: ${driverData.email}'),
             SizedBox(height: 25),
             Text(
               'You will be notified with application status or check the status by going to Settings.',
@@ -108,23 +196,23 @@ class ApplicationSubmittedPage extends StatelessWidget {
                 color: Colors.grey[600],
               ),
             ),
-            SizedBox(height: 150),
+            SizedBox(height: 80),
             SizedBox(
               width: double.infinity,
-              child:ElevatedButton(
+              child: ElevatedButton(
                 onPressed: () {
-
+                  registerDriver();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:Color.fromARGB(230, 41, 84, 115), // لون الخلفية (يمكنك تغييره)
-                  foregroundColor: Colors.white, // لون النص
+                  backgroundColor: Color.fromARGB(230, 41, 84, 115),
+                  foregroundColor: Colors.white,
                   textStyle: TextStyle(
-                    fontSize: 25, // حجم النص
-                    fontWeight: FontWeight.bold, // سمك النص
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
                   ),
-                  minimumSize: Size(double.infinity, 60), // الحد الأدنى للعرض والارتفاع (50 هو الارتفاع)
+                  minimumSize: Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero, // حواف مربعة (بدون انحناء)
+                    borderRadius: BorderRadius.zero,
                   ),
                 ),
                 child: const Text('Explore the App'),

@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 
 import 'package:project1/regist_driver_3.dart';
+import 'package:provider/provider.dart';
+
+import 'driver_data_model.dart';
 
 class VehicleInsuranceUpload extends StatefulWidget {
   @override
@@ -129,6 +132,16 @@ class _VehicleInsuranceUploadState extends State<VehicleInsuranceUpload> {
         );
       },
     );
+  }
+
+
+  void saveInsuranceDetails() {
+    if (_selectedImage != null && _expirationDate.isNotEmpty) {
+      Provider.of<DriverDataModel>(context, listen: false).setInsuranceDetails(
+        expirationDate: _expirationDate,
+        InsuranceImage: _selectedImage,
+      );
+    }
   }
 
   @override
@@ -334,6 +347,7 @@ class _VehicleInsuranceUploadState extends State<VehicleInsuranceUpload> {
                             content: Text('Image submitted successfully!'),
                           ));
 
+                          saveInsuranceDetails();
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => DriverLicenseUpload()),

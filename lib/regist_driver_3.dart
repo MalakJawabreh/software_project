@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:intl/intl.dart';
 import 'package:project1/submit_register.dart';
+import 'package:provider/provider.dart';
+
+import 'driver_data_model.dart';
 
 class DriverLicenseUpload extends StatefulWidget {
   @override
@@ -129,6 +132,16 @@ class _DriverLicenseUploadState extends State<DriverLicenseUpload> {
       },
     );
   }
+
+  void saveLicenseDetails() {
+    if (_selectedImage != null && _expirationDate.isNotEmpty) {
+      Provider.of<DriverDataModel>(context, listen: false).setLicenseDetails(
+        expirationDate: _expirationDate,
+        licenseImage: _selectedImage,
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -330,6 +343,7 @@ class _DriverLicenseUploadState extends State<DriverLicenseUpload> {
                             content: Text('Image submitted successfully!'),
                           ));
 
+                          saveLicenseDetails();
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => ApplicationSubmittedPage()),

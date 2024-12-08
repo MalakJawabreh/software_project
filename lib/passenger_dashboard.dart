@@ -117,20 +117,25 @@ class _PassengerState extends State<Passenger> {
             padding: const EdgeInsets.only(top: 32),
             child: Row(
               children: [
-                Image.asset(
-                  'imagess/app_icon.jpg',
-                  height: 40,
-                ),
-                SizedBox(width: 0),
-                Text(
-                  isArabic ? "وصلني معك" : "Assalni Ma'ak",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 41, 84, 115),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      'imagess/app_icon.jpg',
+                      height: 40,
+                    ),
+                    Text(
+                      isArabic ? "وصلني معك" : "assalni Ma'ak",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 41, 84, 115),
+                      ),
+                    ),
+                  ],
                 ),
               ],
+
             ),
           ),
           backgroundColor: Color.fromARGB(230, 196, 209, 219),
@@ -310,6 +315,7 @@ class _PassengerState extends State<Passenger> {
 
           // إضافة الكاتلوج
 
+
           Card(
             elevation: 5,
             shape: RoundedRectangleBorder(
@@ -329,48 +335,11 @@ class _PassengerState extends State<Passenger> {
               ),
               child: ListTile(
                 title: Text(
-                  isArabic ? 'حجوزاتك' : 'Your Active Bookings',
+                  isArabic ? 'تصفح جميع الرحلات المتاحة' : 'Browse all available trips',
                   style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
                 ),
                 subtitle: Text(
-                  isArabic ? 'إدارة حجوزاتك الحالية' : 'Manage your current bookings',
-                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward,
-                  color: primaryColor2, // تغيير لون الأيقونة إلى الأبيض
-                ),
-                onTap: () {
-                  // تنفيذ الإجراء عند النقر
-                },
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor,
-                    SecondryColor,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
-              ),
-              child: ListTile(
-                title: Text(
-                  isArabic ? 'الأعلانات' : 'Advertisements',
-                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
-                ),
-                subtitle: Text(
-                  isArabic ? 'رؤية الأعلانات الجديدة الآن' : 'View new ads now!',
+                  isArabic ? 'شاهد الرحلات الجديدة الآن!' : 'View new trips now!',
                   style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
                 ),
                 trailing: Icon(
@@ -415,7 +384,7 @@ class _PassengerState extends State<Passenger> {
                   style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
                 ),
                 subtitle: Text(
-                  isArabic ? 'ابحث عن وجهتك الآن ' : 'Find your destination now',
+                  isArabic ? 'ابحث عن وجهتك الآن باستخدام الفلترة ' : 'Find your destination now using filtering',
                   style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
                 ),
                 trailing: Icon(
@@ -431,7 +400,44 @@ class _PassengerState extends State<Passenger> {
               ),
             ),
           ),
+          SizedBox(height: 20),
 
+          Card(
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    primaryColor,
+                    SecondryColor,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+              ),
+              child: ListTile(
+                title: Text(
+                  isArabic ? 'حجوزاتك' : 'Your Active Bookings',
+                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
+                ),
+                subtitle: Text(
+                  isArabic ? 'إدارة حجوزاتك الحالية' : 'Manage your current bookings',
+                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward,
+                  color: primaryColor2, // تغيير لون الأيقونة إلى الأبيض
+                ),
+                onTap: () {
+                  // تنفيذ الإجراء عند النقر
+                },
+              ),
+            ),
+          ),
 
 
         ],

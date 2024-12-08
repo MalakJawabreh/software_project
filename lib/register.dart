@@ -2,8 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:project1/login.dart';
 import 'package:http/http.dart' as http ;
+import 'package:project1/regist_driver_1.dart';
+import 'package:provider/provider.dart';
 import 'config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'driver_data_model.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -40,35 +44,46 @@ class _RegisterState extends State<Register> {
         passwordController.text.isNotEmpty &&
         phoneController.text.isNotEmpty &&
         selectedGender != null &&
-        selectedRole != null &&
-        (selectedRole != "Driver" || (carNumberController.text.isNotEmpty && carTypeController.text.isNotEmpty))) {
+        selectedRole != null
+        ) {
 
-      var regbody = {
-        "fullName": fullNameController.text,
-        "email": emailController.text,
-        "password": passwordController.text,
-        "phoneNumber": phoneController.text,
-        "gender": selectedGender,
-        "role": selectedRole,
-        if (selectedRole == "Driver") ...{
-          "carNumber": carNumberController.text,
-          "carType": carTypeController.text,
-        }
-      };
-
-      var response = await http.post(Uri.parse(registeration),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(regbody));
-
-      var jsonResponse = jsonDecode(response.body);
-      print(jsonResponse['status']);
-
-      if (jsonResponse['status']) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+      if (selectedRole == "Driver") {
+        // حفظ بيانات السائق في Provider
+        Provider.of<DriverDataModel>(context, listen: false).setUser(
+          fullName: fullNameController.text,
+          email: emailController.text,
+          password: passwordController.text,
+          phoneNumber: phoneController.text,
+          gender: selectedGender!,
+          role: selectedRole!,
+        );
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => DriverRegistrationPage()));
       } else {
-        print("Something Error");
+        var regbody = {
+          "fullName": fullNameController.text,
+          "email": emailController.text,
+          "password": passwordController.text,
+          "phoneNumber": phoneController.text,
+          "gender": selectedGender,
+          "role": selectedRole,
+        };
+
+        var response = await http.post(Uri.parse(registeration),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(regbody));
+
+        var jsonResponse = jsonDecode(response.body);
+        print(jsonResponse['status']);
+
+        if (jsonResponse['status']) {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Login()));
+        } else {
+          print("Something Error");
+        }
       }
-    } else {
+    }else {
       setState(() {
         isNotValidated = true;
       });
@@ -231,14 +246,14 @@ class _RegisterState extends State<Register> {
           ),
         ),
 
-        // إضافة حقول رقم السيارة ونوع السيارة إذا كان الدور هو "Driver"
-        if (selectedRole == "Driver") ...[
-          SizedBox(height: 10),
-          inputStyle("Car Number", "Enter your car number", carNumberController),
-          SizedBox(height: 5),
-          inputStyle("Car Type", "Enter your car type", carTypeController),
-          SizedBox(height: 5),
-        ],
+        // // إضافة حقول رقم السيارة ونوع السيارة إذا كان الدور هو "Driver"
+        // if (selectedRole == "Driver") ...[
+        //   SizedBox(height: 10),
+        //   inputStyle("Car Number", "Enter your car number", carNumberController),
+        //   SizedBox(height: 5),
+        //   inputStyle("Car Type", "Enter your car type", carTypeController),
+        //   SizedBox(height: 5),
+        // ],
 
         // زر التسجيل
         Container(

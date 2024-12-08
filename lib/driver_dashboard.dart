@@ -8,10 +8,12 @@ import 'package:project1/regist_driver_1.dart';
 import 'package:project1/regist_driver_3.dart';
 import 'package:project1/search.dart';
 import 'package:project1/test.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'creat_trip_page.dart';
 import 'package:http/http.dart' as http;
+import 'driver_data_model.dart';
 import 'login.dart';
 import 'dart:async';
 
@@ -27,9 +29,14 @@ class _DriverState extends State<Driver> {
   late String email = '';
   late String username = '';
   late String phoneNumber='';
+  late String licensePicture='';
+  late String profilePicture='';
   List<dynamic> upcomingTrips = [];
   List<dynamic> completedTrips = [];
   List<dynamic> canceledTrips = [];
+
+  late String profilepicture="";
+
 
   StreamController<Map<String, dynamic>> dashboardStreamController = StreamController.broadcast();
 
@@ -40,11 +47,13 @@ class _DriverState extends State<Driver> {
   @override
   void initState() {
     super.initState();
+
     // تخصيص لون شريط الحالة فقط
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.black, // جعل شريط الحالة شفافًا
       statusBarIconBrightness: Brightness.dark, // أيقونات الساعة والشحن داكنة
     ));
+
     // محاولة استخراج البيانات من التوكن إذا كان موجودًا
     if (widget.token.isNotEmpty) {
       try {
@@ -52,8 +61,13 @@ class _DriverState extends State<Driver> {
         email = jwtDecodedToken['email'];
         username = jwtDecodedToken['fullName'];
         phoneNumber=jwtDecodedToken['phoneNumber'];
+        licensePicture=jwtDecodedToken['licensePicture'];
+        profilePicture=jwtDecodedToken['profilePicture'];
+
+        fetchProfilePicture();
+        // استدعاء دالة التحديث
         // حفظ البيانات في SharedPreferences
-        saveUserData(email, username,phoneNumber);
+        saveUserData(email, username,phoneNumber,licensePicture,profilePicture);
 
         fetchUpcomingTrips().then((_) {
           updateTripsBasedOnTime();
@@ -77,11 +91,14 @@ class _DriverState extends State<Driver> {
   }
 
 // دالة لحفظ البيانات في SharedPreferences
-  Future<void> saveUserData(String email, String username,String phone) async {
+  Future<void> saveUserData(String email, String username,String phone,String licensePicture,String profilePicture) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', email);
     await prefs.setString('username', username);
     await prefs.setString('phone', phone);
+    await prefs.setString('phone', licensePicture);
+    await prefs.setString('phone', profilePicture);
+
 
     print('Saved email: $email');
     print('Saved username: $username');
@@ -95,6 +112,8 @@ class _DriverState extends State<Driver> {
       email = prefs.getString('email') ?? 'defaultEmail@example.com'; // القيمة الافتراضية في حالة عدم وجود بيانات
       username = prefs.getString('username') ?? 'defaultUsername';
       phoneNumber = prefs.getString('phone') ?? '0000';
+      licensePicture=prefs.getString('licensePicture') ?? '0000';
+      profilePicture=prefs.getString('profilePicture') ?? '0000';
     });
     // طباعة البيانات للتحقق منها
     print('Loaded email: $email');
@@ -139,6 +158,59 @@ class _DriverState extends State<Driver> {
         return false;
       });
     });
+  }
+
+  Future<String?> fetchProfilePicture() async {
+    try {
+      // URL الخاص بالـ API
+      final url = Uri.parse('$profile_picture?email=${email}');
+
+      // إرسال طلب GET
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // فك تشفير الـ JSON
+        final data = json.decode(response.body);
+
+        if (data['status'] == true) {
+          profilepicture = data['profilePicture'];
+          setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+          print("Fetched profile picture URL: $profilepicture");
+          return profilepicture;
+        } else {
+          throw Exception(data['error']);
+        }
+      } else {
+        throw Exception("Failed to fetch profile picture. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching profile picture: $e");
+      return null;
+    }
+  }
+
+  Widget base64ToImage(String base64String) {
+    try {
+      Uint8List imageBytes = base64Decode(base64String);
+      return CircleAvatar(
+        radius: 30, // التحكم في حجم الصورة الدائرية
+        backgroundImage: MemoryImage(imageBytes), // فك تشفير الصورة
+        child: ClipOval( // لتنسيق الصورة لتكون دائرية
+          child: Image.memory(
+            imageBytes,
+            fit: BoxFit.cover,
+            width: 60, // عرض الصورة
+            height: 60, // ارتفاع الصورة
+          ),
+        ),
+      );
+
+    } catch (e) {
+      print("Error decoding Base64: $e");
+      return Center(
+        child: Text("Unable to load image"),
+      );
+    }
   }
 
 
@@ -188,6 +260,7 @@ class _DriverState extends State<Driver> {
 
   @override
   Widget build(BuildContext context) {
+    final driverData = Provider.of<DriverDataModel>(context);
     return Scaffold(
       key: _scaffoldKey,
       appBar: PreferredSize(
@@ -202,6 +275,7 @@ class _DriverState extends State<Driver> {
                   'imagess/app_icon.jpg',
                   height: 40,
                 ),
+                //base64ToImage(licensePicture),
                 SizedBox(width: 0),
                 Padding(
                   padding: const EdgeInsets.only(top: 13),
@@ -270,10 +344,10 @@ class _DriverState extends State<Driver> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 25),
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage('imagess/signup_icon.png'),
-                        radius: 30,
-                      ),
+                      // child: CircleAvatar(
+                      //   radius: 35,
+                      //   backgroundImage:FileImage(driverData.profileImage!),
+                      // ),
                     ),
                     SizedBox(width: 10),
                     Column(
@@ -387,11 +461,13 @@ class _DriverState extends State<Driver> {
             padding: const EdgeInsets.only(top: 15, left: 16, right: 16),
             child: Row(
               children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage('imagess/signup_icon.png'),
-                  radius: 25,
-                ),
-                SizedBox(width: 7),
+              CircleAvatar(
+              radius: 25,
+              backgroundImage:profilepicture.isNotEmpty
+                  ? MemoryImage(base64Decode(profilepicture))
+                  : null,
+            ),
+              SizedBox(width: 7),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
