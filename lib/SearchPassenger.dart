@@ -83,7 +83,8 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   List<dynamic> _trips = [];
 
   String formatTimeWithAMPM(DateTime time) {
-    final format = DateFormat('hh:mm a'); // استخدام تنسيق 12 ساعة مع AM/PM
+    // إذا كانت الساعة 24 أو أكبر، نعدلها إلى الساعة في تنسيق 12 ساعة مع AM/PM
+    final format = DateFormat('hh:mm a'); // تنسيق 12 ساعة مع AM/PM
     return format.format(time);
   }
 
@@ -121,12 +122,13 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
         },
         if (_selectedTime != null) ...{
           'filterOption': 'Time',
-          'filterValue': formatTimeWithAMPM(DateTime(now.year, now.month, now.day, _selectedTime!.hour, _selectedTime!.minute)), // إرسال الوقت مع AM/PM
+          // تحويل الوقت إلى تنسيق AM/PM
+          'filterValue': formatTimeWithAMPM(DateTime(now.year, now.month, now.day, _selectedTime!.hour, _selectedTime!.minute)),
         },
 
         if (_selectedDate != null) ...{
           'filterOption': 'Date',
-          'filterValue': '${_selectedTime!.hour}:${_selectedTime!.minute} ${_selectedTime!.hour >= 12 ? 'PM' : 'AM'}',
+          'filterValue': '${_selectedDate!.year}-${_selectedDate!.month}-${_selectedDate!.day}',
         },
         if (_driverRatingController.text.isNotEmpty) ...{
           'filterOption': 'Driver Rating',
