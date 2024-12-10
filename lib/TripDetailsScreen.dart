@@ -36,11 +36,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     print('Email: ${widget.emailP}');
     print('Name: ${widget.nameP}');
     print('Phone: ${widget.phoneP}');
-    // يمكنك تهيئة هذه القوائم بناءً على المعلومات التي تأتي من الـ trip إذا كان لديك أكثر من رحلة
-    // في حالة وجود رحلة واحدة، يمكنك تخصيص القوائم بحجم واحد.
-    selectedSeats = [1];  // يمكن تخصيص قيمة المقعد الافتراضية بـ 1
-    notes = [''];  // ملاحظة فارغة بشكل افتراضي
+    selectedSeats = List.filled(widget.trip.length, 1);
+    notes = List.filled(widget.trip.length, ''); //
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {

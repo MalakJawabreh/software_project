@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'TripDetailsScreen.dart';
+
 class SearchTripsPage extends StatefulWidget {
   final String emailP;
   final String nameP;

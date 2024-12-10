@@ -148,7 +148,12 @@ class _TestPageState extends State<TestPage> {
       if (response.statusCode == 201) {
         _showMessage(context, "Booking successful!");
         print('Trip booked successfully');
-      } else {
+      }
+     /* else if (response.statusCode == 500) {
+        _showMessage(context, "Booking successful!");
+        print('Trip booked successfully');
+      }*/
+      else {
         _showMessage(context, "Failed to book trip: ${response.body}");
       }
     } catch (e) {
