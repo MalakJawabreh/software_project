@@ -22,8 +22,8 @@ class PassengerDetailsPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildIconButton(Icons.call, "call", Colors.purple, () {}),
-                  _buildIconButton(Icons.chat, "chat", Colors.purple, () {}),
+                  _buildIconButton(Icons.call, "call", Color.fromARGB(230, 41, 84, 115), () {}),
+                  _buildIconButton(Icons.chat, "chat", Color.fromARGB(230, 41, 84, 115), () {}),
                   _buildPopupMenuButton(),
                 ],
               ),
@@ -31,6 +31,7 @@ class PassengerDetailsPage extends StatelessWidget {
               // كارد تفاصيل الراكب
               Card(
                 elevation: 4,
+                color: Color.fromARGB(230, 239, 248, 255), // تغيير لون الكارد
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -79,12 +80,17 @@ class PassengerDetailsPage extends StatelessWidget {
                                 child: Text(
                                   passenger['phoneNumberP'] ?? 'N/A',
                                   style: TextStyle(
-                                      fontSize: 25, color: Colors.purple),
+                                      fontSize: 25, color: Color.fromARGB(
+                                      230, 24, 83, 131),),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(height: 32),
+                          Divider(
+                            height: 32, // المسافة الرأسية حول الديفايدر
+                            thickness: 2, // سماكة الخط
+                            color: Colors.grey, // لون الديفايدر (اختياري)
+                          ),
                           Text(
                             "username",
                             style: TextStyle(
@@ -101,12 +107,17 @@ class PassengerDetailsPage extends StatelessWidget {
                                 child: Text(
                                   passenger['nameP'] ?? 'N/A',
                                   style: TextStyle(
-                                      fontSize: 25, color: Colors.purple),
+                                      fontSize: 25, color: Color.fromARGB(
+                                      230, 24, 83, 131),),
                                 ),
                               ),
                             ],
                           ),
-                          Divider(height: 30),
+                          Divider(
+                            height: 32, // المسافة الرأسية حول الديفايدر
+                            thickness: 2, // سماكة الخط
+                            color: Colors.grey, // لون الديفايدر (اختياري)
+                          ),
                           Text(
                             "location",
                             style: TextStyle(
@@ -124,7 +135,8 @@ class PassengerDetailsPage extends StatelessWidget {
                                 child: Text(
                                   passenger['nameP'] ?? 'N/A',
                                   style: TextStyle(
-                                      fontSize: 25, color: Colors.purple),
+                                      fontSize: 25, color: Color.fromARGB(
+                                      230, 24, 83, 131)),
                                 ),
                               ),
                             ],
@@ -142,8 +154,7 @@ class PassengerDetailsPage extends StatelessWidget {
                             label: Text("Share Profile", style: TextStyle(
                                 fontSize: 22, color: Colors.white),),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromARGB(
-                                  230, 104, 74, 115),),
+                              backgroundColor:  Color.fromARGB(230, 41, 84, 115),),
                           ),
                         ],
                       ),
@@ -176,7 +187,7 @@ class PassengerDetailsPage extends StatelessWidget {
         SizedBox(height: 8),
         Text(
           label,
-          style: TextStyle(color: color, fontSize: 20),
+          style: TextStyle(color: color, fontSize: 20,fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -187,11 +198,11 @@ class PassengerDetailsPage extends StatelessWidget {
         PopupMenuButton<int>(
           icon: Container(
             decoration: BoxDecoration(
-              color: Colors.purple.withOpacity(0.1),
+              color: Color.fromARGB(230, 41, 84, 115).withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             padding: EdgeInsets.all(12),
-            child: Icon(Icons.more_horiz, color: Colors.purple, size: 28),
+            child: Icon(Icons.more_horiz, color: Color.fromARGB(230, 41, 84, 115), size: 28),
           ),
           onSelected: (int value) {
             // تنفيذ الإجراء المطلوب بناءً على الخيار المختار
@@ -226,7 +237,7 @@ class PassengerDetailsPage extends StatelessWidget {
         SizedBox(height: 0),
         Text(
           "more",
-          style: TextStyle(color: Colors.purple, fontSize: 20),
+          style: TextStyle(color:Color.fromARGB(230, 41, 84, 115), fontSize: 20,fontWeight: FontWeight.w600),
         ),
       ],
     );
