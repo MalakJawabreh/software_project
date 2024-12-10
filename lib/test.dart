@@ -245,6 +245,16 @@ class _TestPageState extends State<TestPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (trip['maxPassengers'] == trip['currentPassengers'])
+                      Text(
+                        'Seat Bookings is full !',
+                        style: TextStyle(
+                          color: Colors.red, // لون للتأكيد
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    SizedBox(height: 16,),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -536,7 +546,9 @@ class _TestPageState extends State<TestPage> {
                               ],
                             ),
                             ElevatedButton(
-                              onPressed: () {
+                              onPressed: trip['maxPassengers'] == trip['currentPassengers']
+                                  ? null // يجعل الزر غير نشط
+                                  : () {
                                 print(
                                     'Booked ${selectedSeats[index]} seat(s) for trip from ${trip['from']} to ${trip['to']}');
                                 print('Notes: ${notes[index]}'); // عرض الملاحظات
@@ -548,13 +560,16 @@ class _TestPageState extends State<TestPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                                child: Text(
-                                  'Book Now',
-                                  style: TextStyle(
-                                    color: triadicPink,
-                                  ),
-                                )
+                              child: Text(
+                                'Book Now',
+                                style: TextStyle(
+                                  color: trip['currentPassengers'] == trip['maxPassengers']
+                                      ? Colors.grey // تغيير لون النص للإشارة إلى أن الزر غير نشط
+                                      : triadicPink,
+                                ),
+                              ),
                             ),
+
                           ],
                         ),
                       ],
