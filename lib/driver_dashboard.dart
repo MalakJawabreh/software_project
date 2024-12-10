@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:project1/passengerDetails.dart';
 import 'package:project1/profile_driver.dart';
 import 'package:project1/regist_driver_1.dart';
 import 'package:project1/regist_driver_3.dart';
@@ -229,6 +230,104 @@ class _DriverState extends State<Driver> {
     final parsedDate = DateTime.parse(dateTime);
     // تنسيق التاريخ بالشكل المطلوب
     return DateFormat('dd MMMM yyyy').format(parsedDate); // مثال: 11 ديسمبر 2024
+  }
+
+  Future<void> showPassengersPopup(
+      BuildContext context,
+      String driverEmail,
+      String from,
+      String to,
+      String date,
+      String time,
+      ) async {
+    try {
+
+
+      // إعداد الاستعلام
+      final Uri uri = Uri.parse(passengers).replace(queryParameters: {
+        "driverEmail": driverEmail,
+        "from": from,
+        "to": to,
+        "date": date,
+        "time": time,
+      });
+
+      // تنفيذ الطلب HTTP GET
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        // تحليل البيانات القادمة من API
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> passengers = data['passengers'];
+
+        // عرض Popup مع قائمة الركاب
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Passengers List",style: TextStyle(color: Color.fromARGB(
+                  240, 51, 66, 76),),),
+              content: passengers.isNotEmpty
+                  ? SizedBox(
+                height: 300, // تحديد ارتفاع مناسب
+                width: 300, // تحديد عرض مناسب
+                child: ListView.builder(
+                  itemCount: passengers.length,
+                  itemBuilder: (context, index) {
+                    final passenger = passengers[index];
+                    return ListTile(
+                      leading: Icon(Icons.person, color: Colors.indigo),
+                      title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20,color: Color.fromARGB(230, 41, 84, 115)),),
+                      subtitle: Text(
+                          "Seats: ${passenger['seat']}",style: TextStyle(color: Colors.red,fontSize: 18),),
+                      onTap: (){
+                        // التنقل إلى صفحة التفاصيل
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PassengerDetailsPage(passenger: passenger),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              )
+                  : Text("No passengers found for this trip."),
+              actions: [
+                TextButton(
+                  child: Text("Close"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        throw Exception("Failed to fetch passengers.");
+      }
+    } catch (e) {
+      // عرض رسالة خطأ في حالة الفشل
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                child: Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   void cancelTrip(int index) async {
@@ -746,7 +845,13 @@ class _DriverState extends State<Driver> {
                                           ),
                                         ),
                                         SizedBox(width: 135),
-                                        Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
+                                       // Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
+                                        IconButton(
+                                          icon: Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25),
+                                          onPressed: () async {
+                                            await showPassengersPopup(context, email, trip['from'], trip['to'], trip['date'], trip['time']);
+                                          },
+                                        )
 
                                       ],
                                     ),
@@ -1173,7 +1278,6 @@ class _DriverState extends State<Driver> {
                                         ),
                                         SizedBox(width: 135),
                                         Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
-
                                       ],
                                     ),
                                   ],
@@ -1185,7 +1289,6 @@ class _DriverState extends State<Driver> {
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),

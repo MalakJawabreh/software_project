@@ -144,11 +144,15 @@ class _TestPageState extends State<TestPage> {
         }),
       );
 
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       // إذا كانت الاستجابة ناجحة، عرض رسالة النجاح
       if (response.statusCode == 201) {
         _showMessage(context, "Booking successful!");
         print('Trip booked successfully');
-      } else {
+      }
+      else {
         _showMessage(context, "Failed to book trip: ${response.body}");
       }
     } catch (e) {
@@ -535,7 +539,8 @@ class _TestPageState extends State<TestPage> {
                               onPressed: () {
                                 print(
                                     'Booked ${selectedSeats[index]} seat(s) for trip from ${trip['from']} to ${trip['to']}');
-                                print('Notes: ${notes[index]}'); // عرض الملاحظات
+                                print('Notes: ${notes[index]}'); //
+
                                 bookTrip(index);
                               },
                               style: ElevatedButton.styleFrom(

@@ -9,3 +9,4 @@ final filtered_trips = url + "filtered_trips";
 final book_trip = url + "book_trip";
 final update_profile_picture = url + "update-profile-picture";
 final profile_picture = url + "profile-picture";
+final passengers = url + "passengers";
