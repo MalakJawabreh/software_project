@@ -10,10 +10,18 @@ String formatDate(String dateTime) {
 }
 
 class TripDetailsScreen extends StatefulWidget {
+  final String emailP;
+  final String nameP;
+  final String phoneP;
   final Map<String, dynamic> trip;
 
-  const TripDetailsScreen({Key? key, required this.trip}) : super(key: key);
-
+  const TripDetailsScreen({
+    Key? key,
+    required this.emailP,
+    required this.nameP,
+    required this.phoneP,
+    required this.trip,
+  }) : super(key: key);
   @override
   _TripDetailsScreenState createState() => _TripDetailsScreenState();
 }
@@ -25,11 +33,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    // يمكنك تهيئة هذه القوائم بناءً على المعلومات التي تأتي من الـ trip إذا كان لديك أكثر من رحلة
-    // في حالة وجود رحلة واحدة، يمكنك تخصيص القوائم بحجم واحد.
-    selectedSeats = [1];  // يمكن تخصيص قيمة المقعد الافتراضية بـ 1
-    notes = [''];  // ملاحظة فارغة بشكل افتراضي
+    print('Email: ${widget.emailP}');
+    print('Name: ${widget.nameP}');
+    print('Phone: ${widget.phoneP}');
+    selectedSeats = List.filled(widget.trip.length, 1);
+    notes = List.filled(widget.trip.length, ''); //
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {

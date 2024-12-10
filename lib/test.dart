@@ -539,8 +539,7 @@ class _TestPageState extends State<TestPage> {
                               onPressed: () {
                                 print(
                                     'Booked ${selectedSeats[index]} seat(s) for trip from ${trip['from']} to ${trip['to']}');
-                                print('Notes: ${notes[index]}'); //
-
+                                print('Notes: ${notes[index]}'); // عرض الملاحظات
                                 bookTrip(index);
                               },
                               style: ElevatedButton.styleFrom(

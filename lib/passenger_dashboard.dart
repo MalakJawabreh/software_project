@@ -18,7 +18,7 @@ import 'EmailAddressPage.dart';
 import 'TwoStepVerificationPage.dart';
 import 'profile_driver.dart';
 import 'package:http/http.dart' as http;
-
+import 'BookingTripsPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Upcoming_Passview.dart';
@@ -469,7 +469,7 @@ class _PassengerState extends State<Passenger> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SearchTripsPage()),
+                    MaterialPageRoute(builder: (context) => SearchTripsPage(emailP:email,nameP: fullName,phoneP: phoneNumber,)),
                   );
                 },
               ),
@@ -508,8 +508,14 @@ class _PassengerState extends State<Passenger> {
                   color: primaryColor2, // تغيير لون الأيقونة إلى الأبيض
                 ),
                 onTap: () {
-                  // تنفيذ الإجراء عند النقر
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookingTripsPage(emailP:email),
+                    ),
+                  );
                 },
+
               ),
             ),
           ),

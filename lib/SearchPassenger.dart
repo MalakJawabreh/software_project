@@ -9,9 +9,15 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'TripDetailsScreen.dart';
+
 class SearchTripsPage extends StatefulWidget {
+  final String emailP;
+  final String nameP;
+  final String phoneP;
   @override
   _SearchTripsPageState createState() => _SearchTripsPageState();
+  const SearchTripsPage({required this.emailP,required this.nameP,required this.phoneP, super.key});
+
 
 }
 
@@ -570,8 +576,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TripDetailsScreen(trip: trip),
-                          ),
+                            builder: (context) => TripDetailsScreen(trip: trip,emailP:widget.emailP,nameP: widget.nameP,phoneP:widget.phoneP,)),
                         );
                       },
                       child: Card(
@@ -746,7 +751,6 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     _departureController.dispose();
     _destinationController.dispose();
     _priceController.dispose();
-    //_passengerCountController.dispose();
     _driverRatingController.dispose();
     _driverRatingController.dispose();
     _scrollController.dispose(); // Dispose the ScrollController
