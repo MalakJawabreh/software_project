@@ -14,7 +14,8 @@ class SetDestinationPage extends StatefulWidget {
   final String email;
   final String name;
   final String phone;
-  const SetDestinationPage({required this.email,required this.name,required this.phone, super.key});
+  final String carType;
+  const SetDestinationPage({required this.email,required this.name,required this.phone,required this.carType, super.key});
   @override
   _SetDestinationPageState createState() => _SetDestinationPageState();
 }
@@ -47,6 +48,7 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
         "maxPassengers": _maxPassengersController.text,
         "date": _dateController.text,
         "time": _timeController.text,
+        "carBrand":widget.carType,
       };
 
       var response = await http.post(Uri.parse(create_trip),

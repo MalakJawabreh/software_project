@@ -32,6 +32,7 @@ class _DriverState extends State<Driver> {
   late String phoneNumber='';
   late String licensePicture='';
   late String profilePicture='';
+  late String carType='';
   List<dynamic> upcomingTrips = [];
   List<dynamic> completedTrips = [];
   List<dynamic> canceledTrips = [];
@@ -65,11 +66,12 @@ class _DriverState extends State<Driver> {
         phoneNumber=jwtDecodedToken['phoneNumber'];
         licensePicture=jwtDecodedToken['licensePicture'];
         profilePicture=jwtDecodedToken['profilePicture'];
+        carType=jwtDecodedToken['carType'];
 
         //fetchProfilePicture();
         // استدعاء دالة التحديث
         // حفظ البيانات في SharedPreferences
-        saveUserData(email, username,phoneNumber,licensePicture,profilePicture);
+        saveUserData(email, username,phoneNumber,licensePicture,profilePicture,carType);
 
         fetchUpcomingTrips().then((_) {
           updateTripsBasedOnTime();
@@ -93,13 +95,14 @@ class _DriverState extends State<Driver> {
   }
 
 // دالة لحفظ البيانات في SharedPreferences
-  Future<void> saveUserData(String email, String username,String phone,String licensePicture,String profilePicture) async {
+  Future<void> saveUserData(String email, String username,String phone,String licensePicture,String profilePicture,String carType) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', email);
     await prefs.setString('username', username);
     await prefs.setString('phone', phone);
     await prefs.setString('picture', licensePicture);
     await prefs.setString('picture', profilePicture);
+    await prefs.setString('carType',carType);
 
 
     print('Saved email: $email');
@@ -116,6 +119,7 @@ class _DriverState extends State<Driver> {
       phoneNumber = prefs.getString('phone') ?? '000000000';
       licensePicture=prefs.getString('licensePicture') ?? '0000';
       profilePicture=prefs.getString('profilePicture') ?? '0000';
+      carType=prefs.getString('carType') ?? 'mmm';
     });
     // طباعة البيانات للتحقق منها
     print('Loaded email: $email');
@@ -627,7 +631,7 @@ class _DriverState extends State<Driver> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SetDestinationPage(email: email,name:username,phone:phoneNumber)), // اسم الصفحة
+                          MaterialPageRoute(builder: (context) => SetDestinationPage(email: email,name:username,phone:phoneNumber,carType:carType)), // اسم الصفحة
                         );
                       },
                     ),

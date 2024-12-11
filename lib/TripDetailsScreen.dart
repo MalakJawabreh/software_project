@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'config.dart';
 import 'language_provider.dart';
-
+import 'package:http/http.dart' as http;
 
 String formatDate(String dateTime) {
   final parsedDate = DateTime.parse(dateTime);
@@ -41,6 +44,109 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
 
+  void _showMessage(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10), // لإعطاء الزوايا شكل دائري
+          ),
+          title: Text(
+            'Notification',
+            style: TextStyle(fontSize: 20, color: analogousPink),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK", style: TextStyle(color:analogousPink)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> bookTrip() async {
+    try {
+      final trip = widget.trip;
+
+      // final bookingData = {
+      //   'nameP': widget.nameP,
+      //   'from': trip['from'],
+      //   'to': trip['to'],
+      //   'date': trip['date'],
+      //   'time': trip['time'],
+      // };
+
+      // // تحقق إذا كان المستخدم قد حجز بالفعل نفس الرحلة
+      // final existingBooking = widget.trip.where((t) {
+      //   return t['from'] == bookingData['from'] &&
+      //       t['to'] == bookingData['to'] &&
+      //       t['date'] == bookingData['date'] &&
+      //       t['time'] == bookingData['time'] &&
+      //       t['nameP'] == bookingData['nameP'];
+      // }).toList();
+      //
+      // if (existingBooking.isNotEmpty) {
+      //   _showMessage(context, "You have already booked this trip.");
+      //   return;
+      // }
+      //
+      // // تحقق إذا كان هناك تعارض في المواعيد
+      // final conflictingBooking = trips.where((t) {
+      //   return t['date'] == bookingData['date'] &&
+      //       t['time'] == bookingData['time'] &&
+      //       t['nameP'] == bookingData['nameP'];
+      // }).toList();
+      //
+      // if (conflictingBooking.isNotEmpty) {
+      //   _showMessage(context, "You cannot book two trips at the same time.");
+      //   return;
+      // }
+
+      final response = await http.post(
+        Uri.parse(book_trip),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'nameP': widget.nameP,
+          'EmailP': widget.emailP,
+          'nameD': trip['name'],
+          'EmailD': trip['driverEmail'],
+          'phoneNumberP': widget.phoneP,
+          'phoneNumberD': trip['phoneNumber'],
+          'from': trip['from'],
+          'to': trip['to'],
+          'price': trip['price'],
+          'date': trip['date'],
+          'time': trip['time'],
+          'Note': notes[0],
+          'seat': selectedSeats[0],
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // إذا كانت الاستجابة ناجحة، عرض رسالة النجاح
+      if (response.statusCode == 201) {
+        _showMessage(context, "Booking successful!");
+        print('Trip booked successfully');
+      }
+      else {
+        _showMessage(context, "Failed to book trip: ${response.body}");
+      }
+    } catch (e) {
+      print('Error: $e');
+      _showMessage(context, "An error occurred. Please try again.");
+    }
+  }
 
 
   @override
@@ -351,6 +457,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                                 'Booked ${selectedSeats[0]} seat(s) for trip from ${trip['from']} to ${trip['to']}');
                             print('Notes: ${notes[0]}');
                             // يمكنك إضافة منطق الحجز هنا
+                            bookTrip();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor2,
