@@ -14,7 +14,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'creat_trip_page.dart';
 import 'package:http/http.dart' as http;
+import 'currentlocation.dart';
 import 'driver_data_model.dart';
+import 'location.dart';
 import 'login.dart';
 import 'dart:async';
 
@@ -783,8 +785,23 @@ class _DriverState extends State<Driver> {
                                                     IconButton(
                                                       icon: Icon(Icons.map_outlined, color:Color.fromARGB(230, 41, 84, 115),),  // اختر الأيقونة المناسبة (مثل خريطة)
                                                       onPressed: () {
+
                                                         // أضف هنا الكود الذي سيعرض الخريطة أو يقوم بالإجراء الذي تريده
                                                         print("Open map from ${trip['from']} to ${trip['to']}");
+                                                        // Navigator.push(
+                                                        //   context,
+                                                        //   MaterialPageRoute(builder: (context) => RouteMapScreen(
+                                                        //     fromLocation: trip['from'],
+                                                        //     toLocation: trip['to'],
+                                                        //   ),), // اسم الصفحة
+                                                        // );
+
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(builder: (context) => CurrentLocationPage(),), // اسم الصفحة
+                                                        );
+
+
                                                       },
                                                     ),
                                                   ],

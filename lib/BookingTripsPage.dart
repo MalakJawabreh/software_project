@@ -91,6 +91,24 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
     return DateFormat('hh:mm a').format(parsedDate); // تنسيق الوقت فقط
   }
 
+  Future<void> deleteBooking(String bookingId) async {
+    try {
+      final response = await http.delete(Uri.parse('$delete_booking/$bookingId'));
+
+      if (response.statusCode == 200) {
+        print('Booking deleted successfully.');
+        // يمكنك أيضاً إضافة ما يلزم لتحديث واجهة المستخدم بعد إلغاء الحجز.
+      } else {
+        print('Failed to delete booking: ${response.body}');
+        // معالجة الأخطاء المناسبة هنا.
+      }
+    } catch (error) {
+      print('Error: $error');
+      // معالجة الأخطاء المناسبة هنا.
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
@@ -234,7 +252,38 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    // حذف الحجز
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text(isArabic ? 'تأكيد الإلغاء' : 'Confirm Deletion'),
+                                          content: Text(
+                                            isArabic
+                                                ? 'هل تريد فعلاً إلغاء هذا الحجز؟'
+                                                : 'Do you really want to cancel this booking?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // إغلاق النافذة عند الضغط على Cancel
+                                              },
+                                              child: Text(isArabic ? 'إلغاء' : 'Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // إغلاق النافذة
+                                                final bookingId = booking['_id'].toString();
+                                                deleteBooking(bookingId); // تنفيذ عملية الحذف
+                                              },
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Colors.red, // لون النص
+                                              ),
+                                              child: Text(isArabic ? 'موافق' : 'OK'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -248,6 +297,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                   ),
                                   child: Text(isArabic ? 'حذف' : 'Delete'),
                                 ),
+
                                 TextButton(
                                   onPressed: () {
                                     // تعديل الحجز

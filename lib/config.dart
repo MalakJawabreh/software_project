@@ -1,4 +1,4 @@
-final url = 'http://192.168.1.9:3000/';
+final url = 'http://192.168.1.11:3000/';
 final registeration = url + "registeration";
 final login = url + "login";
 final create_trip = url + "create_trip";
@@ -14,3 +14,4 @@ final Bookung_emailP = url + "Bookung_emailP";
 final update_profile_picture = url + "update-profile-picture";
 final profile_picture = url + "profile-picture";
 final passengers = url + "passengers";
+final delete_booking = url + "delete_book";
