@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:project1/passenger_dashboard.dart';
 import 'config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+
+import 'notifications_service.dart';
 
 
 class TestPage extends StatefulWidget {
@@ -149,8 +152,11 @@ class _TestPageState extends State<TestPage> {
 
       // إذا كانت الاستجابة ناجحة، عرض رسالة النجاح
       if (response.statusCode == 201) {
+        NotificationService.addNotification(widget.emailP, 'booked successfuly !');
+        NotificationService.addNotification(trip['driverEmail'], 'User ${widget.nameP} has booked this trip successfully!');
         _showMessage(context, "Booking successful!");
         print('Trip booked successfully');
+
       }
       else {
         _showMessage(context, "Failed to book trip: ${response.body}");

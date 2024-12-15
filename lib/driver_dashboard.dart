@@ -19,6 +19,8 @@ import 'driver_data_model.dart';
 import 'location.dart';
 import 'login.dart';
 import 'dart:async';
+import 'notifications_service.dart';
+
 
 class Driver extends StatefulWidget {
   final String token;
@@ -39,6 +41,12 @@ class _DriverState extends State<Driver> {
   List<dynamic> completedTrips = [];
   List<dynamic> canceledTrips = [];
 
+  List<String> passengerNames = [];
+  List<String> currentPassengerNames=[];
+  List<String> currentPassengerNamesForCanceledTrip = [];
+
+
+
   String? Picture; // لتخزين رابط صورة الملف الشخصي
 
 
@@ -51,6 +59,7 @@ class _DriverState extends State<Driver> {
   @override
   void initState() {
     super.initState();
+
     _fetchProfilePicture();
 
     // تخصيص لون شريط الحالة فقط
@@ -281,6 +290,8 @@ class _DriverState extends State<Driver> {
                   itemCount: passengers.length,
                   itemBuilder: (context, index) {
                     final passenger = passengers[index];
+                    passengerNames.add(passenger['EmailP']);
+                    currentPassengerNames = List.from(passengerNames);
                     return ListTile(
                       leading: Icon(Icons.person, color: Colors.indigo),
                       title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20,color: Color.fromARGB(230, 41, 84, 115)),),
@@ -304,6 +315,8 @@ class _DriverState extends State<Driver> {
                 TextButton(
                   child: Text("Close"),
                   onPressed: () {
+                    print('Passenger Names before: $passengerNames'); // طباعة القائمة للتحقق
+                    passengerNames.clear(); // تفرغ القائمة تماماً
                     Navigator.of(context).pop();
                   },
                 ),
@@ -339,21 +352,28 @@ class _DriverState extends State<Driver> {
   void cancelTrip(int index) async {
     final canceledTrip = upcomingTrips[index]; // احصل على الرحلة التي سيتم إلغاؤها
     final tripId = canceledTrip['_id']; // تأكد من استخدام الحقل الصحيح للـ id
+
     try {
       // إرسال طلب الحذف إلى السيرفر
       final response = await http.delete(Uri.parse('$delete_trip/$tripId'), headers: {
         'Content-Type': 'application/json',
       });
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status']) {
           // إذا تم الحذف بنجاح، قم بتحديث القائمة
           setState(() {
+
             upcomingTrips.removeAt(index); // حذف الرحلة من قائمة upcoming
             canceledTrips.add(canceledTrip); // إضافة الرحلة إلى قائمة canceled
+            print('Trip canceled successfully.');
+            NotificationService.addNotification(email, 'Trip canceled successfully !');
+
+            for (var emailpass in currentPassengerNames) {
+              NotificationService.addNotification(emailpass, '${username} has cancelled this trip.');
+            }
+
           });
-          print('Trip canceled successfully.');
         } else {
           print('Failed to cancel trip: ${data['error']}');
         }
@@ -366,12 +386,86 @@ class _DriverState extends State<Driver> {
   }
 
   void logout() {
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Login()),
+      MaterialPageRoute(builder: (context) => Login()), // تأكد من أن `Driver` هو اسم صفحة السائق
     );
   }
 
+  OverlayEntry? _overlayEntry; // لإدارة القائمة المنسدلة
+  final LayerLink _layerLink = LayerLink();
+  bool isDropdownOpen = false;
+
+  // إنشاء القائمة المنسدلة
+  OverlayEntry _createOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: 250,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          offset: Offset(-150, 40.0),
+          child: Material(
+            elevation: 5.0,
+            borderRadius: BorderRadius.circular(8.0),
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (NotificationService.getNotifications(email)!.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        'لا توجد إشعارات جديدة',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: NotificationService.getNotifications(email)!.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          leading: Icon(Icons.check_circle, color: Colors.green),
+                          title: Text(NotificationService.getNotifications(email)![index]),
+                        );
+                      },
+                    ),
+                  Divider(),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        NotificationService.clearNotifications(email);
+                        _closeDropdown();
+                      });
+                    },
+                    child: Text('مسح الإشعارات'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openDropdown() {
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+    setState(() {
+      isDropdownOpen = true;
+    });
+  }
+
+  void _closeDropdown() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    setState(() {
+      isDropdownOpen = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -410,28 +504,61 @@ class _DriverState extends State<Driver> {
 
           actions: [
             Padding(
-              padding: const EdgeInsets.only(top: 22),
+              padding: const EdgeInsets.only(top: 18),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => DriverRegistrationPage()), // اسم الصفحة
-                      );
-                    },
+                  // أيقونة الإشعارات مع القائمة المنسدلة
+                  CompositedTransformTarget(
+                    link: _layerLink,
+                    child: IconButton(
+                      icon: Stack(
+                        children: [
+                          Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                          if (NotificationService.getNotificationCount(email) > 0)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 10,
+                                  minHeight: 10,
+                                ),
+                                child: Text(
+                                  '${NotificationService.getNotificationCount(email)}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      onPressed: () {
+                        if (isDropdownOpen) {
+                          _closeDropdown();
+                        } else {
+                          _openDropdown();
+                        }
+                      },
+                    ),
                   ),
+                  // أيقونة الدردشة
                   IconButton(
                     icon: Icon(Icons.chat, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => DriverLicenseUpload()), // اسم الصفحة
-                      );
-
+                      print('Passenger Names before: $passengerNames'); // طباعة القائمة للتحقق
+                      print('Passenger Names: $currentPassengerNames'); // طباعة القائمة للتحقق
+                      print('Passenger Names afterr: $currentPassengerNamesForCanceledTrip'); // طباعة القائمة للتحقق
                     },
                   ),
+                  // أيقونة القائمة
                   IconButton(
                     icon: Icon(Icons.menu, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
                     onPressed: () {

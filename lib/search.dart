@@ -6,6 +6,8 @@ import 'package:project1/searchinfo.dart';
 import 'package:intl/intl.dart'; // لاستعمال تنسيق التاريخ
 import 'package:http/http.dart' as http ;
 import 'package:numberpicker/numberpicker.dart';
+import 'notifications_service.dart';
+
 
 import 'config.dart';
 import 'driver_dashboard.dart';
@@ -59,10 +61,11 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
       print(jsonResponse['status']);
 
       if (jsonResponse['status']) {
+        NotificationService.addNotification(widget.email, 'Trip created successfully !');
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Trip Created Successfully!')),
         );
-
         // إعادة تحميل صفحة Driver
         Navigator.pushReplacement(
           context,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/test.dart';
@@ -8,6 +7,7 @@ import 'config.dart';
 import 'dart:typed_data';
 import 'login.dart';
 import 'package:provider/provider.dart';
+import 'notifications_service.dart';
 import 'theme_provider.dart';
 import 'language_provider.dart';
 import 'ChangePasswordPage.dart';
@@ -25,6 +25,7 @@ import 'Upcoming_Passview.dart';
 import 'SearchPassenger.dart';
 import 'driver_dashboard.dart';
 
+
 class Passenger extends StatefulWidget {
   final String? token;
   final List<dynamic> ?upcomingTrips;
@@ -37,12 +38,15 @@ class Passenger extends StatefulWidget {
 }
 
 class _PassengerState extends State<Passenger> {
-  late String email;
-  late String fullName;
-  late String phoneNumber;
+  late String email='';
+  late String fullName='';
+  late String phoneNumber='';
   late String Picture='';
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   String? profilePicture; // لتخزين رابط صورة الملف الشخصي
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
 
   final List<String> _images = [
     'imagess/a11.jpg',
@@ -55,11 +59,13 @@ class _PassengerState extends State<Passenger> {
   late Timer _timer;
   int _currentPage = 0;
 
+
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-    _fetchProfilePicture(); // استدعاء دالة جلب الصورة
+    _loadUserData().then((_) {
+      _fetchProfilePicture();
+    });
   }
 
   Future<void> _fetchProfilePicture() async {
@@ -72,7 +78,7 @@ class _PassengerState extends State<Passenger> {
   }
 
   // Method to decode token and save user data in shared preferences
-  void _loadUserData() async {
+  Future<void> _loadUserData() async {
     if (widget.token != null) {
       Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token!);
       email = jwtDecodedToken['email'];
@@ -118,7 +124,7 @@ class _PassengerState extends State<Passenger> {
 
         if (data['status'] == true) {
           profilePicture = data['profilePicture'];
-          setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+         // setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
           print("Fetched profile picture URL: $profilePicture");
           return profilePicture;
         } else {
@@ -131,6 +137,7 @@ class _PassengerState extends State<Passenger> {
       print("Error fetching profile picture: $e");
       return null;
     }
+
   }
 
   Widget base64ToImage(String base64String) {
@@ -167,12 +174,88 @@ class _PassengerState extends State<Passenger> {
   }
 
   void logout() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => Login()),
     );
   }
   Color _buttonColor = primaryColor;
+
+  OverlayEntry? _overlayEntry; // لإدارة القائمة المنسدلة
+  final LayerLink _layerLink = LayerLink();
+  bool isDropdownOpen = false;
+
+  // إنشاء القائمة المنسدلة
+  OverlayEntry _createOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: 250,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          offset: Offset(-150, 40.0),
+          child: Material(
+            elevation: 5.0,
+            borderRadius: BorderRadius.circular(8.0),
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (NotificationService.getNotifications(email)!.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        'لا توجد إشعارات جديدة',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: NotificationService.getNotifications(email)!.length,
+                      itemBuilder: (context, index) {
+                        print('Rendering notification at index $index: ${NotificationService.getNotifications(email)![index]}');
+                        return ListTile(
+                          leading: Icon(Icons.check_circle, color: Colors.green),
+                          title: Text(NotificationService.getNotifications(email)![index]),
+                        );
+                      },
+                    ),
+                  Divider(),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        NotificationService.clearNotifications(email);
+                        _closeDropdown();
+                      });
+                    },
+                    child: Text('مسح الإشعارات'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openDropdown() {
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+    setState(() {
+      isDropdownOpen = true;
+    });
+  }
+
+  void _closeDropdown() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    setState(() {
+      isDropdownOpen = false;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -216,10 +299,47 @@ class _PassengerState extends State<Passenger> {
               padding: const EdgeInsets.only(top: 19),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.notifications,
-                        size: 25, color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {},
+                  // أيقونة الإشعارات مع القائمة المنسدلة
+                  CompositedTransformTarget(
+                    link: _layerLink,
+                    child: IconButton(
+                      icon: Stack(
+                        children: [
+                          Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                          if (NotificationService.getNotificationCount(email) > 0)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 10,
+                                  minHeight: 10,
+                                ),
+                                child: Text(
+                                  '${NotificationService.getNotificationCount(email)}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      onPressed: () {
+                        if (isDropdownOpen) {
+                          _closeDropdown();
+                        } else {
+                          _openDropdown();
+                        }
+                      },
+                    ),
                   ),
                   IconButton(
                     icon: Icon(Icons.chat,
@@ -258,7 +378,6 @@ class _PassengerState extends State<Passenger> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
-
                     children: [
                       GestureDetector(
                         onTap: () {

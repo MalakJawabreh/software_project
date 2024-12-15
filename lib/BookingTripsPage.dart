@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // لتحليل البيانات من JSON
 import 'package:http/http.dart' as http;
+import 'package:project1/passenger_dashboard.dart';
 import 'config.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert'; // لتحليل البيانات من JSON
@@ -10,6 +11,7 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'BookingDetailsScreen.dart';
+import 'notifications_service.dart';
 
 
 class BookingTripsPage extends StatefulWidget {
@@ -91,13 +93,17 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
     return DateFormat('hh:mm a').format(parsedDate); // تنسيق الوقت فقط
   }
 
-  Future<void> deleteBooking(String bookingId) async {
+  Future<void> deleteBooking(String bookingId,String emaild,String nameP) async {
     try {
       final response = await http.delete(Uri.parse('$delete_booking/$bookingId'));
 
       if (response.statusCode == 200) {
-        print('Booking deleted successfully.');
-        // يمكنك أيضاً إضافة ما يلزم لتحديث واجهة المستخدم بعد إلغاء الحجز.
+        setState(() {
+          print('Booking deleted successfully.');
+          NotificationService.addNotification(emaild, 'User ${nameP} has delete this booking successfully!');
+          NotificationService.addNotification(widget.emailP,'canceled book!');
+
+        });
       } else {
         print('Failed to delete booking: ${response.body}');
         // معالجة الأخطاء المناسبة هنا.
@@ -273,7 +279,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                               onPressed: () {
                                                 Navigator.of(context).pop(); // إغلاق النافذة
                                                 final bookingId = booking['_id'].toString();
-                                                deleteBooking(bookingId); // تنفيذ عملية الحذف
+                                                deleteBooking(bookingId,booking['EmailD'],booking['nameP']); // تنفيذ عملية الحذف
                                               },
                                               style: TextButton.styleFrom(
                                                 foregroundColor: Colors.red, // لون النص
