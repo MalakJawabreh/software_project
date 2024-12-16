@@ -1,4 +1,4 @@
-final url = 'http://192.168.1.11:3000/';
+final url = 'http://192.168.1.3:3000/';
 final registeration = url + "registeration";
 final login = url + "login";
 final create_trip = url + "create_trip";
