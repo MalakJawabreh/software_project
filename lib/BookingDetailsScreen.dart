@@ -58,6 +58,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
     final price = widget.booking['price'] ?? 0;
     final date = widget.booking['date'] != null ? DateTime.parse(widget.booking['date']) : null;
     final time = widget.booking['time'] ?? (isArabic ? 'غير محدد' : 'Not specified');
+    final carBrand = widget.booking['carBrand'] ?? (isArabic ? 'غير محدد' : 'Not specified');
+
     final note = widget.booking['Note'] ?? (isArabic ? 'لا يوجد ملاحظات' : 'No notes available');
     final seat = widget.booking['seat'] ?? 0;
 
@@ -75,25 +77,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // عرض تفاصيل المسافر
-              _buildSectionTitle(isArabic ? 'معلومات المسافر' : 'Passenger Information'),
-              _buildDetailCard(
-                  isArabic,
-                  isArabic ? 'الاسم:' : 'Name:',  // النص يعرض حسب اللغة
-                  nameP
-              ),
-              _buildDetailCard(
-                  isArabic,
-                  isArabic ? 'البريد الإلكتروني:' : 'Email:',  // النص يعرض حسب اللغة
-                  emailP
-              ),
-              _buildDetailCard(
-                  isArabic,
-                  isArabic ? 'رقم الهاتف:' : 'Phone Number:',  // النص يعرض حسب اللغة
-                  phoneNumberP
-              ),
 
-              SizedBox(height: 16),
 
               // عرض تفاصيل السائق
               _buildSectionTitle(isArabic ? 'معلومات السائق' : 'Driver Information'),
@@ -131,6 +115,11 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> with Single
                   isArabic ?'عدد المقاعد:':'Seats:',
                   seat.toString()),
               SizedBox(height: 16),
+
+
+              _buildDetailCard(isArabic,
+                  isArabic ?'عدد المقاعد:':'carBrand:',
+                  carBrand),
 
               // ملاحظات
               _buildSectionTitle(isArabic ? 'الملاحظات' : 'Notes'),

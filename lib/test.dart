@@ -142,6 +142,7 @@ class _TestPageState extends State<TestPage> {
           'price': trip['price'],
           'date': trip['date'],
           'time': trip['time'],
+          'carBrand':trip['carBrand'],
           'Note': notes[index],
           'seat': selectedSeats[index],
         }),
