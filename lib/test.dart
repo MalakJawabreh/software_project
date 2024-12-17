@@ -101,19 +101,6 @@ class _TestPageState extends State<TestPage> {
         'time': trip['time'],
       };
 
-      // تحقق إذا كان المستخدم قد حجز بالفعل نفس الرحلة
-      final existingBooking = trips.where((t) {
-        return t['from'] == bookingData['from'] &&
-            t['to'] == bookingData['to'] &&
-            t['date'] == bookingData['date'] &&
-            t['time'] == bookingData['time'] &&
-            t['nameP'] == bookingData['nameP'];
-      }).toList();
-
-      if (existingBooking.isNotEmpty) {
-        _showMessage(context, "You have already booked this trip.");
-        return;
-      }
 
       // تحقق إذا كان هناك تعارض في المواعيد
       final conflictingBooking = trips.where((t) {
