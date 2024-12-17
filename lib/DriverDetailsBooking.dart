@@ -266,12 +266,3 @@ class DriverDetailsScreen extends StatelessWidget {
 
 
 
-const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
-//const Color SecondryColor2 = Color.fromARGB(230, 95, 190, 200);
-const Color SecondryColor2 = Color.fromARGB(230, 130, 167, 175);
-const Color complementaryPink = Color.fromARGB(230, 255, 153, 180);
-const Color analogousPink = Color.fromARGB(230, 230, 100, 140);
-const Color triadicPink = Color.fromARGB(230, 245, 115, 165);
-const Color softPink = Color.fromARGB(230, 250, 170, 200);
-const Color primaryColor = Color.fromARGB(230, 41, 84, 115); // اللون الأساسي
-const Color primaryColor2 = Color.fromARGB(230, 20, 60, 115); // اللون الأساسي
