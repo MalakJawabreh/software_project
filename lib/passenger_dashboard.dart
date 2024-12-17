@@ -21,9 +21,7 @@ import 'package:http/http.dart' as http;
 import 'BookingTripsPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Upcoming_Passview.dart';
 import 'SearchPassenger.dart';
-import 'driver_dashboard.dart';
 
 
 class Passenger extends StatefulWidget {
@@ -63,11 +61,26 @@ class _PassengerState extends State<Passenger> {
   @override
   void initState() {
     super.initState();
+    _startImageSlider();
     _loadUserData().then((_) {
       _fetchProfilePicture();
     });
   }
+  void _startImageSlider() {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (_currentPage < _images.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
 
+      _pageController.animateToPage(
+        _currentPage,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
   Future<void> _fetchProfilePicture() async {
     final picture = await fetchProfilePicture();
     if (picture != null) {
@@ -95,7 +108,7 @@ class _PassengerState extends State<Passenger> {
     }
 
     // إعداد التايمر للحركة التلقائية للسلايدر
-    _timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+    _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
       if (_currentPage < _images.length - 1) {
         _currentPage++;
       } else {
@@ -172,6 +185,7 @@ class _PassengerState extends State<Passenger> {
     _pageController.dispose();
     super.dispose();
   }
+
 
   void logout() {
     Navigator.push(
@@ -491,6 +505,7 @@ class _PassengerState extends State<Passenger> {
       ),
       body: Column(
         children: [
+          // إضافة PageView.builder هنا
           SizedBox(
             height: 200,
             child: PageView.builder(
@@ -505,7 +520,7 @@ class _PassengerState extends State<Passenger> {
               },
             ),
           ),
-         // SizedBox(height: 15),
+          SizedBox(height: 20),
 
           // إضافة الكاتلوج
 
