@@ -28,6 +28,7 @@ class _ApplicationSubmittedPageState extends State<ApplicationSubmittedPage> {
     String? licenseImageBase64 = convertImageToBase64(driverData.licenseImage);
     String? InsuranceImageBase64 = convertImageToBase64(driverData.InsuranceImage);
     print(licenseImageBase64);
+    print(InsuranceImageBase64);
 
     var regbody = {
           "fullName":driverData.fullName,
@@ -44,20 +45,23 @@ class _ApplicationSubmittedPageState extends State<ApplicationSubmittedPage> {
 
     print("Data sent to server: ${jsonEncode(regbody)}");
 
-
     var response = await http.post(Uri.parse(registeration),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode(regbody));
 
-        var jsonResponse = jsonDecode(response.body);
-        print(jsonResponse['status']);
-
-        if (jsonResponse['status']) {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Login()));
-        } else {
-          print("Something Error");
-        }
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      print("Response JSON: $jsonResponse");
+      if (jsonResponse['status']) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Login()));
+      } else {
+        print("Error in registration: ${jsonResponse['message']}");
+      }
+    } else {
+      print("Failed to register. Status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
+    }
       }
 
   String? convertImageToBase64(File? imageFile) {
