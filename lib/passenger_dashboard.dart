@@ -460,8 +460,13 @@ class _PassengerState extends State<Passenger> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PrivacyPage()),
+                  MaterialPageRoute(
+                    builder: (context) => PrivacyPage(
+                      token: widget.token, // تمرير الـ token هنا
+                    ),
+                  ),
                 );
+
               },
             ),
             ListTile(
@@ -783,6 +788,11 @@ class SettingsPage extends StatelessWidget {
   }
 }
 class PrivacyPage extends StatelessWidget {
+  final String? token;  // إضافة الـ token هنا
+
+  // Constructor لتمرير الـ token
+  PrivacyPage({Key? key, this.token}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // الحصول على قيمة isArabic من LanguageProvider
@@ -843,15 +853,20 @@ class PrivacyPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.block, size: 30, color: primaryColor2), // تغيير لون الأيقونة
+              leading: Icon(Icons.block, size: 30, color: primaryColor2),
               title: Text(
                 isArabic ? 'جهات اتصال محظورة' : 'Blocked Contact',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2, fontWeight: FontWeight.bold),
               ),
               onTap: () {
+                // تمرير الـ token والمعلومات إلى صفحة BlockedContactsScreen
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => BlockedContactsScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => BlockedContactsScreen(
+                    //  token: token,  // استخدام الـ token الذي تم تمريره
+                    ),
+                  ),
                 );
               },
             ),
@@ -874,6 +889,7 @@ class PrivacyPage extends StatelessWidget {
     );
   }
 }
+
 const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
 //const Color SecondryColor2 = Color.fromARGB(230, 95, 190, 200);
 const Color SecondryColor2 = Color.fromARGB(230, 130, 167, 175);
