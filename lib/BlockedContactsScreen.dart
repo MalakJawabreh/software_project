@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'language_provider.dart';
 
 class BlockedContactsScreen extends StatefulWidget {
@@ -8,16 +9,99 @@ class BlockedContactsScreen extends StatefulWidget {
 }
 
 class _BlockedContactsScreenState extends State<BlockedContactsScreen> {
-  final List<String> blockedContacts = [];
+  List<String> blockedContacts = [];
   final TextEditingController contactController = TextEditingController();
   String contactType = "name"; // Default to 'name' for input type selection
 
+  @override
+  void initState() {
+    super.initState();
+    loadBlockedContacts();
+  }
+
+  Future<void> saveBlockedContacts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('blockedContacts', blockedContacts);
+  }
+
+  Future<void> loadBlockedContacts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      blockedContacts = prefs.getStringList('blockedContacts') ?? [];
+    });
+  }
+
   void addContact(String contact) {
-    if (contact.isNotEmpty && !blockedContacts.contains(contact)) {
+    if (contact.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            Provider.of<LanguageProvider>(context, listen: false).isArabic
+                ? 'الرجاء إدخال بيانات صحيحة'
+                : 'Please enter valid data',
+          ),
+        ),
+      );
+      return;
+    }
+    if (blockedContacts.contains(contact)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            Provider.of<LanguageProvider>(context, listen: false).isArabic
+                ? 'جهة الاتصال مضافة مسبقًا'
+                : 'Contact already blocked',
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      blockedContacts.add(contact);
+    });
+    saveBlockedContacts();
+    contactController.clear();
+  }
+
+  Future<void> confirmDelete(int index) async {
+    bool? confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          Provider.of<LanguageProvider>(context, listen: false).isArabic
+              ? 'تأكيد الحذف'
+              : 'Confirm Deletion',
+        ),
+        content: Text(
+          Provider.of<LanguageProvider>(context, listen: false).isArabic
+              ? 'هل أنت متأكد من حذف جهة الاتصال؟'
+              : 'Are you sure you want to delete this contact?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              Provider.of<LanguageProvider>(context, listen: false).isArabic
+                  ? 'إلغاء'
+                  : 'Cancel',
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              Provider.of<LanguageProvider>(context, listen: false).isArabic
+                  ? 'حذف'
+                  : 'Delete',
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirm ?? false) {
       setState(() {
-        blockedContacts.add(contact);
+        blockedContacts.removeAt(index);
       });
-      contactController.clear();
+      saveBlockedContacts();
     }
   }
 
@@ -123,17 +207,14 @@ class _BlockedContactsScreenState extends State<BlockedContactsScreen> {
 
             // Blocked contacts list
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
+                separatorBuilder: (context, index) => Divider(color: Colors.grey),
                 itemCount: blockedContacts.length,
                 itemBuilder: (context, index) {
                   return Dismissible(
                     key: Key(blockedContacts[index]),
                     onDismissed: (direction) {
-                      setState(() {
-                        blockedContacts.removeAt(index);
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('تم حذف الاتصال المحظور')));
+                      confirmDelete(index);
                     },
                     background: Container(
                       color: Colors.redAccent,
@@ -161,9 +242,7 @@ class _BlockedContactsScreenState extends State<BlockedContactsScreen> {
                         trailing: IconButton(
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
-                            setState(() {
-                              blockedContacts.removeAt(index);
-                            });
+                            confirmDelete(index);
                           },
                         ),
                       ),
