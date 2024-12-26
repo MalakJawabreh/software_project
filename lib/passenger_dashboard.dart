@@ -22,8 +22,7 @@ import 'BookingTripsPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'SearchPassenger.dart';
-
-
+import 'package:project1/ComplaintsPage.dart';
 class Passenger extends StatefulWidget {
   final String? token;
   final List<dynamic> ?upcomingTrips;
@@ -481,6 +480,25 @@ class _PassengerState extends State<Passenger> {
               ),
               onTap: () {},
             ),
+            ListTile(
+              leading: Icon(Icons.report_problem, size: 30),
+              title: Text(
+                isArabic ? 'الشكاوي' : 'Complaints',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
+                ),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ComplaintsPage()),
+                );
+              },
+            ),
+
             ListTile(
               leading: Icon(Icons.contact_support, size: 30),
               title: Text(

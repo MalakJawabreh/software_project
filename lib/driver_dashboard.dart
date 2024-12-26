@@ -30,7 +30,7 @@ import 'TwoStepVerificationPage.dart';
 import 'profile_driver.dart';
 import 'login.dart';
 import 'dart:async';
-
+import 'ComplaintsPage.dart';
 
 class Driver extends StatefulWidget {
   final String token;
@@ -690,6 +690,24 @@ class _DriverState extends State<Driver> {
                   ),
                 ),
                 onTap: () {},
+              ),
+              ListTile(
+                leading: Icon(Icons.report_problem, size: 30),
+                title: Text(
+                  isArabic ? 'الشكاوي' : 'Complaints',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
+                  ),
+                ),
+
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ComplaintsPage()),
+                  );
+                },
               ),
               ListTile(
                 leading: Icon(Icons.contact_support, size: 30),

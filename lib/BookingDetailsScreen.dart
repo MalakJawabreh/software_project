@@ -65,10 +65,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          isArabic ? 'تفاصيل الحجز' : 'Booking Details',
-          style: TextStyle(color: Colors.white),
-        ),
+
         backgroundColor: primaryColor,
       ),
       body: Padding(
