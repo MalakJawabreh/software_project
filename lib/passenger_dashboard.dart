@@ -22,8 +22,7 @@ import 'BookingTripsPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'SearchPassenger.dart';
-
-
+import 'package:project1/ComplaintsPage.dart';
 class Passenger extends StatefulWidget {
   final String? token;
   final List<dynamic> ?upcomingTrips;
@@ -460,8 +459,13 @@ class _PassengerState extends State<Passenger> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PrivacyPage()),
+                  MaterialPageRoute(
+                    builder: (context) => PrivacyPage(
+                      token: widget.token, // تمرير الـ token هنا
+                    ),
+                  ),
                 );
+
               },
             ),
             ListTile(
@@ -476,6 +480,25 @@ class _PassengerState extends State<Passenger> {
               ),
               onTap: () {},
             ),
+            ListTile(
+              leading: Icon(Icons.report_problem, size: 30),
+              title: Text(
+                isArabic ? 'الشكاوي' : 'Complaints',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(230, 41, 84, 115),
+                ),
+              ),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ComplaintsPage()),
+                );
+              },
+            ),
+
             ListTile(
               leading: Icon(Icons.contact_support, size: 30),
               title: Text(
@@ -783,6 +806,11 @@ class SettingsPage extends StatelessWidget {
   }
 }
 class PrivacyPage extends StatelessWidget {
+  final String? token;  // إضافة الـ token هنا
+
+  // Constructor لتمرير الـ token
+  PrivacyPage({Key? key, this.token}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // الحصول على قيمة isArabic من LanguageProvider
@@ -843,15 +871,20 @@ class PrivacyPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.block, size: 30, color: primaryColor2), // تغيير لون الأيقونة
+              leading: Icon(Icons.block, size: 30, color: primaryColor2),
               title: Text(
                 isArabic ? 'جهات اتصال محظورة' : 'Blocked Contact',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: SecondryColor2, fontWeight: FontWeight.bold),
               ),
               onTap: () {
+                // تمرير الـ token والمعلومات إلى صفحة BlockedContactsScreen
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => BlockedContactsScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => BlockedContactsScreen(
+                    //  token: token,  // استخدام الـ token الذي تم تمريره
+                    ),
+                  ),
                 );
               },
             ),
@@ -874,6 +907,7 @@ class PrivacyPage extends StatelessWidget {
     );
   }
 }
+
 const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
 //const Color SecondryColor2 = Color.fromARGB(230, 95, 190, 200);
 const Color SecondryColor2 = Color.fromARGB(230, 130, 167, 175);

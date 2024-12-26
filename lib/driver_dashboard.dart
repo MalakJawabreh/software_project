@@ -200,7 +200,7 @@ class _DriverState extends State<Driver> {
         final data = json.decode(response.body);
 
         if (data['status'] == true) {
-           Picture = data['profilePicture'];
+          Picture = data['profilePicture'];
           setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
           print("Fetched profile picture URL: $Picture");
           return Picture;
@@ -297,19 +297,19 @@ class _DriverState extends State<Driver> {
                       leading: Icon(Icons.person, color: Colors.indigo),
                       title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20,color: Color.fromARGB(230, 41, 84, 115)),),
                       subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Seats: ${passenger['seat']}",
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                        if (passenger['Note'] != null && passenger['Note'].isNotEmpty)
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                          "Notes: ${passenger['Note']}",
-                          style: TextStyle(color: Colors.green, fontSize: 16),
-                        ),
-                      ],
-                    ),
+                            "Seats: ${passenger['seat']}",
+                            style: TextStyle(color: Colors.red, fontSize: 18),
+                          ),
+                          if (passenger['Note'] != null && passenger['Note'].isNotEmpty)
+                            Text(
+                              "Notes: ${passenger['Note']}",
+                              style: TextStyle(color: Colors.green, fontSize: 16),
+                            ),
+                        ],
+                      ),
                       onTap: (){
                         // التنقل إلى صفحة التفاصيل
                         Navigator.push(
@@ -736,7 +736,7 @@ class _DriverState extends State<Driver> {
                   AssetImage('imagess/signup_icon.png'),
                   radius: 30,
                 ),
-              SizedBox(width: 7),
+                SizedBox(width: 7),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1015,7 +1015,7 @@ class _DriverState extends State<Driver> {
                                           ),
                                         ),
                                         SizedBox(width: 135),
-                                       // Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
+                                        // Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
                                         IconButton(
                                           icon: Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25),
                                           onPressed: () async {

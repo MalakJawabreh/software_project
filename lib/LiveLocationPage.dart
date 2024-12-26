@@ -118,4 +118,7 @@ class _LiveLocationPageState extends State<LiveLocationPage> {
   }
 }
 
-const Color primaryColor = Color.fromARGB(230, 41, 84, 115);
+//const Color primaryColor = Color.fromARGB(230, 41, 84, 115);
+const Color primaryColor = Color(0xFF296873); // Color from your previous design
+const Color accentColor = Color(0xFF00796B); // Accent color for action items like buttons
+const Color secondaryColor = Color(0xFFE1F5FE); // A lighter backgrou

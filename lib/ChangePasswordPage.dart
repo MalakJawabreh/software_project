@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'language_provider.dart';
+import 'config.dart'; // Import the configuration file for URLs
 
 class ChangePasswordPage extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
@@ -8,6 +11,61 @@ class ChangePasswordPage extends StatelessWidget {
   final TextEditingController oldPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+
+  Future<void> changePassword(BuildContext context) async {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final isArabic = languageProvider.isArabic;
+
+    if (_formKey.currentState!.validate()) {
+      try {
+        final response = await http.post(
+          Uri.parse(change_password), // Use the URL defined in config.dart
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': emailController.text,
+            'oldPassword': oldPasswordController.text,
+            'newPassword': newPasswordController.text,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          if (responseData['status'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  isArabic
+                      ? 'تم تغيير كلمة المرور بنجاح!'
+                      : 'Password changed successfully!',
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  responseData['error'] ??
+                      (isArabic
+                          ? 'حدث خطأ أثناء تغيير كلمة المرور.'
+                          : 'An error occurred while changing the password.'),
+                ),
+              ),
+            );
+          }
+        } else {
+          throw Exception(isArabic ? 'فشل الاتصال بالخادم.' : 'Failed to connect to the server.');
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isArabic ? 'حدث خطأ: $error' : 'An error occurred: $error',
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +78,7 @@ class ChangePasswordPage extends StatelessWidget {
           isArabic ? 'تغيير كلمة المرور' : 'Change Password',
           style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: SecondryColor,
+        backgroundColor: secondaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -118,26 +176,10 @@ class ChangePasswordPage extends StatelessWidget {
               SizedBox(height: 24.0),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // تنفيذ منطق تغيير كلمة السر هنا
-                      print('Email: ${emailController.text}');
-                      print('Old Password: ${oldPasswordController.text}');
-                      print('New Password: ${newPasswordController.text}');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isArabic
-                                ? 'تم تغيير كلمة المرور بنجاح!'
-                                : 'Password changed successfully!',
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: () => changePassword(context),
                   child: Text(
                     isArabic ? 'إرسال' : 'Submit',
-                    style: TextStyle(color: SecondryColor),
+                    style: TextStyle(color: secondaryColor),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
@@ -152,5 +194,8 @@ class ChangePasswordPage extends StatelessWidget {
   }
 }
 
-const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
-const Color primaryColor = Color.fromARGB(230, 41, 84, 115);
+//const Color secondaryColor = Color.fromARGB(230, 196, 209, 219);
+//const Color primaryColor = Color.fromARGB(230, 41, 84, 115);
+const Color primaryColor = Color(0xFF296873); // Color from your previous design
+const Color accentColor = Color(0xFF00796B); // Accent color for action items like buttons
+const Color secondaryColor = Color(0xFFE1F5FE); // A lighter background color for cards and inputs
