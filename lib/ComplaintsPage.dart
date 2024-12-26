@@ -108,6 +108,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min, // يجعل العمود بأقل ارتفاع ممكن
               children: [
                 Row(
                   children: [
@@ -127,8 +128,8 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                     ),
                     if (index < 2)
                       Container(
-                        height: 2,
-                        width: 40, // جعل الخط أطول بين الدوائر
+                        height: 3,
+                        width: 50, // جعل الخط أطول بين الدوائر
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: isCompleted ? Color(0xFF00796B) : Colors.grey,
@@ -139,18 +140,8 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                       ),
                   ],
                 ),
-                SizedBox(height: 8),
-                Text(
-                  isArabic
-                      ? ["الخطوة 1", "الخطوة 2", "الخطوة 3"][index]
-                      : ["Step 1", "Step 2", "Step 3"][index],
-                  style: TextStyle(
-                    color: isCompleted
-                        ? Color(0xFF00796B)
-                        : (isCurrent ? Color(0xFF00796B) : Colors.grey),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                SizedBox(height: 4), // المسافة بين الدائرة والنص
+
               ],
             ),
           );
@@ -158,6 +149,8 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
       ),
     );
   }
+
+
 
   Widget _buildStep1({required bool isArabic}) {
     return Form(
