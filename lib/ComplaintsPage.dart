@@ -428,13 +428,10 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
 
 // Show success dialog
   void _showSuccessDialog() {
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final isArabic = languageProvider.isArabic;
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(isArabic ? "تم تقديم الشكوى بنجاح!" : "Complaint Submitted Successfully!"),
+        title: Text("Complaint Submitted Successfully!"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -446,7 +443,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                   Icon(FontAwesomeIcons.whatsapp, color: Colors.green, size: 30),
                   SizedBox(width: 8),
                   Text(
-                    isArabic ? "تواصل عبر واتساب" : "Contact via WhatsApp",
+                    "Contact via WhatsApp",
                     style: TextStyle(
                       color: Colors.blue,
                       fontSize: 16,
@@ -458,7 +455,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
               ),
             ),
             SizedBox(height: 16),
-            Text(isArabic ? "يمكنك المتابعة بعد 3 أيام." : "You can follow up after 3 days."),
+            Text("You can follow up after 3 days."),
           ],
         ),
         actions: [
@@ -466,7 +463,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text(isArabic ? "إغلاق" : "Close"),
+            child: Text("Close"),
           ),
         ],
       ),
@@ -475,20 +472,17 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
 
 // Show error dialog
   void _showErrorDialog(String message) {
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final isArabic = languageProvider.isArabic;
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(isArabic ? "خطأ" : "Error"),
-        content: Text(isArabic ? message : message), // استخدام الرسالة المرسلة
+        title: Text("Error"),
+        content: Text(message), // استخدام الرسالة المرسلة
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text(isArabic ? "إغلاق" : "Close"),
+            child: Text("Close"),
           ),
         ],
       ),
