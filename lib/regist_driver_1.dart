@@ -16,7 +16,10 @@ class _DriverRegistrationPageState extends State<DriverRegistrationPage> {
   final TextEditingController _yearController = TextEditingController();
   final TextEditingController _plateNumberController = TextEditingController();
 
-  final List<String> carMakes = ['Audi', 'BMW', 'Mercedes', 'Toyota', 'Honda'];
+  final List<String> carMakes = [
+    'Toyota', 'bmw','Honda', 'Ford', 'BMW', 'Mercedes', 'Chevrolet', 'Nissan', 'Audi', 'Volkswagen', 'Hyundai',
+    'Kia', 'Lexus', 'Mazda', 'Subaru', 'Porsche', 'Jaguar', 'Land Rover', 'Chrysler', 'Tesla', 'Mitsubishi', 'Skoda'
+  ];
   String? selectedCarMake;
 
   final List<Map<String, dynamic>> colors = [

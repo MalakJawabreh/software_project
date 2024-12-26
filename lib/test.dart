@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:project1/passengerDetails.dart';
 import 'package:project1/passenger_dashboard.dart';
 import 'config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -41,7 +42,119 @@ class _TestPageState extends State<TestPage> {
     });
   }
 
+  Future<void> showPassengersPopup(
+      BuildContext context,
+      String driverEmail,
+      String from,
+      String to,
+      String date,
+      String time,
+      ) async {
+    try {
 
+
+      // إعداد الاستعلام
+      final Uri uri = Uri.parse(passengers).replace(queryParameters: {
+        "driverEmail": driverEmail,
+        "from": from,
+        "to": to,
+        "date": date,
+        "time": time,
+      });
+
+      // تنفيذ الطلب HTTP GET
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        // تحليل البيانات القادمة من API
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> passengers = data['passengers'];
+
+        // عرض Popup مع قائمة الركاب
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Passengers List",style: TextStyle(color: Color.fromARGB(
+                  240, 51, 66, 76),),),
+              content: passengers.isNotEmpty
+                  ? SizedBox(
+                height: 300, // تحديد ارتفاع مناسب
+                width: 300, // تحديد عرض مناسب
+                child: ListView.builder(
+                  itemCount: passengers.length,
+                  itemBuilder: (context, index) {
+                    final passenger = passengers[index];
+                    //passengerNames.add(passenger['EmailP']);
+                    //currentPassengerNames = List.from(passengerNames);
+                    return ListTile(
+                      leading: Icon(Icons.person, color: Colors.indigo),
+                      title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20,color: Color.fromARGB(230, 41, 84, 115)),),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Seats: ${passenger['seat']}",
+                            style: TextStyle(color: Colors.red, fontSize: 18),
+                          ),
+                          if (passenger['Note'] != null && passenger['Note'].isNotEmpty)
+                            Text(
+                              "Notes: ${passenger['Note']}",
+                              style: TextStyle(color: Colors.green, fontSize: 16),
+                            ),
+                        ],
+                      ),
+                      onTap: (){
+                        // التنقل إلى صفحة التفاصيل
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PassengerDetailsPage(passenger: passenger),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              )
+                  : Text("No passengers found for this trip."),
+              actions: [
+                TextButton(
+                  child: Text("Close"),
+                  onPressed: () {
+                    // print('Passenger Names before: $passengerNames'); // طباعة القائمة للتحقق
+                    // passengerNames.clear(); // تفرغ القائمة تماماً
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        throw Exception("Failed to fetch passengers.");
+      }
+    } catch (e) {
+      // عرض رسالة خطأ في حالة الفشل
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                child: Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   Future<void> fetchTrips() async {
     try {
@@ -61,6 +174,7 @@ class _TestPageState extends State<TestPage> {
       print('Error: $e');
     }
   }
+
   void _showMessage(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -101,19 +215,6 @@ class _TestPageState extends State<TestPage> {
         'time': trip['time'],
       };
 
-      // تحقق إذا كان المستخدم قد حجز بالفعل نفس الرحلة
-      final existingBooking = trips.where((t) {
-        return t['from'] == bookingData['from'] &&
-            t['to'] == bookingData['to'] &&
-            t['date'] == bookingData['date'] &&
-            t['time'] == bookingData['time'] &&
-            t['nameP'] == bookingData['nameP'];
-      }).toList();
-
-      if (existingBooking.isNotEmpty) {
-        _showMessage(context, "You have already booked this trip.");
-        return;
-      }
 
       // تحقق إذا كان هناك تعارض في المواعيد
       final conflictingBooking = trips.where((t) {
@@ -142,6 +243,7 @@ class _TestPageState extends State<TestPage> {
           'price': trip['price'],
           'date': trip['date'],
           'time': trip['time'],
+          'carBrand':trip['carBrand'],
           'Note': notes[index],
           'seat': selectedSeats[index],
         }),
@@ -461,6 +563,19 @@ class _TestPageState extends State<TestPage> {
                                   color: primaryColor,
                                   fontWeight: FontWeight.bold,fontSize: 16),
                             ),
+                            GestureDetector(
+                              onTap: ()  async {
+                                await showPassengersPopup(context, trip['driverEmail'], trip['from'], trip['to'], trip['date'], trip['time']);
+                              },
+                              child: Text(
+                                'Passengers: ${trip['currentPassengers']}',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            )
                           ],
                         ),
                       ],

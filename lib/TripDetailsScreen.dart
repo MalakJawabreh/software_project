@@ -359,6 +359,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                               color: primaryColor,
                               fontWeight: FontWeight.bold,fontSize: 16),
                         ),
+                        Text(
+                          'Car Type: ${trip['carBrand']}',
+                          style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,fontSize: 16),
+                        ),
                       ],
                     ),
                   ],

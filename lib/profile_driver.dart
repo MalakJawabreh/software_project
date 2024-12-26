@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http ;
+import 'VisibilitySettingsScreen.dart';
+import 'account.dart';
 import 'config.dart';
 import 'driver_data_model.dart';
 
@@ -304,6 +306,13 @@ class _ProfileDriverState extends State<ProfileDriver> {
                   print("Failed to fetch profile picture.");
                 }
               });
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AccountsCenterPage(username:widget.username,email:widget.email
+                  ),
+                ),
+              );
             },
           ),
           SizedBox(height: 15),
@@ -332,7 +341,17 @@ class _ProfileDriverState extends State<ProfileDriver> {
               ),
             ),
             trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {},
+            onTap: () {
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VisibilitySettingsScreen(
+                  ),
+                ),
+              );
+
+            },
           ),
           SizedBox(height: 15),
           ListTile(

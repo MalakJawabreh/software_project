@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'driver_data_model.dart';
+class DriverDetailsScreen extends StatelessWidget {
+  final String name;
+  final String email;
+  final String phoneNumber;
 
-class PassengerDetailsPage extends StatelessWidget {
-  final Map<String, dynamic> passenger;
-
-  const PassengerDetailsPage({Key? key, required this.passenger})
-      : super(key: key);
+  const DriverDetailsScreen({
+    Key? key,
+    required this.name,
+    required this.email,
+    required this.phoneNumber,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    late DriverDataModel driverData = Provider.of<DriverDataModel>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         // title: Text("Passenger Details"),
@@ -44,12 +46,12 @@ class PassengerDetailsPage extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // عرض الاسم
                           Text(
-                            "username",
+                            "Username",
                             style: TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,
@@ -60,10 +62,11 @@ class PassengerDetailsPage extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  passenger['nameP'] ?? 'N/A',
+                                  name, // عرض الاسم
                                   style: TextStyle(
-                                      fontSize: 25, color: Color.fromARGB(
-                                      230, 24, 83, 131),),
+                                    fontSize: 25,
+                                    color: Color.fromARGB(230, 24, 83, 131),
+                                  ),
                                 ),
                               ),
                             ],
@@ -71,8 +74,9 @@ class PassengerDetailsPage extends StatelessWidget {
                           Divider(
                             height: 32, // المسافة الرأسية حول الديفايدر
                             thickness: 2, // سماكة الخط
-                            color: Colors.grey, // لون الديفايدر (اختياري)
+                            color: Colors.grey, // لون الديفايدر
                           ),
+                          // عرض الإيميل تحت الاسم
                           Text(
                             "Email",
                             style: TextStyle(
@@ -85,22 +89,23 @@ class PassengerDetailsPage extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  passenger['EmailP'] ?? 'N/A',
+                                  email, // عرض الإيميل
                                   style: TextStyle(
-                                    fontSize: 25, color: Color.fromARGB(
-                                      230, 24, 83, 131),),
+                                    fontSize: 25,
+                                    color: Color.fromARGB(230, 24, 83, 131),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                           Divider(
-                            height: 32, // المسافة الرأسية حول الديفايدر
-                            thickness: 2, // سماكة الخط
-                            color: Colors.grey, // لون الديفايدر (اختياري)
+                            height: 32,
+                            thickness: 2,
+                            color: Colors.grey,
                           ),
+                          // عرض رقم الهاتف
                           Text(
-                            "mobile",
-
+                            "Mobile",
                             style: TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,
@@ -109,54 +114,46 @@ class PassengerDetailsPage extends StatelessWidget {
                           SizedBox(height: 4),
                           Row(
                             children: [
-                              // Icon(Icons.location_on, color: Colors.red),
-                              // SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  passenger['phoneNumberP'] ?? 'N/A',
-
+                                  phoneNumber, // عرض رقم الهاتف
                                   style: TextStyle(
-                                      fontSize: 25, color: Color.fromARGB(
-                                      230, 24, 83, 131),),
+                                    fontSize: 25,
+                                    color: Color.fromARGB(230, 24, 83, 131),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                           Divider(
-                            height: 32, // المسافة الرأسية حول الديفايدر
-                            thickness: 2, // سماكة الخط
-                            color: Colors.grey, // لون الديفايدر (اختياري)
+                            height: 32,
+                            thickness: 2,
+                            color: Colors.grey,
                           ),
-                          driverData.getLocationByEmail(passenger['EmailP']) != null
-                              ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          // الموقع
+                          Text(
+                            "Location",
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Row(
                             children: [
-                              Text(
-                                "Location",
-                                style: TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.bold,
+                              Icon(Icons.location_on, color: Color.fromARGB(240, 38, 28, 44)),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  name, // عرض الموقع كمثال
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    color: Color.fromARGB(230, 24, 83, 131),
+                                  ),
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(Icons.location_on, color: Color.fromARGB(240, 38, 28, 44)),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                          child:Text(
-                                            driverData.getLocationByEmail(passenger['EmailP']) ?? 'الموقع غير متوفر',
-                                            style: TextStyle(
-                                              fontSize: 25,
-                                              color: Color.fromARGB(230, 24, 83, 131),
-                                            ),
-                                          ),
-                                        ),
-                                ],
-                              ),
                             ],
-                          )
-                              : SizedBox(), // لا يظهر أي شيء إذا كانت القيمة null
+                          ),
                         ],
                       ),
                       SizedBox(height: 30),
@@ -166,11 +163,17 @@ class PassengerDetailsPage extends StatelessWidget {
                           ElevatedButton.icon(
                             onPressed: () {},
                             icon: Icon(
-                              Icons.share, size: 25, color: Colors.white,),
-                            label: Text("Share Profile", style: TextStyle(
-                                fontSize: 22, color: Colors.white),),
+                              Icons.share,
+                              size: 25,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              "Share Profile",
+                              style: TextStyle(fontSize: 22, color: Colors.white),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:  Color.fromARGB(230, 41, 84, 115),),
+                              backgroundColor: Color.fromARGB(230, 41, 84, 115),
+                            ),
                           ),
                         ],
                       ),
@@ -185,8 +188,7 @@ class PassengerDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton(IconData icon, String label, Color color,
-      VoidCallback onPressed) {
+  Widget _buildIconButton(IconData icon, String label, Color color, VoidCallback onPressed) {
     return Column(
       children: [
         GestureDetector(
@@ -203,11 +205,12 @@ class PassengerDetailsPage extends StatelessWidget {
         SizedBox(height: 8),
         Text(
           label,
-          style: TextStyle(color: color, fontSize: 20,fontWeight: FontWeight.w600),
+          style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
+
   Widget _buildPopupMenuButton() {
     return Column(
       children: [
@@ -221,7 +224,6 @@ class PassengerDetailsPage extends StatelessWidget {
             child: Icon(Icons.more_horiz, color: Color.fromARGB(230, 41, 84, 115), size: 28),
           ),
           onSelected: (int value) {
-            // تنفيذ الإجراء المطلوب بناءً على الخيار المختار
             print("Option $value selected");
           },
           itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
@@ -229,14 +231,14 @@ class PassengerDetailsPage extends StatelessWidget {
               value: 1,
               child: ListTile(
                 leading: Icon(Icons.share),
-                title: Text("Share Contact",style: TextStyle(fontSize: 20),),
+                title: Text("Share Contact", style: TextStyle(fontSize: 20)),
               ),
             ),
             PopupMenuItem<int>(
               value: 2,
               child: ListTile(
                 leading: Icon(Icons.clear),
-                title: Text("Clear Messages",style: TextStyle(fontSize: 20),),
+                title: Text("Clear Messages", style: TextStyle(fontSize: 20)),
               ),
             ),
             PopupMenuItem<int>(
@@ -245,17 +247,22 @@ class PassengerDetailsPage extends StatelessWidget {
                 leading: Icon(Icons.block, color: Colors.red),
                 title: Text(
                   "Block User",
-                  style: TextStyle(color: Colors.red,fontSize: 20,),),
+                  style: TextStyle(color: Colors.red, fontSize: 20),
                 ),
               ),
+            ),
           ],
         ),
         SizedBox(height: 0),
         Text(
-          "more",
-          style: TextStyle(color:Color.fromARGB(230, 41, 84, 115), fontSize: 20,fontWeight: FontWeight.w600),
+          "More",
+          style: TextStyle(
+              color: Color.fromARGB(230, 41, 84, 115), fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ],
     );
   }
 }
+
+
+

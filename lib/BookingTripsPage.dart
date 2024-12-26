@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'BookingDetailsScreen.dart';
 import 'notifications_service.dart';
-
+import 'EditBookingScreen.dart';
 
 class BookingTripsPage extends StatefulWidget {
   final String emailP;
@@ -254,7 +254,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     ),
                                     elevation: 5, // إضافة ظل خفيف للزر
                                   ),
-                                  child: Text(isArabic ? 'تأكيد' : 'Confirm'),
+                                  child: Text(isArabic ? 'ادفع الأن' : 'Pay Now'),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -306,7 +306,21 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
 
                                 TextButton(
                                   onPressed: () {
-                                    // تعديل الحجز
+                                    // التوجه إلى شاشة تعديل الحجز
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditBookingScreen(booking: booking),
+                                      ),
+                                    ).then((updatedBooking) {
+                                      if (updatedBooking != null) {
+                                        // تحديث واجهة المستخدم بعد تعديل الحجز
+                                        setState(() {
+                                          final index = bookings.indexOf(booking);
+                                          bookings[index] = updatedBooking;
+                                        });
+                                      }
+                                    });
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -319,7 +333,8 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     elevation: 5, // إضافة ظل خفيف للزر
                                   ),
                                   child: Text(isArabic ? 'تعديل' : 'Edit'),
-                                ),
+                                )
+                                ,
                               ],
                             ),
 

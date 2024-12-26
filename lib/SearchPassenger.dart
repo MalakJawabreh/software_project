@@ -26,6 +26,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   final TextEditingController _departureController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _driverNameController = TextEditingController(); // حقل اسم السائق الجديد
 
   final TextEditingController _driverRatingController =
   TextEditingController();
@@ -72,12 +73,13 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   ];
 
   List<String> _carBrands = [
-    'Toyota', 'Honda', 'Ford', 'BMW', 'Mercedes', 'Chevrolet', 'Nissan', 'Audi', 'Volkswagen', 'Hyundai',
+    'Toyota', 'bmw','Honda', 'Ford', 'BMW', 'Mercedes', 'Chevrolet', 'Nissan', 'Audi', 'Volkswagen', 'Hyundai',
     'Kia', 'Lexus', 'Mazda', 'Subaru', 'Porsche', 'Jaguar', 'Land Rover', 'Chrysler', 'Tesla', 'Mitsubishi', 'Skoda'
   ];
 
 // قائمة الفلاتر المتاحة
-  List<String> _filterOptions = ['Price', 'Car Type', 'Time', 'Date', 'Driver Rating'];
+  List<String> _filterOptions = ['Price', 'Car Type', 'Time', 'Date', 'Driver Rating', 'Driver Name'];
+
 
 // الفلاتر باللغة العربية
   List<String> _filterOptionsArabic = ['السعر', 'نوع السيارة', 'الوقت', 'التاريخ', 'تقييم السائق'];
@@ -140,6 +142,11 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
           'filterOption': 'Driver Rating',
           'filterValue': _driverRatingController.text,
         },
+        if (_driverNameController.text.isNotEmpty) ...{
+          'filterOption': 'Driver Name',
+          'filterValue': _driverNameController.text,
+        },
+
       });
 
       final response = await http.get(url);
@@ -281,6 +288,8 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     await prefs.setString("destination", _destinationController.text);
     await prefs.setString("price", _priceController.text);
     await prefs.setString("carBrand", _selectedCarBrand ?? "");
+    await prefs.setString("driverName", _driverNameController.text);
+
     await prefs.setString(
         "time",
         _selectedTime != null
@@ -305,6 +314,8 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
       _destinationController.text = prefs.getString("destination") ?? "";
       _priceController.text = prefs.getString("price") ?? "";
       _selectedCarBrand = prefs.getString("carBrand");
+      _driverNameController.text = prefs.getString("driverName") ?? "";
+
 
       final timeString = prefs.getString("time");
       if (timeString != null && timeString.isNotEmpty) {
@@ -347,6 +358,8 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
       _selectedDate = null;
       _driverRatingController.clear();
       _selectedFilters.clear();
+      _driverNameController.clear();
+
     });
 
     _showMessage("Filters cleared successfully!");
@@ -528,6 +541,16 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
                     child: _buildTextField(_driverRatingController,   isArabic ? "تقييم السائق (1-5)" : "Driver Rating (1-5)", Icons.star),
+                  ),
+// داخل الكود الأساسي
+                if (_selectedFilters.contains(isArabic ? "اسم السائق" : "Driver Name"))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: _buildTextField(
+                      _driverNameController, // TextEditingController لاسم السائق
+                      isArabic ? "اسم السائق" : "Driver Name", // النص الظاهر بناءً على اللغة
+                      Icons.person, // أيقونة الشخص
+                    ),
                   ),
 
                 SizedBox(height: 16),

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/passengerDetails.dart';
+import 'package:project1/passenger_dashboard.dart';
 import 'package:project1/profile_driver.dart';
 import 'package:project1/regist_driver_1.dart';
 import 'package:project1/regist_driver_3.dart';
@@ -295,8 +296,20 @@ class _DriverState extends State<Driver> {
                     return ListTile(
                       leading: Icon(Icons.person, color: Colors.indigo),
                       title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20,color: Color.fromARGB(230, 41, 84, 115)),),
-                      subtitle: Text(
-                          "Seats: ${passenger['seat']}",style: TextStyle(color: Colors.red,fontSize: 18),),
+                      subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Seats: ${passenger['seat']}",
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                        if (passenger['Note'] != null && passenger['Note'].isNotEmpty)
+                          Text(
+                          "Notes: ${passenger['Note']}",
+                          style: TextStyle(color: Colors.green, fontSize: 16),
+                        ),
+                      ],
+                    ),
                       onTap: (){
                         // التنقل إلى صفحة التفاصيل
                         Navigator.push(
@@ -637,7 +650,12 @@ class _DriverState extends State<Driver> {
                   ),
                 ),
                 contentPadding: EdgeInsets.only(left: 30),  // إضافة بادينغ من اليسار
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SettingsPage()),
+                  );
+                },
               ),
               SizedBox(height: 10,),
               ListTile(
@@ -651,7 +669,12 @@ class _DriverState extends State<Driver> {
                   ),
                 ),
                 contentPadding: EdgeInsets.only(left: 30),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PrivacyPage()),
+                  );
+                },
               ),
               SizedBox(height: 10,),
               ListTile(
@@ -922,12 +945,11 @@ class _DriverState extends State<Driver> {
                                                         //     toLocation: trip['to'],
                                                         //   ),), // اسم الصفحة
                                                         // );
-
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(builder: (context) => CurrentLocationPage(),), // اسم الصفحة
-                                                        );
-
+                                                        //
+                                                        // Navigator.push(
+                                                        //   context,
+                                                        //   MaterialPageRoute(builder: (context) => CurrentLocationPage(),), // اسم الصفحة
+                                                        // );
 
                                                       },
                                                     ),
