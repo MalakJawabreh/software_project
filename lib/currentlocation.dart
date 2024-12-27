@@ -150,118 +150,126 @@ class _CurrentLocationPageState extends State<CurrentLocationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Current Location'),
+        //title: const Text('Current Location'),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: FlutterMap(
-              mapController: _mapController,  // Using the initialized mapController
-              options: MapOptions(
-                center: currentLatLng ?? LatLng(0.0, 0.0), // Default to a placeholder
-                zoom: 13.0,
+          // الخريطة
+          FlutterMap(
+            mapController: _mapController, // Using the initialized mapController
+            options: MapOptions(
+              center: currentLatLng ?? LatLng(0.0, 0.0), // Default to a placeholder
+              zoom: 13.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
               ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  subdomains: ['a', 'b', 'c'],
+              if (currentLatLng != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: currentLatLng!,
+                      builder: (context) => Icon(Icons.location_on, size: 40.0, color: Colors.red),
+                    ),
+                  ],
                 ),
-                if (currentLatLng != null)
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: currentLatLng!,
-                        builder: (context) => Icon(Icons.location_on, size: 40.0, color: Colors.red),
+            ],
+          ),
+          // الكارد أسفل الخريطة
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min, // تصغير العمود ليتناسب مع المحتوى
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // العنوان مع الأيقونة
+                      Row(
+                        children: [
+                          Icon(Icons.location_on, color: Colors.red, size: 27),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Current Location',
+                            style: TextStyle(
+                              fontSize: 22.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12), // مسافة بين العنوان وبقية المحتوى
+                      // اسم الموقع مع الزر
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              locationName,
+                              style: TextStyle(fontSize: 20.0),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isVisible = !isVisible; // عكس الحالة
+                                setlocation(widget.email, isVisible);
+                              });
+                              // طباعة الحالة على الكونسول
+                              if (isVisible) {
+                                print("Visible: $locationName"); // طباعة اسم الموقع إذا كان مرئيًا
+                              } else {
+                                print("Not Visible");
+                              }
+                            },
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 300),
+                              width: 70,
+                              height: 30,
+                              padding: EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: isVisible ? Colors.green : Colors.red, // تغيير اللون بناءً على الحالة
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Stack(
+                                children: [
+                                  Align(
+                                    alignment: !isVisible ? Alignment.centerLeft : Alignment.centerRight,
+                                    child: Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // توزيع العناصر بين اليسار واليمين
-              children: [
-                Text(
-                  locationName,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(fontSize: 20.0),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isVisible = !isVisible; // عكس الحالة
-                      setlocation(widget.email,isVisible);
-                    });
-                    // طباعة الحالة على الكونسول
-                    if (isVisible) {
-                      print("Visible: $locationName"); // طباعة اسم الموقع إذا كان مرئيًا
-                    } else {
-                      print("Not Visible");
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    width: 70,
-                    height: 30,
-                    padding: EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: isVisible ? Colors.green : Colors.red, // تغيير اللون بناءً على الحالة
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Stack(
-                      children: [
-                        // النصوص (Visible و Not Visible)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              '',
-                              style: TextStyle(
-                                color: !isVisible ? Colors.white : Colors.white60,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              '',
-                              style: TextStyle(
-                                color: isVisible ? Colors.white : Colors.white60,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // الدائرة المنزلقة
-                        Align(
-                          alignment: !isVisible ? Alignment.centerLeft : Alignment.centerRight,
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
 }
