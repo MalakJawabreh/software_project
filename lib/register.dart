@@ -114,7 +114,7 @@ class _RegisterState extends State<Register> {
     return Column(
       children: [
         Container(
-          height: 260,
+          height: 310,
           width: double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -126,11 +126,11 @@ class _RegisterState extends State<Register> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 2.0,left: 130),
+                padding: const EdgeInsets.only(top: 2.0,left: 100),
                 child: Image.asset(
                   "imagess/signup_icon.png",
-                  width: 170,
-                  height: 170,
+                  width: 220,
+                  height: 220,
                 ),
               ),
               Padding(
@@ -141,7 +141,7 @@ class _RegisterState extends State<Register> {
                   style: TextStyle(fontSize: 36, color: Colors.blueGrey[600], fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Text(
@@ -152,16 +152,16 @@ class _RegisterState extends State<Register> {
             ],
           ),
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 20),
 
         inputStyle("Full Name", "Enter your full name", fullNameController),
-        SizedBox(height: 5),
+        SizedBox(height: 10),
         inputStyle("Email", "test@gmail.com", emailController),
-        SizedBox(height: 5),
+        SizedBox(height: 10),
         inputStyle("Password", "****", passwordController),
-        SizedBox(height: 5),
+        SizedBox(height: 10),
         inputStyle("Phone Number", "Enter your phone number", phoneController),
-        SizedBox(height: 5),
+        SizedBox(height: 10),
 
         // Gender selection
         Padding(
@@ -255,6 +255,7 @@ class _RegisterState extends State<Register> {
         //   SizedBox(height: 5),
         // ],
 
+        SizedBox(height: 10),
         // زر التسجيل
         Container(
           height: 50,
@@ -273,7 +274,7 @@ class _RegisterState extends State<Register> {
             ),
           ),
         ),
-        SizedBox(height: 0),
+        SizedBox(height: 5),
 
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
@@ -334,19 +335,19 @@ class _RegisterState extends State<Register> {
             padding: const EdgeInsets.all(13.0), // ضبط المسافة حسب الرغبة
             child: _getIconForField(label),
           ),
-          // suffixIcon: label == "Password"
-          //     ? IconButton(
-          //   icon: Icon(
-          //     _obscureText ? Icons.visibility_off : Icons.visibility,
-          //     color: Colors.grey[600],
-          //   ),
-          //   onPressed: () {
-          //     setState(() {
-          //       _obscureText = !_obscureText;
-          //     });
-          //   },
-          // )
-          //     : null,
+          suffixIcon: label == "Password"
+              ? IconButton(
+            icon: Icon(
+              _obscureText ? Icons.visibility_off : Icons.visibility,
+              color: Colors.grey[600],
+            ),
+            onPressed: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+          )
+              : null,
         ),
       ),
     );

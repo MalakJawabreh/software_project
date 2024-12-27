@@ -25,6 +25,7 @@ class _LoginState extends State<Login> {
   final TextEditingController passwordController = TextEditingController();
   bool isNotValidated = false;
   late SharedPreferences prefs;
+  bool _obscureText = true; // متغير لتحديد إذا كانت كلمة المرور مخفية
 
   @override
   void initState() {
@@ -79,7 +80,81 @@ class _LoginState extends State<Login> {
           print('Role not recognized');
         }
       } else {
-        print('Something Error');
+        // طباعة الرسالة الواردة من السيرفر في حالة وجود خطأ
+        String errorMessage = jsonResponse['message'] ?? 'Unknown error occurred';
+        if (errorMessage == 'Email does not exist') {
+          // عرض نافذة صغيرة تخبر المستخدم بأن الإيميل غير صحيح
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.warning, // أيقونة تحذير
+                      color: Colors.red, // اللون الأحمر للأيقونة
+                    ),
+                    SizedBox(width: 8), // مساحة بين الأيقونة والنص
+                    Text(
+                      'Login Error',
+                      style: TextStyle(
+                        color: Colors.red, // اللون الأحمر للنص
+                        fontWeight: FontWeight.bold, // جعل النص عريضًا
+                      ),
+                    ),
+                  ],
+                ),
+                content: Text(
+                  'The email you entered does not exist. Please try again.',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // إغلاق النافذة
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else if (errorMessage == 'Invalid password') {
+          // عرض نافذة صغيرة تخبر المستخدم بأن الإيميل غير صحيح
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title:  Row(
+                  children: [
+                    Icon(
+                      Icons.warning, // أيقونة تحذير
+                      color: Colors.red, // اللون الأحمر للأيقونة
+                    ),
+                    SizedBox(width: 8), // مساحة بين الأيقونة والنص
+                    Text(
+                      'Login Error',
+                      style: TextStyle(
+                        color: Colors.red, // اللون الأحمر للنص
+                        fontWeight: FontWeight.bold, // جعل النص عريضًا
+                      ),
+                    ),
+                  ],
+                ),
+                content: Text('The password is wrong. Please try again.',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // إغلاق النافذة
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          print('Error: $errorMessage');
+        }
       }
     }
     else {
@@ -219,6 +294,7 @@ class _LoginState extends State<Login> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: TextField(
         controller: controller,
+        obscureText: title == "Password" ? _obscureText : false, // إخفاء النص فقط في كلمة المرور
         decoration: InputDecoration(
           labelText: title,
           hintText: hintTxt,
@@ -242,6 +318,19 @@ class _LoginState extends State<Login> {
             padding: const EdgeInsets.all(13.0),
             child: _getIconForField(title),
           ),
+          suffixIcon: title == "Password"
+              ? IconButton(
+            icon: Icon(
+              _obscureText ? Icons.visibility_off : Icons.visibility,
+              color: Colors.grey[600],
+            ),
+            onPressed: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+          )
+              : null,
         ),
       ),
     );
