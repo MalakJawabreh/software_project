@@ -23,6 +23,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'SearchPassenger.dart';
 import 'package:project1/ComplaintsPage.dart';
+import 'SupportPage.dart';
 class Passenger extends StatefulWidget {
   final String? token;
   final List<dynamic> ?upcomingTrips;
@@ -509,8 +510,16 @@ class _PassengerState extends State<Passenger> {
                   color: Color.fromARGB(230, 41, 84, 115),
                 ),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SupportPage(isArabic: isArabic),
+                  ),
+                );
+              },
             ),
+
             ListTile(
               leading: Icon(Icons.logout, size: 30),
               title: Text(
