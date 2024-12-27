@@ -1,16 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'language_provider.dart';
+import 'driver_data_model.dart'; // استيراد ملف الموديل
 
 class VisibilitySettingsScreen extends StatefulWidget {
   @override
+  final String email;
+  const VisibilitySettingsScreen({required this.email, super.key});
+
   _VisibilitySettingsScreenState createState() =>
       _VisibilitySettingsScreenState();
 }
 
 class _VisibilitySettingsScreenState extends State<VisibilitySettingsScreen> {
+  late DriverDataModel driverDataModel; // تعريف المتغير
   String _selectedOption = "Everyone"; // القيمة الافتراضية
 
+  @override
+  void initState() {
+    super.initState();
+    // الحصول على قيمة الرؤية (visibility) من الموديل
+    driverDataModel = Provider.of<DriverDataModel>(context, listen: false);
+    // تهيئة القيمة الافتراضية استنادًا إلى البيانات من الموديل
+    String? visibility = driverDataModel.getVisibilityByEmail(widget.email);
+    if (visibility != null) {
+      _selectedOption = visibility; // تعيين القيمة المستردة كقيمة افتراضية
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
@@ -61,7 +77,12 @@ class _VisibilitySettingsScreenState extends State<VisibilitySettingsScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     print("Selected option: $_selectedOption");
-                    Navigator.pop(context);
+                    driverDataModel.setVisibility(widget.email, _selectedOption);
+
+                    // التحقق من القيمة التي تم حفظها
+                    final savedVisibility = driverDataModel.getVisibilityByEmail(widget.email);
+                    print(
+                        "Saved visibility:  $savedVisibility for email: ${widget.email}");
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,

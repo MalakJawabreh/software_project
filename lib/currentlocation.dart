@@ -26,12 +26,20 @@ class _CurrentLocationPageState extends State<CurrentLocationPage> {
   late MapController _mapController;  // Declare the MapController
   LatLng? currentLatLng;
   bool isVisible=false;  // الحالة الأولية لظهور/اختفاء
+  late DriverDataModel driverDataModel; // تعريف المتغير
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();  // Initialize MapController here
     _getCurrentLocation();
+    // الحصول على قيمة الرؤية (visibility) من الموديل
+    driverDataModel = Provider.of<DriverDataModel>(context, listen: false);
+    // تهيئة القيمة الافتراضية استنادًا إلى البيانات من الموديل
+    bool? visibility = driverDataModel.getVisibilitylocation(widget.email);
+    if (visibility != null) {
+      isVisible = visibility; // تعيين القيمة المستردة كقيمة افتراضية
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -231,6 +239,14 @@ class _CurrentLocationPageState extends State<CurrentLocationPage> {
                               } else {
                                 print("Not Visible");
                               }
+
+                              print("Selected visible: $isVisible");
+                              driverDataModel.setVisibilitylocation(widget.email, isVisible);
+
+                              // التحقق من القيمة التي تم حفظها
+                              final savedVisibilitylocation = driverDataModel.getVisibilitylocation(widget.email);
+                              print(
+                                  "Saved visibility:  $savedVisibilitylocation for email: ${widget.email}");
                             },
                             child: AnimatedContainer(
                               duration: Duration(milliseconds: 300),

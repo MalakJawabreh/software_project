@@ -346,7 +346,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => VisibilitySettingsScreen(
+                  builder: (context) => VisibilitySettingsScreen(email:widget.email
                   ),
                 ),
               );

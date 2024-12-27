@@ -31,6 +31,7 @@ import 'profile_driver.dart';
 import 'login.dart';
 import 'dart:async';
 import 'ComplaintsPage.dart';
+import 'SupportPage.dart';
 
 class Driver extends StatefulWidget {
   final String token;
@@ -678,17 +679,22 @@ class _DriverState extends State<Driver> {
                     color: Color.fromARGB(230, 41, 84, 115),
                   ),
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PrivacyPage(
-                        token: widget.token, // تمرير الـ token هنا
+                  onTap: () {
+                    if (widget.token == null || email.isEmpty) {
+                      // التعامل مع الحالة إذا كانت القيم غير موجودة
+                      print("Error: token or email is missing!");
+                      return;
+                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PrivacyPage(
+                          token: widget.token,
+                          email: email,
+                        ),
                       ),
-                    ),
-                  );
-
-                },
+                    );
+                  },
               ),
               SizedBox(height: 10,),
               ListTile(
@@ -731,7 +737,14 @@ class _DriverState extends State<Driver> {
                     color: Color.fromARGB(230, 41, 84, 115),
                   ),
                 ),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SupportPage(isArabic: isArabic),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: Icon(Icons.logout, size: 30),
@@ -1617,9 +1630,10 @@ class SettingsPage extends StatelessWidget {
 
 class PrivacyPage extends StatelessWidget {
   final String? token;  // إضافة الـ token هنا
+  final String email;
 
   // Constructor لتمرير الـ token
-  PrivacyPage({Key? key, this.token}) : super(key: key);
+  PrivacyPage({Key? key, this.token,required this.email}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1666,7 +1680,7 @@ class PrivacyPage extends StatelessWidget {
                 // الانتقال إلى صفحة إعدادات الرؤية
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => VisibilitySettingsScreen()),
+                  MaterialPageRoute(builder: (context) => VisibilitySettingsScreen(email:email)),
                 );
               },
             ),

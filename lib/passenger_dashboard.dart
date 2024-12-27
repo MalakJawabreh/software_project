@@ -23,6 +23,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'SearchPassenger.dart';
 import 'package:project1/ComplaintsPage.dart';
+import 'SupportPage.dart';
 class Passenger extends StatefulWidget {
   final String? token;
   final List<dynamic> ?upcomingTrips;
@@ -39,6 +40,7 @@ class _PassengerState extends State<Passenger> {
   late String fullName='';
   late String phoneNumber='';
   late String Picture='';
+  late String gender='';
 
   String? profilePicture; // لتخزين رابط صورة الملف الشخصي
 
@@ -97,6 +99,7 @@ class _PassengerState extends State<Passenger> {
       fullName = jwtDecodedToken['fullName'];
       phoneNumber = jwtDecodedToken['phoneNumber'];
       Picture=jwtDecodedToken['profilePicture'];
+      gender=jwtDecodedToken['gender'];
 
       // Save email and full name in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -104,6 +107,7 @@ class _PassengerState extends State<Passenger> {
       await prefs.setString('fullName', fullName);
       await prefs.setString('phoneNumber', phoneNumber);
       await prefs.setString('profilePicture', Picture);
+      await prefs.setString('gender', gender);
     }
 
     // إعداد التايمر للحركة التلقائية للسلايدر
@@ -456,17 +460,22 @@ class _PassengerState extends State<Passenger> {
                   color: Color.fromARGB(230, 41, 84, 115),
                 ),
               ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PrivacyPage(
-                      token: widget.token, // تمرير الـ token هنا
+                onTap: () {
+                  if (widget.token == null || email.isEmpty) {
+                    // التعامل مع الحالة إذا كانت القيم غير موجودة
+                    print("Error: token or email is missing!");
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PrivacyPage(
+                        token: widget.token,
+                        email: email,
+                      ),
                     ),
-                  ),
-                );
-
-              },
+                  );
+                }
             ),
             ListTile(
               leading: Icon(Icons.reviews, size: 30),
@@ -509,8 +518,16 @@ class _PassengerState extends State<Passenger> {
                   color: Color.fromARGB(230, 41, 84, 115),
                 ),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SupportPage(isArabic: isArabic),
+                  ),
+                );
+              },
             ),
+
             ListTile(
               leading: Icon(Icons.logout, size: 30),
               title: Text(
@@ -526,166 +543,414 @@ class _PassengerState extends State<Passenger> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          // إضافة PageView.builder هنا
-          SizedBox(
-            height: 200,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _images.length,
-              itemBuilder: (context, index) {
-                return Image.asset(
-                  _images[index], // تحميل الصورة من الأصول
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                );
-              },
+      body: SingleChildScrollView(
+        child: Column(
+          //crossAxisAlignment: CrossAxisAlignment.start, // لجعل الأطفال يصطفون على اليسار
+          children: [
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16.0,top:16.0), // ضبط المسافة من اليسار
+                child: Text(
+                  'Hi $fullName!', // دمج كلمة "Hi" مع fullName
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xE61B3453),
+                  ),
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: 20),
-
-          // إضافة الكاتلوج
-
-
-          Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
-            ),
-            child: Container(
+            SizedBox(height: 20,),
+            Container(
+              width: 350, // تحديد العرض المطلوب
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor,
-                    SecondryColor,
-                  ],
+                border: Border.all(
+                  color: Color(0xFF143C73), // لون الكحلي (يمكن تغييره حسب رغبتك)
+                  width: 3, // سماكة الحدود
                 ),
-                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+                borderRadius: BorderRadius.circular(15), // نفس الانحناء للبطاقة
               ),
-              child: ListTile(
-                title: Text(
-                  isArabic ? 'تصفح جميع الرحلات المتاحة' : 'Browse all available trips',
-                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                subtitle: Text(
-                  isArabic ? 'شاهد الرحلات الجديدة الآن!' : 'View new trips now!',
-                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
+                elevation: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      // النصوص
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome!',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Let's book your trips now!",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 58),
+                      Image.asset(
+                        'imagess/Mobile inbox-pana.png', // استبدل بمسار الصورة
+                        height: 80,
+                        width: 80,
+                      ),
+                    ],
+                  ),
                 ),
-                trailing: Icon(
-                  Icons.arrow_forward,
-                  color:primaryColor2, // تغيير لون الأيقونة إلى الأبيض
-                ),
-                onTap: () {
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => TestPage(emailP:email,nameP: fullName,phoneP: phoneNumber,)),
-                  );
-
-
-
-                },
-
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor,
-                    SecondryColor,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
-              ),
-              child: ListTile(
-                title: Text(
-                  isArabic ? 'البحث عن رحلات ' : 'Search Trips',
-                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
-                ),
-                subtitle: Text(
-                  isArabic ? 'ابحث عن وجهتك الآن باستخدام الفلترة ' : 'Find your destination now using filtering',
-                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward,
-                  color:primaryColor2, // تغيير لون الأيقونة إلى الأبيض
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SearchTripsPage(emailP:email,nameP: fullName,phoneP: phoneNumber,)),
-                  );
-                },
               ),
             ),
-          ),
-          SizedBox(height: 20),
 
-          Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // لجعل الزوايا مدورة (اختياري)
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor,
-                    SecondryColor,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
-              ),
-              child: ListTile(
-                title: Text(
-                  isArabic ? 'حجوزاتك' : 'Your Active Bookings',
-                  style: TextStyle(color: Colors.white), // تغيير اللون للنص إلى الأبيض ليكون واضحًا مع التدرج
-                ),
-                subtitle: Text(
-                  isArabic ? 'إدارة حجوزاتك الحالية' : 'Manage your current bookings',
-                  style: TextStyle(color: Colors.white70), // اللون الرمادي الفاتح للنص الفرعي
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward,
-                  color: primaryColor2, // تغيير لون الأيقونة إلى الأبيض
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BookingTripsPage(emailP:email),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0, top: 20.0), // إضافة مساحة حول النص
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start, // لضمان أن النص والأيقونة على اليسار
+                children: [
+                  Icon(
+                    Icons.category_sharp, // رمز يعبر عن الأقسام (يمكن تغييره لأي أيقونة أخرى)
+                    size: 30, // حجم الأيقونة يتماشى مع النص
+                    color: Color(0xE63D5778), // نفس لون النص
+                  ),
+                  SizedBox(width: 10), // مساحة بين النص والأيقونة
+                  Text(
+                    'Categories', // النص الذي تريد عرضه
+                    style: TextStyle(
+                      fontSize: 30, // حجم الخط كبير
+                      fontWeight: FontWeight.bold, // خط عريض
+                      color: Color(0xE63D5778), // لون أزرق داكن // لون النص
                     ),
-                  );
-                },
-
+                  ),
+                  SizedBox(width: 130), // مساحة بين النص والأيقونة
+                  Text(
+                    'View all', // النص الذي تريد عرضه
+                    style: TextStyle(
+                      fontSize: 15, // حجم الخط كبير
+                      fontWeight: FontWeight.bold, // خط عريض
+                      color: Color(0xE60757BC), // لون أزرق داكن // لون النص
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-
-
-        ],
+            SizedBox(height: 15),
+            // إضافة الكاتلوج
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // لجعل الزوايا مدورة
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      SecondryColor,
+                      softPink,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // صورة الكارد: PageView للصور المتحركة
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      child: SizedBox(
+                        height: 150,
+                        width: double.infinity,
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: _images.length,
+                          itemBuilder: (context, index) {
+                            return Image.asset(
+                              _images[index],
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(
+                        isArabic ? 'تصفح جميع الرحلات المتاحة' : 'Browse all available trips',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      subtitle: Text(
+                        isArabic ? 'شاهد الرحلات الجديدة الآن!' : 'View new trips now!',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 18,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.arrow_forward,
+                        size: 45,
+                        color: primaryColor2,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TestPage(
+                              emailP: email,
+                              nameP: fullName,
+                              phoneP: phoneNumber,
+                              gender:gender,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // لجعل الزوايا مدورة
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      SecondryColor,
+                      softPink,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // صورة الكارد
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      child: Image.asset(
+                        'imagess/booking.jpg', // استبدل هذا بالمسار الصحيح للصورة
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(
+                        isArabic ? 'البحث عن رحلات ' : 'Search Trips',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      subtitle: Text(
+                        isArabic ? 'ابحث عن وجهتك الآن باستخدام الفلترة ' : 'Find your destination now using filtering',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.arrow_forward,
+                        size: 45,
+                        color: primaryColor2,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SearchTripsPage(
+                              emailP: email,
+                              nameP: fullName,
+                              phoneP: phoneNumber,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // لجعل الزوايا مدورة
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      SecondryColor,
+                      softPink,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // صورة الكارد
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      child: Image.asset(
+                        'imagess/active.jpg', // استبدل هذا بالمسار الصحيح للصورة
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(
+                        isArabic ? 'حجوزاتك' : 'Your Active Bookings',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      subtitle: Text(
+                        isArabic ? 'إدارة حجوزاتك الحالية' : 'Manage your current bookings',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.arrow_forward,
+                        size: 45,
+                        color: primaryColor2,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingTripsPage(emailP: email),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30), // لجعل الزوايا مدورة
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      SecondryColor,
+                      softPink,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // صورة الكارد
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      child: Image.asset(
+                        'imagess/drive_pass.jpg', // استبدل هذا بالمسار الصحيح للصورة
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(
+                        isArabic ? 'جميع السائقين في التطبيق' : 'All Drivers in Application',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      subtitle: Text(
+                        isArabic ? 'توصل الى اي سائق تريده بسرعة.' : 'Quickly connect with any driver you need',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          color: Color.fromARGB(230, 20, 60, 115),
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.arrow_forward,
+                        size: 45,
+                        color: primaryColor2,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingTripsPage(emailP: email),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+          ],
+        ),
       ),
+
     );
   }
 }
 
   // حوار البحث
-
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -807,9 +1072,10 @@ class SettingsPage extends StatelessWidget {
 }
 class PrivacyPage extends StatelessWidget {
   final String? token;  // إضافة الـ token هنا
+  final String email;
 
   // Constructor لتمرير الـ token
-  PrivacyPage({Key? key, this.token}) : super(key: key);
+  PrivacyPage({Key? key, this.token,required this.email}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -856,7 +1122,7 @@ class PrivacyPage extends StatelessWidget {
                 // الانتقال إلى صفحة إعدادات الرؤية
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => VisibilitySettingsScreen()),
+                  MaterialPageRoute(builder: (context) => VisibilitySettingsScreen(email:email)),
                 );
               },
             ),

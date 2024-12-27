@@ -40,6 +40,33 @@ class DriverDataModel with ChangeNotifier {
     return null; // إذا لم يكن هناك مواقع مسجلة، نعيد null
   }
 
+  // تخزين الرؤية للمستخدمين
+  static Map<String, UserVisibility> _userVisibility = {};
+
+// إضافة أو تحديث الرؤية للمستخدم بناءً على البريد الإلكتروني
+  void setVisibility(String email, String visibility) {
+    _userVisibility[email] = UserVisibility(visibility: visibility);
+  }
+// استرجاع نوع الرؤية بناءً على البريد الإلكتروني
+  String? getVisibilityByEmail(String email) {
+    if (_userVisibility.containsKey(email)) {
+      return _userVisibility[email]!.visibility;
+    }
+    return null; // إذا لم يكن هناك رؤية مسجلة
+  }
+  // تخزين الرؤية للمستخدمين
+  static Map<String, UserVisibilitylocation> _userVisibilitylocation = {};
+
+  void setVisibilitylocation(String email, bool visibilitylocation) {
+    _userVisibilitylocation[email] = UserVisibilitylocation(visibilitylocation: visibilitylocation);
+  }
+
+  bool? getVisibilitylocation(String email) {
+    if (_userVisibilitylocation.containsKey(email)) {
+      return _userVisibilitylocation[email]!.visibilitylocation;
+    }
+    return null; // إذا لم يكن هناك رؤية مسجلة
+  }
 
   late String location;
   late String emailuser;
@@ -124,4 +151,17 @@ class UserLocation {
     required this.location,
     required this.visible,
   });
+}
+
+class UserVisibility {
+  final String visibility; // نوع الرؤية: Everyone, Females only, Males only
+
+  UserVisibility({required this.visibility});
+}
+
+
+class UserVisibilitylocation {
+  final bool visibilitylocation; // نوع الرؤية: Everyone, Females only, Males only
+
+  UserVisibilitylocation({required this.visibilitylocation});
 }

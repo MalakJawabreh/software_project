@@ -5,9 +5,11 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:project1/passengerDetails.dart';
 import 'package:project1/passenger_dashboard.dart';
+import 'package:provider/provider.dart';
 import 'config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+import 'driver_data_model.dart';
 import 'notifications_service.dart';
 
 
@@ -16,8 +18,9 @@ class TestPage extends StatefulWidget {
   final String emailP;
   final String nameP;
   final String phoneP;
+  final String gender;
   _TestPageState createState() => _TestPageState();
-  const TestPage({required this.emailP,required this.nameP,required this.phoneP, super.key});
+  const TestPage({required this.emailP,required this.nameP,required this.phoneP,required this.gender, super.key});
 
 }
 
@@ -26,16 +29,18 @@ class _TestPageState extends State<TestPage> {
   List<int> selectedSeats = [];
   List<String> notes = []; // لتخزين الملاحظات
 
+  late DriverDataModel driverDataModel; // تعريف المتغير
+
+
   @override
   void initState() {
     super.initState();
-
+    driverDataModel = Provider.of<DriverDataModel>(context, listen: false);
     fetchTrips().then((_) {
       updateTripsBasedOnTime();
       selectedSeats = List.filled(trips.length, 1);
       notes = List.filled(trips.length, ''); // لتخزين الملاحظات بشكل افتراضي فارغ
     });
-
     Timer.periodic(Duration(seconds: 20), (timer) {
       updateTripsBasedOnTime();
     });
@@ -103,20 +108,43 @@ class _TestPageState extends State<TestPage> {
                             ),
                         ],
                       ),
-                      onTap: (){
-                        // التنقل إلى صفحة التفاصيل
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PassengerDetailsPage(passenger: passenger),
-                          ),
-                        );
+                      onTap: () {
+                        String? visibility = driverDataModel.getVisibilityByEmail(passenger['EmailP']);
+
+                        // التحقق إذا كان visibility هو "Everyone"
+                        if (visibility == "Everyone") {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PassengerDetailsPage(passenger: passenger),
+                            ),
+                          );
+                        } else if (visibility == "Females only" && widget.gender == "Female") {
+                          // التحقق إذا كان visibility هو "Females only" والمستخدم أنثى
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PassengerDetailsPage(passenger: passenger),
+                            ),
+                          );
+                        } else {
+                          // إذا لم تتحقق أي من الحالات أعلاه
+                          if (visibility == "Females only") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('This passenger is only visible to females.')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('This passenger is not visible to everyone.')),
+                            );
+                          }
+                        }
                       },
+
                     );
                   },
                 ),
               )
-              //hellomalakkjfkd
                   : Text("No passengers found for this trip."),
               actions: [
                 TextButton(
