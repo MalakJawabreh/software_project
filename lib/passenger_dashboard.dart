@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:project1/rating_page.dart';
 import 'package:project1/test.dart';
 import 'dart:async';
 import 'config.dart';
@@ -286,17 +287,19 @@ class _PassengerState extends State<Passenger> {
         child: AppBar(
           automaticallyImplyLeading: false,
           title: Padding(
-            padding: const EdgeInsets.only(top: 32),
+            padding: const EdgeInsets.only(top: 28),
             child: Row(
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
-                      'imagess/app_icon.jpg',
-                      height: 40,
+                      'imagess/app_white.jpg',
+                      height: 30,
                     ),
-                    Text(
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                    child:Text(
                       isArabic ? "وصلني معك" : "assalni Ma'ak",
                       style: TextStyle(
                         fontSize: 25,
@@ -304,16 +307,18 @@ class _PassengerState extends State<Passenger> {
                         color: Color.fromARGB(255, 41, 84, 115),
                       ),
                     ),
+                    ),
                   ],
                 ),
               ],
 
             ),
           ),
-          backgroundColor: Color.fromARGB(230, 196, 209, 219),
+          //backgroundColor: Color.fromARGB(230, 196, 209, 219),
+          backgroundColor: Colors.white,
           actions: [
             Padding(
-              padding: const EdgeInsets.only(top: 19),
+              padding: const EdgeInsets.only(top: 21),
               child: Row(
                 children: [
                   // أيقونة الإشعارات مع القائمة المنسدلة
@@ -547,6 +552,10 @@ class _PassengerState extends State<Passenger> {
         child: Column(
           //crossAxisAlignment: CrossAxisAlignment.start, // لجعل الأطفال يصطفون على اليسار
           children: [
+            Divider(
+              height: 1, // تحديد ارتفاع الـ Divider
+              color: Color(0xE6617383), // اللون السكني (لون رمادي فاتح)
+            ),
             Align(
               alignment: Alignment.centerLeft, // محاذاة النص لليسار
               child: Padding(
@@ -600,13 +609,51 @@ class _PassengerState extends State<Passenger> {
                               color: Colors.grey[800],
                             ),
                           ),
+                          SizedBox(height: 16), // مسافة بين النصوص والزر
+                          Padding(
+                            padding: EdgeInsets.only(left: 20.0), // إضافة padding من اليسار فقط
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RatingPage(emailP: email),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:Color(0xE6FFCD09), // لون الزر
+                                foregroundColor:Color(0xE6131A75), // لون النص داخل الزر
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20), // حواف مستديرة
+                                ),
+                                elevation: 5, // ارتفاع الزر ليبدو مميزاً
+                                padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0), // تعديل padding لتغيير العرض
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.star, // اختر الأيقونة التي ترغب بها
+                                    color: Color(0xE6131A75), // لون الأيقونة
+                                    size: 20, // حجم الأيقونة
+                                  ),
+                                  SizedBox(width:3), // فاصل بين الأيقونة والنص
+                                  Text('Rating now !'),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                      SizedBox(width: 58),
+                      SizedBox(width: 20),
                       Image.asset(
                         'imagess/Mobile inbox-pana.png', // استبدل بمسار الصورة
-                        height: 80,
-                        width: 80,
+                        height: 120,
+                        width: 130,
                       ),
                     ],
                   ),

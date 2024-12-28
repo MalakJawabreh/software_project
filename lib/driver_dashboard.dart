@@ -506,13 +506,13 @@ class _DriverState extends State<Driver> {
             child: Row(
               children: [
                 Image.asset(
-                  'imagess/app_icon.jpg',
-                  height: 40,
+                  'imagess/app_white.jpg',
+                  height: 30,
                 ),
                 //base64ToImage(licensePicture),
                 SizedBox(width: 0),
                 Padding(
-                  padding: const EdgeInsets.only(top: 13),
+                  padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     "assalni Ma'ak",
                     style: TextStyle(
@@ -525,7 +525,9 @@ class _DriverState extends State<Driver> {
               ],
             ),
           ),
-          backgroundColor: Color.fromARGB(230, 196, 209, 219),
+          backgroundColor: Colors.white,
+
+          //Color.fromARGB(230, 196, 209, 219),
 
           actions: [
             Padding(
@@ -762,9 +764,12 @@ class _DriverState extends State<Driver> {
           ),
         ),
       ),
-
       body: Column(
         children: [
+          Divider(
+            height: 1, // تحديد ارتفاع الـ Divider
+            color: Color(0xE6617383), // اللون السكني (لون رمادي فاتح)
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 15, left: 16, right: 16),
             child: Row(
@@ -978,20 +983,13 @@ class _DriverState extends State<Driver> {
 
                                                         // أضف هنا الكود الذي سيعرض الخريطة أو يقوم بالإجراء الذي تريده
                                                         print("Open map from ${trip['from']} to ${trip['to']}");
-                                                        // Navigator.push(
-                                                        //   context,
-                                                        //   MaterialPageRoute(builder: (context) => RouteMapScreen(
-                                                        //     fromLocation: trip['from'],
-                                                        //     toLocation: trip['to'],
-                                                        //   ),), // اسم الصفحة
-                                                        // );
-
-                                                        // Navigator.push(
-                                                        //   context,
-                                                        //   MaterialPageRoute(builder: (context) => CurrentLocationPage(),), // اسم الصفحة
-                                                        // );
-
-
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(builder: (context) => RouteMapScreen(
+                                                            fromLocation: trip['from'],
+                                                            toLocation: trip['to'],
+                                                          ),), // اسم الصفحة
+                                                        );
                                                       },
                                                     ),
                                                   ],
