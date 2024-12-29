@@ -24,3 +24,4 @@ final update_booking = url + "update_booking";
 final getuser=url + "getuser";
 final update_location=url + "update_location";
 final update_Booking_Rate=url + "update_Booking_Rate";
+final all_driver=url + "all_driver";

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'driver_data_model.dart';
 
 class DriverDetailsScreen extends StatelessWidget {
   final String name;
@@ -14,6 +17,7 @@ class DriverDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late DriverDataModel driverData = Provider.of<DriverDataModel>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         // title: Text("Passenger Details"),
@@ -130,30 +134,36 @@ class DriverDetailsScreen extends StatelessWidget {
                             thickness: 2,
                             color: Colors.grey,
                           ),
-                          // الموقع
-                          Text(
-                            "Location",
-                            style: TextStyle(
-                              fontSize: 23,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Row(
+                          driverData.getLocationByEmail(email) != null
+                              ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.location_on, color: Color.fromARGB(240, 38, 28, 44)),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  name, // عرض الموقع كمثال
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    color: Color.fromARGB(230, 24, 83, 131),
-                                  ),
+                              Text(
+                                "Location",
+                                style: TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on, color: Color.fromARGB(240, 38, 28, 44)),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child:Text(
+                                      driverData.getLocationByEmail(email) ?? 'الموقع غير متوفر',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        color: Color.fromARGB(230, 24, 83, 131),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                          ),
+                          )
+                              : SizedBox(),
                         ],
                       ),
                       SizedBox(height: 30),

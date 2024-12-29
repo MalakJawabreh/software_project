@@ -4,6 +4,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/rating_page.dart';
 import 'package:project1/test.dart';
 import 'dart:async';
+import 'alldriver.dart';
 import 'config.dart';
 import 'dart:typed_data';
 import 'login.dart';
@@ -982,7 +983,7 @@ class _PassengerState extends State<Passenger> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BookingTripsPage(emailP: email),
+                            builder: (context) => DriverListPage(),
                           ),
                         );
                       },
