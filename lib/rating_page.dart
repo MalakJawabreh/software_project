@@ -24,6 +24,7 @@ class RatingPage extends StatefulWidget {
 
 class _RatingPageState extends State<RatingPage> {
   List<dynamic> bookings = []; // لتخزين الحجوزات
+  List<dynamic> expiredBookings = []; // لتخزين الحجوزات
   bool isLoading = false; // لإظهار مؤشر التحميل
   String? error;
 
@@ -35,10 +36,42 @@ class _RatingPageState extends State<RatingPage> {
     print('Fetching trips for email: ${widget.emailP}');
 
     // جلب البيانات عند تحميل الصفحة
-    fetchUpcomingTrips();
+    fetchUpcomingTrips().then((_) {
+      // بعد إحضار البيانات، قم بتحديث المواعيد بناءً على الوقت
+      updateTripsBasedOnTime();
+    });
 
+    // تحديث المواعيد كل 20 ثانية
+    Timer.periodic(Duration(seconds: 20), (timer) {
+      if (!mounted) {
+        timer.cancel(); // إذا تم إلغاء الـ widget، قم بإلغاء الـ timer
+      } else {
+        updateTripsBasedOnTime();
+      }
+    });
   }
 
+  void updateTripsBasedOnTime() {
+    final now = DateTime.now();
+    final dateFormat = DateFormat("yyyy-MM-ddTHH:mm:ss.SSS'Z' h:mm a");
+
+    setState(() {
+      bookings.removeWhere((booking) {
+        try {
+          final dateTime = dateFormat
+              .parse(booking['date'] + ' ' + booking['time'], true)
+              .toLocal();
+          if (dateTime.isBefore(now)) {
+            expiredBookings.add(booking); // إضافة الحجوزات المنتهية إلى القائمة
+            return true;
+          }
+        } catch (e) {
+          print('Error parsing date: $e');
+        }
+        return false;
+      });
+    });
+  }
   // دالة لجلب الحجوزات بناءً على البريد الإلكتروني
   Future<void> fetchUpcomingTrips() async {
     // بدء تحميل البيانات
@@ -82,6 +115,31 @@ class _RatingPageState extends State<RatingPage> {
     }
   }
 
+  Future<void> saveChanges(int selectedStars,String feedbackText,String bookingid) async {
+    final updatedBooking = {
+      'driverRate':selectedStars,
+      'NoteRate': feedbackText,
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse('$update_Booking_Rate/$bookingid'),
+        body: json.encode(updatedBooking),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Booking updated successfully')));
+
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update booking: ${response.statusCode}')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating booking: $e')));
+    }
+  }
+
 
   String formatDate(String dateTime) {
     final parsedDate = DateTime.parse(dateTime);
@@ -95,7 +153,7 @@ class _RatingPageState extends State<RatingPage> {
 
 
 
-  void showRatingDialog(BuildContext context, String name) {
+  void showRatingDialog(BuildContext context, String name,String bookingid) {
     int selectedStars = 0; // متغير لحفظ عدد النجوم المختارة
     String feedbackText = ""; // لحفظ نص التغذية الراجعة
 
@@ -167,6 +225,7 @@ class _RatingPageState extends State<RatingPage> {
                     onPressed: () {
                       print("Rating: $selectedStars stars");
                       print("feedbackText: $feedbackText");
+                      saveChanges(selectedStars,feedbackText,bookingid);
                       Navigator.pop(context); // إغلاق الحوار
                       showThankYouDialog(context,selectedStars,feedbackText); // فتح نافذة الشكر
                     },
@@ -261,7 +320,7 @@ class _RatingPageState extends State<RatingPage> {
       ),
       body:
 
-      bookings.isNotEmpty
+      expiredBookings.isNotEmpty
           ? Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -280,9 +339,9 @@ class _RatingPageState extends State<RatingPage> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(), // منع التمرير داخل القائمة
-              itemCount: bookings.length,
+              itemCount: expiredBookings.length,
               itemBuilder: (context, index) {
-                final booking = bookings[index];
+                final booking = expiredBookings[index];
                 final from = booking['from'] ?? (isArabic ? 'غير محدد' : 'Not specified');
                 final to = booking['to'] ?? (isArabic ? 'غير محدد' : 'Not specified');
                 final dateRaw = booking['date'];
@@ -388,7 +447,7 @@ class _RatingPageState extends State<RatingPage> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () {
-                                        showRatingDialog(context,booking['nameD']);
+                                        showRatingDialog(context,booking['nameD'],booking['_id']);
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: analogousPink, // لون الزر

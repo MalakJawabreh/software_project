@@ -35,8 +35,39 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
     print('Fetching trips for email: ${widget.emailP}');
 
     // جلب البيانات عند تحميل الصفحة
-    fetchUpcomingTrips();
+    fetchUpcomingTrips().then((_) {
+      // بعد إحضار البيانات، قم بتحديث المواعيد بناءً على الوقت
+      updateTripsBasedOnTime();
+    });
 
+    // تحديث المواعيد كل 20 ثانية
+    Timer.periodic(Duration(seconds: 20), (timer) {
+      if (!mounted) {
+        timer.cancel(); // إذا تم إلغاء الـ widget، قم بإلغاء الـ timer
+      } else {
+        updateTripsBasedOnTime();
+      }
+    });
+  }
+
+  void updateTripsBasedOnTime() {
+    final now = DateTime.now();
+    final dateFormat = DateFormat("yyyy-MM-ddTHH:mm:ss.SSS'Z' h:mm a");
+
+    setState(() {
+      bookings.removeWhere((booking) {
+        try {
+          final dateTime = dateFormat.parse(
+              booking['date'] + ' ' + booking['time'], true).toLocal();
+          if (dateTime.isBefore(now)) {
+            return true;
+          }
+        } catch (e) {
+          print('Error parsing date: $e');
+        }
+        return false;
+      });
+    });
   }
 
   // دالة لجلب الحجوزات بناءً على البريد الإلكتروني

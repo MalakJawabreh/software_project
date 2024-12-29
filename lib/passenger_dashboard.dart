@@ -283,11 +283,11 @@ class _PassengerState extends State<Passenger> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80),
+        preferredSize: Size.fromHeight(70),
         child: AppBar(
           automaticallyImplyLeading: false,
           title: Padding(
-            padding: const EdgeInsets.only(top: 28),
+            padding: const EdgeInsets.only(top: 18),
             child: Row(
               children: [
                 Row(
@@ -318,13 +318,15 @@ class _PassengerState extends State<Passenger> {
           backgroundColor: Colors.white,
           actions: [
             Padding(
-              padding: const EdgeInsets.only(top: 21),
+              padding: const EdgeInsets.only(top: 18),
               child: Row(
                 children: [
                   // أيقونة الإشعارات مع القائمة المنسدلة
                   CompositedTransformTarget(
                     link: _layerLink,
-                    child: IconButton(
+                    child:Padding(
+                      padding: EdgeInsets.only(top: 0.0),
+                      child: IconButton(
                       icon: Stack(
                         children: [
                           Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
@@ -361,6 +363,7 @@ class _PassengerState extends State<Passenger> {
                           _openDropdown();
                         }
                       },
+                    ),
                     ),
                   ),
                   IconButton(

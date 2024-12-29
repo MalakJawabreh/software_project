@@ -121,24 +121,15 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
         .toList();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime initialDate = DateTime.now();
-    DateTime firstDate = DateTime(2024);
-    DateTime lastDate = DateTime(2025);
-
-    DateTime? pickedDate = await showDatePicker(
+  Future<DateTime?> _selectDate(BuildContext context) async {
+    return await showDatePicker(
       context: context,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
+      initialDate: DateTime.now(), // التاريخ الافتراضي
+      firstDate: DateTime.now(),  // أول تاريخ متاح
+      lastDate: DateTime(2100),   // آخر تاريخ متاح
     );
-
-    if (pickedDate != null && pickedDate != initialDate) {
-      setState(() {
-        _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
-      });
-    }
   }
+
 
   Future<void> _selectTime(BuildContext context) async {
     TimeOfDay? pickedTime = await showTimePicker(
@@ -327,7 +318,22 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                           ),
                         ),
                       ),
-                      onTap: () => _selectDate(context),
+                      onTap: () async {
+                        // استدعاء _selectDate وتخزين النتيجة في selectedDate
+                        final DateTime? selectedDate = await _selectDate(context);
+                        // التحقق إذا كان التاريخ مختارًا
+                        if (selectedDate != null) {
+                          final now = DateTime.now();
+                          if (selectedDate.isBefore(DateTime(now.year, now.month, now.day))) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Please select a date in the future.')),
+                            );
+                          } else {
+                            // تحديث حقل النص بالتاريخ
+                            _dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
+                          }
+                        }
+                      },
                     ),
                   ),
                 ],

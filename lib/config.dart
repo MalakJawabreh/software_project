@@ -23,3 +23,4 @@ final delete_booking = url + "delete_book";
 final update_booking = url + "update_booking";
 final getuser=url + "getuser";
 final update_location=url + "update_location";
+final update_Booking_Rate=url + "update_Booking_Rate";
