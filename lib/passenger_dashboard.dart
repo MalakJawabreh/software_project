@@ -142,7 +142,7 @@ class _PassengerState extends State<Passenger> {
 
         if (data['status'] == true) {
           profilePicture = data['profilePicture'];
-         // setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+          // setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
           print("Fetched profile picture URL: $profilePicture");
           return profilePicture;
         } else {
@@ -300,14 +300,14 @@ class _PassengerState extends State<Passenger> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 10),
-                    child:Text(
-                      isArabic ? "وصلني معك" : "assalni Ma'ak",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 41, 84, 115),
+                      child:Text(
+                        isArabic ? "وصلني معك" : "assalni Ma'ak",
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 41, 84, 115),
+                        ),
                       ),
-                    ),
                     ),
                   ],
                 ),
@@ -328,43 +328,43 @@ class _PassengerState extends State<Passenger> {
                     child:Padding(
                       padding: EdgeInsets.only(top: 0.0),
                       child: IconButton(
-                      icon: Stack(
-                        children: [
-                          Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
-                          if (NotificationService.getNotificationCount(email) > 0)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                padding: EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                constraints: BoxConstraints(
-                                  minWidth: 10,
-                                  minHeight: 10,
-                                ),
-                                child: Text(
-                                  '${NotificationService.getNotificationCount(email)}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                        icon: Stack(
+                          children: [
+                            Icon(Icons.notifications, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
+                            if (NotificationService.getNotificationCount(email) > 0)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  padding: EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
-                                  textAlign: TextAlign.center,
+                                  constraints: BoxConstraints(
+                                    minWidth: 10,
+                                    minHeight: 10,
+                                  ),
+                                  child: Text(
+                                    '${NotificationService.getNotificationCount(email)}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
+                        onPressed: () {
+                          if (isDropdownOpen) {
+                            _closeDropdown();
+                          } else {
+                            _openDropdown();
+                          }
+                        },
                       ),
-                      onPressed: () {
-                        if (isDropdownOpen) {
-                          _closeDropdown();
-                        } else {
-                          _openDropdown();
-                        }
-                      },
-                    ),
                     ),
                   ),
                   IconButton(
@@ -417,14 +417,14 @@ class _PassengerState extends State<Passenger> {
                             ),
                           );
                         },
-                     child:  Text(
-                        fullName,
-                        style: TextStyle(
-                          color: Color.fromARGB(230, 41, 84, 115),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                        child:  Text(
+                          fullName,
+                          style: TextStyle(
+                            color: Color.fromARGB(230, 41, 84, 115),
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                     ),
                       ),
                       SizedBox(height: 5), // مسافة بين الاسم والبريد الإلكتروني
                       Text(
@@ -460,15 +460,15 @@ class _PassengerState extends State<Passenger> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.privacy_tip, size: 30),
-              title: Text(
-                isArabic ? 'الخصوصية' : 'Privacy',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(230, 41, 84, 115),
+                leading: Icon(Icons.privacy_tip, size: 30),
+                title: Text(
+                  isArabic ? 'الخصوصية' : 'Privacy',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(230, 41, 84, 115),
+                  ),
                 ),
-              ),
                 onTap: () {
                   if (widget.token == null || email.isEmpty) {
                     // التعامل مع الحالة إذا كانت القيم غير موجودة
@@ -1001,7 +1001,7 @@ class _PassengerState extends State<Passenger> {
   }
 }
 
-  // حوار البحث
+// حوار البحث
 
 class SettingsPage extends StatelessWidget {
   @override
@@ -1199,7 +1199,7 @@ class PrivacyPage extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => BlockedContactsScreen(
-                    //  token: token,  // استخدام الـ token الذي تم تمريره
+                      //  token: token,  // استخدام الـ token الذي تم تمريره
                     ),
                   ),
                 );

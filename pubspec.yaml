@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  fl_chart: 0.40.0
+  table_calendar: ^3.0.7
   url_launcher: ^6.1.9 # تأكد من أنك تستخدم آخر إصدار
   font_awesome_flutter: ^10.5.1
   fluttertoast: ^8.0.9
