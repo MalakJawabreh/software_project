@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'AdminTripManagement.dart';
 import 'AdminUserManagement.dart';
 import 'AdminComplaintManagement.dart';
+import 'AdminBookhingMang.dart';
 void main() {
   runApp(AdminDashboardApp());
 }
@@ -36,6 +37,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
     DashboardOverviewPage(),
     UserManagementPage(),
     AdminTripManagementPage(),
+    BookingsPage(),
     ComplaintsPage(),
     GeneralSettingsPage(),
   ];
@@ -104,8 +106,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
                 Divider(color: Colors.grey[700]),
                 _buildCustomDrawerItem(Icons.people, 'User Management', 1),
                 _buildCustomDrawerItem(Icons.directions_car, 'Trip Management', 2),
-                _buildCustomDrawerItem(Icons.report_problem, 'Complaint Management', 3),
-                _buildCustomDrawerItem(Icons.settings, 'General Settings', 4),
+                _buildCustomDrawerItem(Icons.event, 'Bookings Management', 3),
+                _buildCustomDrawerItem(Icons.report_problem,'Complaint Management', 4),
+
+                _buildCustomDrawerItem(Icons.settings, 'General Settings', 5),
               ],
             ),
           ),
