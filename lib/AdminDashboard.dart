@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'AdminTripManagement.dart';
+import 'AdminUserManagement.dart';
+import 'AdminComplaintManagement.dart';
 void main() {
   runApp(AdminDashboardApp());
 }
@@ -34,7 +36,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
     DashboardOverviewPage(),
     UserManagementPage(),
     AdminTripManagementPage(),
-    ComplaintManagementPage(),
+    ComplaintsPage(),
     GeneralSettingsPage(),
   ];
 
@@ -56,7 +58,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
       width: _isSidebarCollapsed ? 70 : 250,
-      constraints: BoxConstraints(minWidth: 70, maxWidth: 250), // لضمان أبعاد محددة
+      constraints: BoxConstraints(minWidth: 70, maxWidth: 250),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.black, Colors.pinkAccent],
@@ -71,8 +73,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
             decoration: BoxDecoration(
               color: Colors.pinkAccent.withOpacity(0.2),
             ),
-            child:Row(
-              mainAxisAlignment: MainAxisAlignment.start, // ضمان وجود مساحة لكل العناصر
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 CircleAvatar(
                   radius: 15,
@@ -94,7 +96,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
                   ),
               ],
             ),
-
           ),
           Expanded(
             child: ListView(
@@ -125,7 +126,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
     );
   }
 
-
   Widget _buildCustomDrawerItem(IconData icon, String title, int index) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -142,13 +142,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
           size: 20,
         ),
         title: _isSidebarCollapsed
-            ? null // عدم إظهار النصوص عند تضييق الشريط الجانبي
+            ? null
             : Text(
           title,
-          overflow: TextOverflow.ellipsis, // لتجنب تجاوز النصوص المساحة المتاحة
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: _selectedIndex == index ? Colors.pinkAccent : Colors
-                .grey[300],
+            color: _selectedIndex == index ? Colors.pinkAccent : Colors.grey[300],
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -181,52 +180,57 @@ class DashboardOverviewPage extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
-                GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.5,
-                  ),
-                  itemCount: 4,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    final cards = [
-                      DashboardCard(
-                        title: 'Total Users',
-                        value: '1,245',
-                        percentage: '+5%',
-                        chart: _buildSampleChart(Colors.pink),
-                        color: Colors.pink,
-                        icon: Icons.people,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    int crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1.5,
                       ),
-                      DashboardCard(
-                        title: 'Total Trips',
-                        value: '320',
-                        percentage: '+8%',
-                        chart: _buildSampleChart(Colors.purple),
-                        color: Colors.purple,
-                        icon: Icons.directions_car,
-                      ),
-                      DashboardCard(
-                        title: 'Pending Complaints',
-                        value: '12',
-                        percentage: '-3%',
-                        chart: _buildSampleChart(Colors.red),
-                        color: Colors.red,
-                        icon: Icons.report_problem,
-                      ),
-                      DashboardCard(
-                        title: 'Bookings',
-                        value: '980',
-                        percentage: '+12%',
-                        chart: _buildSampleChart(Colors.orange),
-                        color: Colors.orange,
-                        icon: Icons.book_online,
-                      ),
-                    ];
-                    return cards[index];
+                      itemCount: 4,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final cards = [
+                          DashboardCard(
+                            title: 'Total Users',
+                            value: '1,245',
+                            percentage: '+5%',
+                            chart: _buildSampleChart(Colors.pink),
+                            color: Colors.pink,
+                            icon: Icons.people,
+                          ),
+                          DashboardCard(
+                            title: 'Total Trips',
+                            value: '320',
+                            percentage: '+8%',
+                            chart: _buildSampleChart(Colors.purple),
+                            color: Colors.purple,
+                            icon: Icons.directions_car,
+                          ),
+                          DashboardCard(
+                            title: 'Pending Complaints',
+                            value: '12',
+                            percentage: '-3%',
+                            chart: _buildSampleChart(Colors.red),
+                            color: Colors.red,
+                            icon: Icons.report_problem,
+                          ),
+                          DashboardCard(
+                            title: 'Bookings',
+                            value: '980',
+                            percentage: '+12%',
+                            chart: _buildSampleChart(Colors.orange),
+                            color: Colors.orange,
+                            icon: Icons.book_online,
+                          ),
+                        ];
+                        return cards[index];
+                      },
+                    );
                   },
                 ),
               ],
@@ -234,7 +238,6 @@ class DashboardOverviewPage extends StatelessWidget {
           ),
           SizedBox(width: 16),
           Expanded(
-            flex: 1,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -253,25 +256,27 @@ class DashboardOverviewPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 5),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFF1E1E2C),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  padding: EdgeInsets.all(8.0),
-                  child: TableCalendar(
-                    firstDay: DateTime.utc(2020, 1, 1),
-                    lastDay: DateTime.utc(2030, 12, 31),
-                    focusedDay: DateTime.now(),
-                    calendarStyle: CalendarStyle(
-                      todayDecoration: BoxDecoration(
-                        color: Colors.pink,
-                        shape: BoxShape.circle,
-                      ),
-                      selectedDecoration: BoxDecoration(
-                        color: Colors.purple,
-                        shape: BoxShape.circle,
+                SizedBox(height: 8),
+                Expanded( // هذا هو الحل الرئيسي لضمان عدم التجاوز
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFF1E1E2C),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: TableCalendar(
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.utc(2030, 12, 31),
+                      focusedDay: DateTime.now(),
+                      calendarStyle: CalendarStyle(
+                        todayDecoration: BoxDecoration(
+                          color: Colors.pink,
+                          shape: BoxShape.circle,
+                        ),
+                        selectedDecoration: BoxDecoration(
+                          color: Colors.purple,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                   ),
@@ -279,6 +284,8 @@ class DashboardOverviewPage extends StatelessWidget {
               ],
             ),
           ),
+
+
         ],
       ),
     );
@@ -391,31 +398,12 @@ class DashboardCard extends StatelessWidget {
   }
 }
 
-class UserManagementPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'User Management Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
 
 
 
-class ComplaintManagementPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Complaint Management Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
+
+
+
 
 class GeneralSettingsPage extends StatelessWidget {
   @override

@@ -5,6 +5,11 @@ final change_password = url + "change-password";
 final block_contact = url + "block-user";
 final unblock_contact = url + "unblock-user";
 final submitComplaint = url + "submitComplaint";
+final getAllComplaints = url + "getAllComplaints";
+
+final all_users = url + "all_users";
+final all_passenger=url+"all_passenger";
+
 
 final create_trip = url + "create_trip";
 final driver_trips =url + "driver_trips";
