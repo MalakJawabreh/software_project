@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-
+import 'AdminBookhingMang.dart';
+import 'AdminComplaintManagement.dart';
+import 'AdminPassengerpage.dart';
+import 'AdminUserManagement.dart';
+import 'AdminDriverspage.dart';
+import 'Adminallusers.dart';
+import 'AdminTripManagement.dart';
 void main() {
   runApp(AdminDashboardApp());
 }
@@ -31,10 +37,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   final List<Widget> _pages = [
     DashboardOverviewPage(),
-    PlaceholderWidget('User Management'),
-    PlaceholderWidget('Trip Management'),
-    PlaceholderWidget('Bookings Management'),
-    PlaceholderWidget('Complaint Management'),
+    UserManagementPage(),
+    AdminTripManagementPage(),
+    BookingsPage(),
+    ComplaintsPage(),
     PlaceholderWidget('General Settings'),
   ];
 
