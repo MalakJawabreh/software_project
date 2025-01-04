@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'; // مكتبة التقويم
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:intl/intl.dart'; // استيراد مكتبة intl
-import 'config.dart'; // استيراد ملف الكونفج
+import 'package:intl/intl.dart';
+import 'config.dart';
 
 class BookingsPage extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _BookingsPageState extends State<BookingsPage> {
   bool isLoading = true;
   String errorMessage = '';
   TextEditingController searchController = TextEditingController();
+  DateTime? selectedDate; // تخزين التاريخ المحدد من التقويم
 
   @override
   void initState() {
@@ -24,12 +26,11 @@ class _BookingsPageState extends State<BookingsPage> {
 
   Future<void> fetchBookings() async {
     try {
-      final response = await http.get(Uri.parse(get_booking_trip)); // استخدام الرابط من ملف الكونفج
-
+      final response = await http.get(Uri.parse(get_booking_trip));
       if (response.statusCode == 200) {
         setState(() {
           bookings = json.decode(response.body);
-          filteredBookings = bookings; // لتصفية الحجز عند بدء التحميل
+          filteredBookings = bookings;
           isLoading = false;
         });
       } else {
@@ -46,13 +47,11 @@ class _BookingsPageState extends State<BookingsPage> {
     }
   }
 
-  // دالة لتنسيق التاريخ بشكل مناسب
   String formatDate(String dateStr) {
     DateTime date = DateTime.parse(dateStr);
-    return DateFormat('yyyy-MM-dd HH:mm').format(date); // تنسيق التاريخ بالشكل المطلوب
+    return DateFormat('yyyy-MM-dd HH:mm').format(date);
   }
 
-  // دالة لتصفية الحجوزات بناءً على البحث
   void searchBookings(String query) {
     final filtered = bookings.where((booking) {
       final nameP = booking['nameP'].toLowerCase();
@@ -70,11 +69,86 @@ class _BookingsPageState extends State<BookingsPage> {
     });
   }
 
-  // دالة لإلغاء الحجز
+  void filterBookingsByDate(DateTime date) {
+    final filtered = bookings.where((booking) {
+      final bookingDate = DateTime.parse(booking['date']);
+      return bookingDate.year == date.year &&
+          bookingDate.month == date.month &&
+          bookingDate.day == date.day;
+    }).toList();
+
+    setState(() {
+      filteredBookings = filtered;
+    });
+  }
+
+  void showCalendarDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              color: Color(0xFFF5F5DC),// خلفية للكاليندر
+
+              borderRadius: BorderRadius.circular(12), // زوايا مستديرة
+            ),
+            child: CalendarCarousel(
+              onDayPressed: (DateTime date, _) {
+                filterBookingsByDate(date); // تصفية الحجوزات
+                Navigator.pop(context); // إغلاق النافذة
+              },
+              selectedDateTime: selectedDate,
+              todayBorderColor: Colors.pinkAccent,
+              selectedDayButtonColor: Colors.pinkAccent,
+              headerTextStyle: TextStyle(
+                color: Colors.black, // النص في الهيدر بالأسود
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              weekdayTextStyle: TextStyle(
+                color: Colors.black, // أسماء الأيام بالأسود
+                fontWeight: FontWeight.bold,
+              ),
+              weekendTextStyle: TextStyle(
+                color: Colors.redAccent, // أيام عطلة باللون الأحمر
+              ),
+              daysTextStyle: TextStyle(
+                color: Colors.black, // الأرقام باللون الأسود
+              ),
+              iconColor: Colors.black, // لون الأيقونات (الأسهم) بالأسود
+              height: 400, // ارتفاع الكاليندر الداخلي
+              // عرض الكاليندر الداخلي
+              showOnlyCurrentMonthDate: true,
+              todayButtonColor: Colors.transparent,
+              todayTextStyle: TextStyle(
+                color: Colors.pinkAccent, // اليوم الحالي باللون الوردي
+                fontWeight: FontWeight.bold,
+              ),
+              selectedDayBorderColor: Colors.black, // حدود اليوم المحدد
+              selectedDayTextStyle: TextStyle(
+                color: Colors.black, // النص داخل اليوم المحدد بالأسود
+                fontWeight: FontWeight.bold,
+              ),
+              prevDaysTextStyle: TextStyle(
+                color: Colors.grey, // الأيام السابقة باللون الرمادي
+              ),
+              nextDaysTextStyle: TextStyle(
+                color: Colors.grey, // الأيام اللاحقة باللون الرمادي
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> cancelBooking(String bookingId) async {
     try {
       final response = await http.delete(
-        Uri.parse('$get_booking_trip/$bookingId'), // رابط API للإلغاء
+        Uri.parse('$get_booking_trip/$bookingId'),
       );
       if (response.statusCode == 200) {
         setState(() {
@@ -90,11 +164,7 @@ class _BookingsPageState extends State<BookingsPage> {
     }
   }
 
-  // دالة لتعديل الحجز
   Future<void> editBooking(String bookingId) async {
-    // سيتم فتح شاشة لتعديل الحجز بناءً على bookingId
-    // يمكن تنفيذ ذلك باستخدام Navigator push إلى صفحة أخرى مع نموذج تعديل الحجز
-    // وسيتم تعديل الحجز باستخدام API بعد إتمام التعديل
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Edit feature coming soon')));
   }
 
@@ -103,8 +173,11 @@ class _BookingsPageState extends State<BookingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('All Bookings'),
-        backgroundColor: Colors.deepPurple,
         actions: [
+          IconButton(
+            icon: Icon(Icons.calendar_today, color: Colors.white),
+            onPressed: showCalendarDialog, // فتح التقويم عند النقر
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(
@@ -177,8 +250,7 @@ class _BookingsPageState extends State<BookingsPage> {
                   _buildDetailRow('Time: ${booking['time']}', Colors.blueAccent),
                   _buildDetailRow('Driver Rating: ${booking['driverRate'] ?? 'N/A'}', Colors.yellow),
                   _buildDetailRow('Note Rate: ${booking['NoteRate'] ?? 'N/A'}', Colors.yellow),
-                  // أزرار الإدارة مع الترتيب الجديد
-                  SizedBox(height: 16), // زيادة المسافة بين المعلومات والأزرار
+                  SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -193,7 +265,7 @@ class _BookingsPageState extends State<BookingsPage> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 20), // إضافة مسافة بين الأزرار
+                      SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: () => editBooking(booking['_id']),
                         child: Text('Edit'),

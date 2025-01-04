@@ -278,7 +278,7 @@ class _AllPassengersPageState extends State<AllPassengersPage> {
             padding: const EdgeInsets.all(12),
             child: TextField(
               decoration: InputDecoration(
-                labelText: 'Search by Name, Email, Phone, or Role',
+                labelText: 'Search by Name, Email, Phone',
                 labelStyle: TextStyle(color: Colors.pinkAccent),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),

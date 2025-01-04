@@ -103,7 +103,7 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
             width: 300, // عرض الكاليندر
             height: 300, // ارتفاع الكاليندر
             decoration: BoxDecoration(
-              color: Colors.white, // خلفية بيضاء للكاليندر
+              color: Color(0xFFF5F5DC),// خلفية للكاليندر
               borderRadius: BorderRadius.circular(12), // زوايا مستديرة
             ),
             child: CalendarCarousel<Event>(
