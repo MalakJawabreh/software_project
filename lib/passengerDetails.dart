@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'chat_page.dart';
 import 'driver_data_model.dart';
 
 class PassengerDetailsPage extends StatelessWidget {
@@ -26,8 +27,19 @@ class PassengerDetailsPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildIconButton(Icons.call, "call", Color.fromARGB(230, 41, 84, 115), () {}),
-                  _buildIconButton(Icons.chat, "chat", Color.fromARGB(230, 41, 84, 115), () {}),
+                  _buildIconButton(Icons.call, "call", Color.fromARGB(230, 41, 84, 115),
+                          () {
+
+                  }),
+                  _buildIconButton(Icons.chat, "chat", Color.fromARGB(230, 41, 84, 115), ()
+                  {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(currentUserEmail:passenger['EmailD'],currentUserName:passenger['nameD'],recevuserName:passenger['nameP'],recevEmail:passenger['EmailP']), // استبدل CallPage بالصفحة التي تريد الانتقال إليها
+                      ),
+                    );
+                  }),
                   _buildPopupMenuButton(),
                 ],
               ),

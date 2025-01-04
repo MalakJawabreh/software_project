@@ -9,6 +9,8 @@ import 'dashboard.dart';
 import 'driver_dashboard.dart';
 import 'passenger_dashboard.dart';
 import 'professional_dashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -33,6 +35,17 @@ class _LoginState extends State<Login> {
     super.initState();
     initSharePref();
   }
+
+  // void testFirestore() async {
+  //   try {
+  //     await FirebaseFirestore.instance.collection('test').doc('testDoc').set({
+  //       'testKey': 'testValue',
+  //     });
+  //     print('Firestore connection works fine.');
+  //   } catch (e) {
+  //     print('Error: $e');
+  //   }
+  // }
 
   void initSharePref() async {
     prefs = await SharedPreferences.getInstance();
@@ -266,6 +279,7 @@ class _LoginState extends State<Login> {
                 ),
                 GestureDetector(
                   onTap: () {
+                    //testFirestore();
                     Navigator.of(context)
                         .push(
                         MaterialPageRoute(builder: (context) => Register()));

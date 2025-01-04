@@ -5,6 +5,7 @@ import 'package:project1/rating_page.dart';
 import 'package:project1/test.dart';
 import 'dart:async';
 import 'alldriver.dart';
+import 'chatList.dart';
 import 'config.dart';
 import 'dart:typed_data';
 import 'login.dart';
@@ -370,7 +371,12 @@ class _PassengerState extends State<Passenger> {
                   IconButton(
                     icon: Icon(Icons.chat,
                         size: 25, color: Color.fromARGB(230, 41, 84, 115)),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ChatListPage(currentUserEmail:email,currentUserName:fullName)),
+                      );
+                    },
                   ),
                   IconButton(
                     icon: Icon(Icons.menu,
@@ -983,7 +989,7 @@ class _PassengerState extends State<Passenger> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DriverListPage(),
+                            builder: (context) => DriverListPage(emailP:email,nameP:fullName),
                           ),
                         );
                       },

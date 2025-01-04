@@ -7,6 +7,14 @@ import 'DriverDetailsBooking.dart';
 import 'config.dart';
 
 class DriverListPage extends StatefulWidget {
+  final String emailP;
+  final String nameP;
+
+  const DriverListPage({
+    required this.emailP,
+    required this.nameP,
+    Key? key,
+  }) : super(key: key);
   @override
   _DriverListPageState createState() => _DriverListPageState();
 }
@@ -173,7 +181,9 @@ class _DriverListPageState extends State<DriverListPage> {
                                       builder: (context) => DriverDetailsScreen(
                                           name:filteredDrivers[index]['fullName'],
                                           email:filteredDrivers[index]['email'],
-                                          phoneNumber:filteredDrivers[index]['phoneNumber']
+                                          phoneNumber:filteredDrivers[index]['phoneNumber'],
+                                          emailP:widget.emailP,
+                                          nameP:widget.nameP
                                       ),
                                     ),
                                   );

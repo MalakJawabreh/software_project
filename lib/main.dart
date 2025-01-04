@@ -7,8 +7,12 @@ import 'driver_data_model.dart';
 import 'theme_provider.dart'; // تأكد من استيراد ملف ThemeProvider بشكل صحيح
 import 'onbording_screen.dart'; // تأكد من استيراد ملف OnboardingScreen بشكل صحيح
 import 'language_provider.dart'; // استيراد الـ LanguageProvider
+import 'package:firebase_core/firebase_core.dart'; // استيراد Firebase
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // ضمان التهيئة الصحيحة للويدجت
+  await Firebase.initializeApp(); // تهيئة Firebase
+
   runApp(
     MultiProvider(
       providers: [

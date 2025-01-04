@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'chat_page.dart';
 import 'driver_data_model.dart';
 
 class DriverDetailsScreen extends StatelessWidget {
   final String name;
   final String email;
   final String phoneNumber;
+  final String emailP;
+  final String nameP;
 
   const DriverDetailsScreen({
     Key? key,
     required this.name,
     required this.email,
     required this.phoneNumber,
+    required this.emailP,
+    required this.nameP,
   }) : super(key: key);
 
   @override
@@ -33,7 +38,14 @@ class DriverDetailsScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildIconButton(Icons.call, "call", Color.fromARGB(230, 41, 84, 115), () {}),
-                  _buildIconButton(Icons.chat, "chat", Color.fromARGB(230, 41, 84, 115), () {}),
+                  _buildIconButton(Icons.chat, "chat", Color.fromARGB(230, 41, 84, 115), () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(currentUserEmail:emailP,currentUserName:nameP,recevuserName:name,recevEmail:email), // استبدل CallPage بالصفحة التي تريد الانتقال إليها
+                      ),
+                    );
+                  }),
                   _buildPopupMenuButton(),
                 ],
               ),

@@ -11,6 +11,7 @@ import 'package:project1/search.dart';
 import 'package:project1/test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'chatList.dart';
 import 'config.dart';
 import 'creat_trip_page.dart';
 import 'package:http/http.dart' as http;
@@ -580,9 +581,10 @@ class _DriverState extends State<Driver> {
                   IconButton(
                     icon: Icon(Icons.chat, size: 30, color: Color.fromARGB(230, 41, 84, 115)),
                     onPressed: () {
-                      print('Passenger Names before: $passengerNames'); // طباعة القائمة للتحقق
-                      print('Passenger Names: $currentPassengerNames'); // طباعة القائمة للتحقق
-                      print('Passenger Names afterr: $currentPassengerNamesForCanceledTrip'); // طباعة القائمة للتحقق
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ChatListPage(currentUserEmail:email,currentUserName:username)),
+                      );
                     },
                   ),
                   // أيقونة القائمة

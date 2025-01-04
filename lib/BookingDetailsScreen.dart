@@ -84,7 +84,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
                       name: nameD,
                       email: emailD,
                       phoneNumber: phoneNumberD,
-
+                      emailP:emailP,
+                        nameP:nameP,
                     ),
                   ),
                 );
