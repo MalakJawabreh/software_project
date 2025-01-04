@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'AdminTripManagement.dart';
-import 'AdminUserManagement.dart';
-import 'AdminComplaintManagement.dart';
-import 'AdminBookhingMang.dart';
+
 void main() {
   runApp(AdminDashboardApp());
 }
@@ -29,17 +25,17 @@ class AdminDashboardPage extends StatefulWidget {
   _AdminDashboardPageState createState() => _AdminDashboardPageState();
 }
 
-class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTickerProviderStateMixin {
+class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
   bool _isSidebarCollapsed = false;
 
   final List<Widget> _pages = [
     DashboardOverviewPage(),
-    UserManagementPage(),
-    AdminTripManagementPage(),
-    BookingsPage(),
-    ComplaintsPage(),
-    GeneralSettingsPage(),
+    PlaceholderWidget('User Management'),
+    PlaceholderWidget('Trip Management'),
+    PlaceholderWidget('Bookings Management'),
+    PlaceholderWidget('Complaint Management'),
+    PlaceholderWidget('General Settings'),
   ];
 
   @override
@@ -107,8 +103,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> with SingleTick
                 _buildCustomDrawerItem(Icons.people, 'User Management', 1),
                 _buildCustomDrawerItem(Icons.directions_car, 'Trip Management', 2),
                 _buildCustomDrawerItem(Icons.event, 'Bookings Management', 3),
-                _buildCustomDrawerItem(Icons.report_problem,'Complaint Management', 4),
-
+                _buildCustomDrawerItem(Icons.report_problem, 'Complaint Management', 4),
                 _buildCustomDrawerItem(Icons.settings, 'General Settings', 5),
               ],
             ),
@@ -171,158 +166,75 @@ class DashboardOverviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hello, Admin',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            'Hello, Admin',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              int crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
+              return GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.5,
                 ),
-                SizedBox(height: 16),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    int crossAxisCount = constraints.maxWidth > 600 ? 4 : 2;
-                    return GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemCount: 4,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final cards = [
-                          DashboardCard(
-                            title: 'Total Users',
-                            value: '1,245',
-                            percentage: '+5%',
-                            chart: _buildSampleChart(Colors.pink),
-                            color: Colors.pink,
-                            icon: Icons.people,
-                          ),
-                          DashboardCard(
-                            title: 'Total Trips',
-                            value: '320',
-                            percentage: '+8%',
-                            chart: _buildSampleChart(Colors.purple),
-                            color: Colors.purple,
-                            icon: Icons.directions_car,
-                          ),
-                          DashboardCard(
-                            title: 'Pending Complaints',
-                            value: '12',
-                            percentage: '-3%',
-                            chart: _buildSampleChart(Colors.red),
-                            color: Colors.red,
-                            icon: Icons.report_problem,
-                          ),
-                          DashboardCard(
-                            title: 'Bookings',
-                            value: '980',
-                            percentage: '+12%',
-                            chart: _buildSampleChart(Colors.orange),
-                            color: Colors.orange,
-                            icon: Icons.book_online,
-                          ),
-                        ];
-                        return cards[index];
-                      },
-                    );
-                  },
+                itemCount: 4,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final cards = [
+                    DashboardCard(
+                      title: 'Active Users',
+                      value: '1,245',
+                      percentage: '+5%',
+                      color: Colors.pink,
+                      icon: Icons.people,
+                    ),
+                    DashboardCard(
+                      title: 'Completed Trips',
+                      value: '320',
+                      percentage: '+8%',
+                      color: Colors.purple,
+                      icon: Icons.directions_car,
+                    ),
+                    DashboardCard(
+                      title: 'Pending Complaints',
+                      value: '12',
+                      percentage: '-3%',
+                      color: Colors.red,
+                      icon: Icons.report_problem,
+                    ),
+                    DashboardCard(
+                      title: 'New Bookings',
+                      value: '980',
+                      percentage: '+12%',
+                      color: Colors.orange,
+                      icon: Icons.book_online,
+                    ),
+                  ];
+                  return cards[index];
+                },
+              );
+            },
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: LineChartWidget(),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: PieChartWidget(),
                 ),
               ],
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      filled: true,
-                      fillColor: Colors.black12,
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 8),
-                Expanded( // هذا هو الحل الرئيسي لضمان عدم التجاوز
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFF1E1E2C),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    padding: EdgeInsets.all(8.0),
-                    child: TableCalendar(
-                      firstDay: DateTime.utc(2020, 1, 1),
-                      lastDay: DateTime.utc(2030, 12, 31),
-                      focusedDay: DateTime.now(),
-                      calendarStyle: CalendarStyle(
-                        todayDecoration: BoxDecoration(
-                          color: Colors.pink,
-                          shape: BoxShape.circle,
-                        ),
-                        selectedDecoration: BoxDecoration(
-                          color: Colors.purple,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSampleChart(Color color) {
-    return LineChart(
-      LineChartData(
-        gridData: FlGridData(show: false),
-        titlesData: FlTitlesData(show: false),
-        borderData: FlBorderData(show: false),
-        minX: 0,
-        maxX: 10,
-        minY: 0,
-        maxY: 10,
-        lineBarsData: [
-          LineChartBarData(
-            spots: [
-              FlSpot(0, 3),
-              FlSpot(2, 5),
-              FlSpot(4, 4),
-              FlSpot(6, 7),
-              FlSpot(8, 6),
-              FlSpot(10, 8),
-            ],
-            isCurved: true,
-            colors: [color],
-            barWidth: 3,
-            isStrokeCapRound: true,
-            dotData: FlDotData(show: true),
-            belowBarData: BarAreaData(
-              show: true,
-              colors: [color.withOpacity(0.3)],
             ),
           ),
         ],
@@ -331,11 +243,138 @@ class DashboardOverviewPage extends StatelessWidget {
   }
 }
 
+class LineChartWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'User Growth',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(show: false),
+                  titlesData: FlTitlesData(show: true),
+                  borderData: FlBorderData(show: true),
+                  minX: 0,
+                  maxX: 7,
+                  minY: 0,
+                  maxY: 10,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: [
+                        FlSpot(0, 3),
+                        FlSpot(1, 1),
+                        FlSpot(2, 4),
+                        FlSpot(3, 7),
+                        FlSpot(4, 6),
+                        FlSpot(5, 8),
+                        FlSpot(6, 10),
+                      ],
+                      isCurved: true,
+                      colors: [Colors.pinkAccent],
+                      barWidth: 2,
+                      isStrokeCapRound: true,
+                      belowBarData: BarAreaData(show: false),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PieChartWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Trips Categories',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Expanded(
+              child: PieChart(
+                PieChartData(
+                  sections: [
+                    PieChartSectionData(
+                      color: Colors.pink,
+                      value: 40,
+                      title: '40%',
+                      radius: 50,
+                      titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    PieChartSectionData(
+                      color: Colors.red,
+                      value: 30,
+                      title: '30%',
+                      radius: 50,
+                      titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    PieChartSectionData(
+                      color: Colors.green,
+                      value: 20,
+                      title: '20%',
+                      radius: 50,
+                      titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            // Adding a category explanation
+            Row(
+              children: [
+                _buildCategoryIndicator(Colors.pink, 'Completed Trips'),
+                SizedBox(width: 16),
+                _buildCategoryIndicator(Colors.red, 'Cancelled Trips'),
+                SizedBox(width: 16),
+                _buildCategoryIndicator(Colors.green, 'Upcoming Trips'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryIndicator(Color color, String label) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 8,
+          backgroundColor: color,
+        ),
+        SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.white)),
+      ],
+    );
+  }
+}
+
 class DashboardCard extends StatelessWidget {
   final String title;
   final String value;
   final String percentage;
-  final Widget chart;
   final Color color;
   final IconData icon;
 
@@ -343,7 +382,6 @@ class DashboardCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.percentage,
-    required this.chart,
     required this.color,
     required this.icon,
   });
@@ -375,25 +413,35 @@ class DashboardCard extends StatelessWidget {
               title,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
-            Expanded(
-              child: chart,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  percentage,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: percentage.startsWith('+') ? Colors.green : Colors.red,
-                  ),
-                ),
-              ],
+            Spacer(),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: constraints.maxWidth > 300 ? 20 : 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        percentage,
+                        style: TextStyle(
+                          fontSize: constraints.maxWidth > 300 ? 16 : 12,
+                          color: percentage.startsWith('+') ? Colors.green : Colors.red,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -403,18 +451,16 @@ class DashboardCard extends StatelessWidget {
 }
 
 
+class PlaceholderWidget extends StatelessWidget {
+  final String title;
 
+  const PlaceholderWidget(this.title);
 
-
-
-
-
-class GeneralSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'General Settings Page',
+        title,
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       ),
     );
