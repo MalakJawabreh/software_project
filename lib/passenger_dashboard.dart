@@ -44,6 +44,7 @@ class _PassengerState extends State<Passenger> {
   late String phoneNumber='';
   late String Picture='';
   late String gender='';
+  late String id='';
 
   String? profilePicture; // لتخزين رابط صورة الملف الشخصي
 
@@ -96,14 +97,22 @@ class _PassengerState extends State<Passenger> {
 
   // Method to decode token and save user data in shared preferences
   Future<void> _loadUserData() async {
+    print("hi");
     if (widget.token != null) {
+      print("hi");
       Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token!);
       email = jwtDecodedToken['email'];
       fullName = jwtDecodedToken['fullName'];
       phoneNumber = jwtDecodedToken['phoneNumber'];
-      Picture=jwtDecodedToken['profilePicture'];
+      // تحقق من وجود صورة البروفايل في التوكن
+      if (jwtDecodedToken['profilePicture'] != null && jwtDecodedToken['profilePicture'] != '') {
+        Picture = jwtDecodedToken['profilePicture']; // تعيين صورة البروفايل إذا كانت موجودة
+      } else {
+        Picture = ''; // تعيين قيمة فارغة أو يمكنك تعيين صورة افتراضية هنا
+      }
       gender=jwtDecodedToken['gender'];
-
+      id=jwtDecodedToken['_id'];
+      print(jwtDecodedToken['_id']);
       // Save email and full name in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', email);
@@ -111,8 +120,8 @@ class _PassengerState extends State<Passenger> {
       await prefs.setString('phoneNumber', phoneNumber);
       await prefs.setString('profilePicture', Picture);
       await prefs.setString('gender', gender);
+      await prefs.setString('_id', id);
     }
-
     // إعداد التايمر للحركة التلقائية للسلايدر
     _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
       if (_currentPage < _images.length - 1) {
@@ -142,10 +151,17 @@ class _PassengerState extends State<Passenger> {
         final data = json.decode(response.body);
 
         if (data['status'] == true) {
-          profilePicture = data['profilePicture'];
-          // setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
-          print("Fetched profile picture URL: $profilePicture");
-          return profilePicture;
+          // التحقق من وجود صورة بروفايل
+          if (data['profilePicture'] != null && data['profilePicture'] != '') {
+            profilePicture = data['profilePicture'];
+            // setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+            print("Fetched profile picture URL: $profilePicture");
+            return profilePicture;
+          } else {
+            // إذا لم تكن الصورة موجودة
+            print("No profile picture found.");
+            return null;
+          }
         } else {
           throw Exception(data['error']);
         }
@@ -778,6 +794,7 @@ class _PassengerState extends State<Passenger> {
                               nameP: fullName,
                               phoneP: phoneNumber,
                               gender:gender,
+                              id:id,
                             ),
                           ),
                         );

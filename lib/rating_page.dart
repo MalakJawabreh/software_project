@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // لتحليل البيانات من JSON
 import 'package:http/http.dart' as http;
-import 'package:project1/passenger_dashboard.dart';
 import 'config.dart';
-import 'package:flutter/material.dart';
-import 'dart:convert'; // لتحليل البيانات من JSON
-import 'package:http/http.dart' as http;
 import 'language_provider.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'BookingDetailsScreen.dart';
-import 'notifications_service.dart';
-import 'EditBookingScreen.dart';
 
 class RatingPage extends StatefulWidget {
   final String emailP;
@@ -140,6 +134,37 @@ class _RatingPageState extends State<RatingPage> {
     }
   }
 
+  Future<void> createReview (
+      String nameP,
+      String nameD,
+      String emailD,
+      int selectedStars,
+      String feedbackText,
+      ) async {
+    final url = Uri.parse(review_post);
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'reviewerName': nameP,
+        'reviewerEmail': widget.emailP,
+        'reviewedName': nameD,
+        'reviewedEmail': emailD,
+        'rating': selectedStars,
+        'notes': feedbackText,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print('Review created successfully!');
+    } else {
+      print('Failed to create review: ${response.body}');
+    }
+  }
+
 
   String formatDate(String dateTime) {
     final parsedDate = DateTime.parse(dateTime);
@@ -153,7 +178,7 @@ class _RatingPageState extends State<RatingPage> {
 
 
 
-  void showRatingDialog(BuildContext context, String name,String bookingid) {
+  void showRatingDialog(BuildContext context, String nameD,String emailD,String nameP) {
     int selectedStars = 0; // متغير لحفظ عدد النجوم المختارة
     String feedbackText = ""; // لحفظ نص التغذية الراجعة
 
@@ -168,7 +193,7 @@ class _RatingPageState extends State<RatingPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    name,
+                    nameD,
                     style: TextStyle(color: analogousPink, fontWeight: FontWeight.bold, fontSize: 25),
                   ),
                   SizedBox(height: 1),
@@ -225,7 +250,7 @@ class _RatingPageState extends State<RatingPage> {
                     onPressed: () {
                       print("Rating: $selectedStars stars");
                       print("feedbackText: $feedbackText");
-                      saveChanges(selectedStars,feedbackText,bookingid);
+                      createReview (nameP, nameD,emailD,selectedStars,feedbackText);
                       Navigator.pop(context); // إغلاق الحوار
                       showThankYouDialog(context,selectedStars,feedbackText); // فتح نافذة الشكر
                     },
@@ -318,11 +343,10 @@ class _RatingPageState extends State<RatingPage> {
         ),
         backgroundColor: Colors.white,
       ),
-      body:
-
-      expiredBookings.isNotEmpty
+      body: expiredBookings.isNotEmpty
           ? Padding(
         padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(  // إضافة SingleChildScrollView هنا
         child: Column(
           children: [
             Text(
@@ -447,7 +471,7 @@ class _RatingPageState extends State<RatingPage> {
                                   children: [
                                     ElevatedButton(
                                       onPressed: () {
-                                        showRatingDialog(context,booking['nameD'],booking['_id']);
+                                        showRatingDialog(context,booking['nameD'],booking['EmailD'],booking['nameP']);
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: analogousPink, // لون الزر
@@ -481,6 +505,7 @@ class _RatingPageState extends State<RatingPage> {
             ),
           ],
         ),
+      ),
       )
           : Center(
         child: Text(
@@ -499,6 +524,7 @@ class _RatingPageState extends State<RatingPage> {
           ),
         ),
       ),
+
     );
   }
 }

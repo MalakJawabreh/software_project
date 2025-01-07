@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:project1/searchinfo.dart';
 import 'package:intl/intl.dart'; // لاستعمال تنسيق التاريخ
@@ -31,6 +33,100 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
   TextEditingController _maxPassengersController = TextEditingController();
   TextEditingController _priceController = TextEditingController(); // حقل السعر
   String selectedCurrency = 'ILS'; // العملة الافتراضية
+  String _selectedVisibility = 'Public'; // القيمة الافتراضية هي Public
+
+  void _showVisibilityOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Trip visibility status',style: TextStyle(color: Colors.red),),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text('Public'),
+                leading: Radio<String>(
+                  value: 'Public',
+                  groupValue: _selectedVisibility,
+                  onChanged: (String? value) {
+                    setState(() {
+                      _selectedVisibility = value!;
+                    });
+                    print(_selectedVisibility);
+                    Navigator.pop(context); // إغلاق النافذة بعد الاختيار
+                  },
+                ),
+              ),
+              ListTile(
+                title: Text('Female Only'),
+                leading: Radio<String>(
+                  value: 'Female',
+                  groupValue: _selectedVisibility,
+                  onChanged: (String? value) {
+                    setState(() {
+                      _selectedVisibility = value!;
+                    });
+                    print(_selectedVisibility);
+                    Navigator.pop(context); // إغلاق النافذة بعد الاختيار
+                  },
+                ),
+              ),
+              ListTile(
+                title: Text('Male Only'),
+                leading: Radio<String>(
+                  value: 'Male',
+                  groupValue: _selectedVisibility,
+                  onChanged: (String? value) {
+                    setState(() {
+                      _selectedVisibility = value!;
+                    });
+                    print(_selectedVisibility);
+                    Navigator.pop(context); // إغلاق النافذة بعد الاختيار
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // الحصول على الموقع الحالي
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // تحويل الإحداثيات إلى بيانات جغرافية (Placemark)
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      // استخراج اسم المدينة فقط
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+
+        // تحديث النص ليظهر فقط اسم المدينة
+        _fromController.text = place.locality ?? "Unknown Location";
+      } else {
+        _fromController.text = "Unknown Location";
+      }
+    } catch (e) {
+      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Unable to fetch location or address"),
+      ));
+    }
+  }
+
+
 
   void createTrip() async {
     if (_fromController.text.isNotEmpty &&
@@ -51,6 +147,7 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
         "date": _dateController.text,
         "time": _timeController.text,
         "carBrand":widget.carType,
+        "visibilty_trip":_selectedVisibility,
       };
 
       var response = await http.post(Uri.parse(create_trip),
@@ -163,72 +260,137 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                   Lottie.asset('animation/car.json', width: 380, height: 300),
                   Positioned(
                     top: 200,
-                    left: 16.0,
-                    child: Text(
-                      'Create New Trip',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(230, 41, 84, 115),
-                      ),
+                    left: 5.0,
+                    right: 4.0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // لتوزيع العناصر بين اليمين واليسار
+                      children: [
+                        // جملة "Create New Trip"
+                        Text(
+                          'Create New Trip',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(230, 41, 84, 115),
+                          ),
+                        ),
+                        // الزر الخاص بتحديد الـ Visibility
+                        Padding(
+                          padding: EdgeInsets.only(left: 25.0), // المسافة المطلوبة من اليسار
+                          child: GestureDetector(
+                            onTap: () {
+                              _showVisibilityOptions(); // عرض قائمة الخيارات
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(230, 213, 218, 221),
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _selectedVisibility == 'Public'
+                                        ? Icons.public
+                                        : _selectedVisibility == 'Female'
+                                        ? Icons.female
+                                        : Icons.male,
+                                    color: Color.fromARGB(230, 17, 72, 103),
+                                    size: 19,
+                                  ),
+                                  SizedBox(width: 4.0), // تباعد بين الأيقونة والنص
+                                  Text(
+                                    _selectedVisibility,
+                                    style: TextStyle(
+                                      color:Color.fromARGB(230, 17, 72, 103),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 2.0), // تباعد بين النص والسهم
+                                  Icon(Icons.arrow_drop_down, color: Color.fromARGB(230, 17, 72, 103)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Positioned(
-                    top: 250,
-                    left: 16.0,
-                    child: Text(
-                      '"Map Your Way, Design Your Trip"',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(230, 12, 46, 78),
-                      ),
+                    top: 253,
+                    left: 5.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '"Map Your Way, Design Your Trip"',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(230, 12, 46, 78),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 8),
-              // حقل From
+              SizedBox(height: 10),
               Row(
                 children: [
                   SizedBox(width: 8),
                   Expanded(
-                    child: TextField(
-                      onChanged: (val) {
-                        if (val != '') {
-                          placeAutoCompletedFrom(val);
-                        } else {
-                          fromItems.clear();
-                          setState(() {});
-                        }
-                      },
-                      controller: _fromController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter Departure Location',
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                            width: 2.5,
+                    child: Container(
+
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              onChanged: (val) {
+                                if (val != '') {
+                                  placeAutoCompletedFrom(val);
+                                } else {
+                                  fromItems.clear();
+                                  setState(() {});
+                                }
+                              },
+                              controller: _fromController,
+                              decoration: InputDecoration(
+                                hintText: 'Enter Departure Location',
+                                border: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.grey,
+                                    width: 2.5,
+                                  ),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Color.fromARGB(230, 12, 46, 78),
+                                    width: 3.0,
+                                  ),
+                                ),
+                                prefixIcon: Padding(
+                                  padding: EdgeInsets.only(bottom: 8.0),
+                                  child: Icon(
+                                    Icons.location_on,
+                                    color: Color.fromARGB(230, 149, 117, 84),
+                                  ),
+                                ),
+                                suffixIcon: IconButton(
+                                  padding: EdgeInsets.only(bottom: 8.0),
+                                  icon: Icon(Icons.my_location, color: Colors.pink),
+                                  onPressed: _getCurrentLocation, // استدعاء الدالة للحصول على الموقع الحالي
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(230, 12, 46, 78),
-                            width: 3.0,
-                          ),
-                        ),
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(bottom: 8.0),
-                          child: Icon(
-                            Icons.location_on,
-                            color: Color.fromARGB(230, 149, 117, 84),
-                          ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
+
               SizedBox(height: 24),
               ...fromItems
                   .map((e) =>
@@ -480,75 +642,76 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 26),
+              SizedBox(height: 45,),
               Center(
-                child:ElevatedButton(
-                  onPressed: () async {
-                    // تأخير صغير لمحاكاة عملية إنشاء الرحلة
-                    await Future.delayed(Duration(seconds: 1));
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // لضبط المحاذاة في المنتصف
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        // تأخير صغير لمحاكاة عملية إنشاء الرحلة
+                        await Future.delayed(Duration(seconds: 1));
 
-                    // عرض حوار التأكيد
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor:Color.fromARGB(230, 221, 232, 246), // لون خلفية أزرق فاتح
-                          title: Text(
-                            'Confirm Trip Creation',
-                            style: TextStyle(color:Color.fromARGB(230, 12, 46, 78),fontSize: 20,fontWeight: FontWeight.bold), // تغيير لون الخط إلى أزرق
-                          ),
-                          content: Text(
-                            'Do you want to confirm the creation of this trip?',
-                            style: TextStyle(color:Color.fromARGB(230, 12, 46, 78),fontSize: 18 ), // تغيير لون الخط إلى أخضر
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context); // إغلاق حوار التأكيد
-                              },
-                              child: Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                createTrip();
-                                Navigator.pop(context);
-
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
+                        // عرض حوار التأكيد
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: Color.fromARGB(230, 221, 232, 246), // لون خلفية أزرق فاتح
+                              title: Text(
+                                'Confirm Trip Creation',
+                                style: TextStyle(color: Color.fromARGB(230, 12, 46, 78), fontSize: 20, fontWeight: FontWeight.bold), // تغيير لون الخط إلى أزرق
+                              ),
+                              content: Text(
+                                'Do you want to confirm the creation of this trip?',
+                                style: TextStyle(color: Color.fromARGB(230, 12, 46, 78), fontSize: 18), // تغيير لون الخط إلى أخضر
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // إغلاق حوار التأكيد
+                                  },
+                                  child: Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    createTrip();
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                  child: Text('Create Trip'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(230, 80, 103, 124), // اللون الخلفي عند الضغط (أزرق فاتح)
-                    foregroundColor: Colors.white, // اللون النص عند الضغط // اللون النص عند الضغط
-                    padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 32.0),
-                    textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    minimumSize: Size(150, 40),
-                  ),
+                      child: Text('Create Trip',style: TextStyle(fontSize: 22),),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(230, 80, 103, 124), // اللون الخلفي عند الضغط (أزرق فاتح)
+                        foregroundColor: Colors.white, // اللون النص عند الضغط
+                        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 32.0),
+                        textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        minimumSize: Size(150, 40),
+                      ),
+                    ),
+                    SizedBox(width: 16.0), // مسافة بين الزرين
+                    ElevatedButton(
+                      onPressed: () async {
+                        await Future.delayed(Duration(seconds: 1));
+                        Navigator.pop(context); // العودة إلى الصفحة السابقة
+                      },
+                      child: Text('Back',style: TextStyle(fontSize: 22),),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(230, 232, 237, 239), // اللون الخلفي عند الضغط (أزرق فاتح)
+                        foregroundColor:  Color.fromARGB(230, 80, 103, 124), // اللون النص عند الضغط
+                        padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 33.0),
+                        textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        minimumSize: Size(158, 40),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
-              SizedBox(height: 10,),
-              Center(
-                child:ElevatedButton(
-                  onPressed: () async {
-                    await Future.delayed(Duration(seconds: 1));
-                    Navigator.pop(context); // العودة إلى الصفحة السابقة
-                  },
-                  child: Text('Back'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(230, 80, 103, 124), // اللون الخلفي عند الضغط (أزرق فاتح)
-                    foregroundColor: Colors.white, // اللون النص عند الضغط
-                    padding: EdgeInsets.symmetric(vertical: 13.0, horizontal: 33.0),
-                    textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    minimumSize: Size(158, 40),
-                  ),
-                ),
-              )
 
             ],
           ),

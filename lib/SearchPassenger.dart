@@ -108,6 +108,21 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
       updateTripsBasedOnTime();
     });
   }
+
+  String formatTimeToAMPM(DateTime selectedTime) {
+    final hour = selectedTime.hour;
+    final minute = selectedTime.minute;
+    final ampm = hour >= 12 ? 'PM' : 'AM';
+    final hour12 = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final formattedMinute = minute.toString().padLeft(2, '0'); // لضمان أن الدقائق تظهر بصيغة 2 خانات
+    return '$hour12:$formattedMinute $ampm';
+  }
+  // دالة لتحويل TimeOfDay إلى DateTime
+  DateTime convertTimeOfDayToDateTime(TimeOfDay timeOfDay) {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
+  }
+
   //نيو
   Future<void> fetchFilteredTrips() async {
     try {
@@ -116,6 +131,11 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
         throw Exception("Both 'from' and 'to' fields must be filled.");
       }
       final now = DateTime.now();
+
+      final formattedDate = "${_selectedDate?.toIso8601String()}+00:00";
+      final selectedDateTime = convertTimeOfDayToDateTime(_selectedTime!);
+      final formattedTime = formatTimeToAMPM(selectedDateTime);
+
 
       final Uri url = Uri.parse(filtered_trips).replace(queryParameters: {
         'from': _departureController.text,
@@ -131,12 +151,12 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
         if (_selectedTime != null) ...{
           'filterOption': 'Time',
           // تحويل الوقت إلى تنسيق AM/PM
-          'filterValue': formatTimeWithAMPM(DateTime(now.year, now.month, now.day, _selectedTime!.hour, _selectedTime!.minute)),
+          'filterValue': formattedTime,
         },
 
         if (_selectedDate != null) ...{
           'filterOption': 'Date',
-          'filterValue': '${_selectedDate!.year}-${_selectedDate!.month}-${_selectedDate!.day}',
+          'filterValue': formattedDate,
         },
         if (_driverRatingController.text.isNotEmpty) ...{
           'filterOption': 'Driver Rating',
@@ -371,6 +391,14 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     );
   }
 
+  double calculateDialogHeight(List<String> options) {
+    const double optionHeight = 50.0; // ارتفاع كل خيار
+    const double buttonHeight = 60.0; // ارتفاع أزرار الموافقة والإلغاء
+    const double maxDialogHeight = 400.0; // الحد الأقصى للارتفاع
+    final double calculatedHeight = options.length * optionHeight + buttonHeight;
+    return calculatedHeight > maxDialogHeight ? maxDialogHeight : calculatedHeight;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -447,14 +475,13 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                     isArabic ? "موافق" : "OK",
                     style: TextStyle(color:triadicPink), // لون النص في زر الموافقة
                   ),
+                  dialogHeight: calculateDialogHeight(isArabic ? _filterOptionsArabic : _filterOptions),
                   onConfirm: (results) {
                     setState(() {
                       _selectedFilters = List<String>.from(results);
                     });
                   },
-                )
-                ,
-
+                ),
                 // فلتر نوع السيارة
                 if (_selectedFilters.contains(isArabic ? "نوع السيارة" : "Car Type"))
                   Padding(

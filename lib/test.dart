@@ -19,8 +19,10 @@ class TestPage extends StatefulWidget {
   final String nameP;
   final String phoneP;
   final String gender;
+  final String id;
+
   _TestPageState createState() => _TestPageState();
-  const TestPage({required this.emailP,required this.nameP,required this.phoneP,required this.gender, super.key});
+  const TestPage({required this.emailP,required this.nameP,required this.phoneP,required this.gender,required this.id, super.key});
 
 }
 
@@ -35,6 +37,8 @@ class _TestPageState extends State<TestPage> {
   @override
   void initState() {
     super.initState();
+    print(widget.id);
+    print('User ID: ${widget.id}');
     driverDataModel = Provider.of<DriverDataModel>(context, listen: false);
     fetchTrips().then((_) {
       updateTripsBasedOnTime();
@@ -183,10 +187,10 @@ class _TestPageState extends State<TestPage> {
       );
     }
   }
-
   Future<void> fetchTrips() async {
     try {
-      final response = await http.get(Uri.parse(all_trip));
+      final response = await http.get(Uri.parse('$getTripsByGender/${widget.id}'));
+
 
       if (response.statusCode == 200) {
         final List<dynamic> tripList = json.decode(response.body)['trips'];

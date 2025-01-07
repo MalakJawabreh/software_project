@@ -72,7 +72,6 @@ class _DriverState extends State<Driver> {
   void initState() {
     super.initState();
 
-    _fetchProfilePicture();
 
     // تخصيص لون شريط الحالة فقط
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
@@ -88,9 +87,15 @@ class _DriverState extends State<Driver> {
         username = jwtDecodedToken['fullName'];
         phoneNumber=jwtDecodedToken['phoneNumber'];
         licensePicture=jwtDecodedToken['licensePicture'];
-        profilePicture=jwtDecodedToken['profilePicture'];
+        // تحقق من وجود صورة البروفايل في التوكن
+        if (jwtDecodedToken['profilePicture'] != null && jwtDecodedToken['profilePicture'] != '') {
+          profilePicture = jwtDecodedToken['profilePicture']; // تعيين صورة البروفايل إذا كانت موجودة
+        } else {
+          profilePicture = ''; // تعيين قيمة فارغة أو يمكنك تعيين صورة افتراضية هنا
+        }
         carType=jwtDecodedToken['carType'];
 
+        _fetchProfilePicture();
         //fetchProfilePicture();
         // استدعاء دالة التحديث
         // حفظ البيانات في SharedPreferences
@@ -198,6 +203,7 @@ class _DriverState extends State<Driver> {
     }
   }
 
+
   Future<String?> fetchProfilePicture() async {
     try {
       // URL الخاص بالـ API
@@ -211,10 +217,17 @@ class _DriverState extends State<Driver> {
         final data = json.decode(response.body);
 
         if (data['status'] == true) {
-          Picture = data['profilePicture'];
-          setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
-          print("Fetched profile picture URL: $Picture");
-          return Picture;
+          // التحقق من وجود صورة بروفايل
+          if (data['profilePicture'] != null && data['profilePicture'] != '') {
+            Picture = data['profilePicture'];
+            // setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+            print("Fetched profile picture URL: $Picture");
+            return Picture;
+          } else {
+            // إذا لم تكن الصورة موجودة
+            print("No profile picture found.");
+            return null;
+          }
         } else {
           throw Exception(data['error']);
         }
@@ -225,6 +238,7 @@ class _DriverState extends State<Driver> {
       print("Error fetching profile picture: $e");
       return null;
     }
+
   }
 
   Widget base64ToImage(String base64String) {
@@ -615,8 +629,8 @@ class _DriverState extends State<Driver> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 25),
-                      child: profilePicture != null
-                          ? base64ToImage(profilePicture!)
+                      child: Picture != null
+                          ? base64ToImage(Picture!)
                           : CircleAvatar(
                         backgroundImage:
                         AssetImage('imagess/signup_icon.png'),
@@ -776,8 +790,8 @@ class _DriverState extends State<Driver> {
             padding: const EdgeInsets.only(top: 15, left: 16, right: 16),
             child: Row(
               children: [
-                profilePicture != null
-                    ? base64ToImage(profilePicture!)
+                Picture != null
+                    ? base64ToImage(Picture!)
                     : CircleAvatar(
                   backgroundImage:
                   AssetImage('imagess/signup_icon.png'),

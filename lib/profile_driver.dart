@@ -38,7 +38,6 @@ class _ProfileDriverState extends State<ProfileDriver> {
 
       fetchProfilePicture();
   }
-
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
     XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
