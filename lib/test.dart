@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:project1/passengerDetails.dart';
 import 'package:project1/passenger_dashboard.dart';
 import 'package:provider/provider.dart';
+import 'DriverDetailsBooking.dart';
 import 'config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _TestPageState extends State<TestPage> {
   List<String> notes = []; // لتخزين الملاحظات
 
   late DriverDataModel driverDataModel; // تعريف المتغير
+  Map<String, double?> ratings = {};  // لحفظ التقييمات حسب البريد الإلكتروني
 
 
   @override
@@ -49,6 +51,43 @@ class _TestPageState extends State<TestPage> {
       updateTripsBasedOnTime();
     });
   }
+
+  // Future<void> _fetchRatings() async {
+  //   for (var trip in trips) {
+  //     final email = trip['email'];  // تأكد أن الـ email موجود في الـ trip
+  //     print('Fetching rating for: $email');  // طباعة الـ email
+  //     final rating = await getAverageRating(email);
+  //     setState(() {
+  //       ratings[email] = rating;  // حفظ التقييم
+  //     });
+  //   }
+  // }
+
+  Future<Map<String, dynamic>?> getAverageRating(String email) async {
+    final String endpoint = '$average_rate/$email';
+
+    try {
+      final response = await http.get(Uri.parse(endpoint));
+      if (response.statusCode == 200) {
+        // تحويل الاستجابة إلى JSON
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        // لا توجد تقييمات
+        print('No reviews found for this user');
+        return null;
+      } else {
+        // طباعة أي خطأ آخر
+        print('Error: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return null;
+    }
+  }
+
+
+
 
   Future<void> showPassengersPopup(
       BuildContext context,
@@ -333,13 +372,14 @@ class _TestPageState extends State<TestPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'All Trips',
+          'Available Trips',
           style: TextStyle(
-            color: Colors.grey[700],
-            fontWeight: FontWeight.bold// لون رمادي غامق
+            color:primaryColor2,
+            fontWeight: FontWeight.bold,// لون رمادي غامق
+            fontSize: 25,
           ),
         ),
-        backgroundColor:SecondryColor2,
+        backgroundColor:Colors.white,
       ),
       body: trips.isEmpty
           ? Center(
@@ -372,10 +412,12 @@ class _TestPageState extends State<TestPage> {
             return SizedBox();
           }
 
+          final email = trip['email'];  // افترض أن البريد الإلكتروني موجود في الـ trip
           return Padding(
             padding: const EdgeInsets.symmetric(
                 vertical: 8.0, horizontal: 16.0),
             child: Card(
+              color :Color.fromARGB(230, 251, 249, 247),
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -418,28 +460,113 @@ class _TestPageState extends State<TestPage> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: Text(
-                                      'Driver: ${trip['name'] ?? 'N/A'}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                        color:primaryColor2,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DriverDetailsScreen(
+                                              name: trip['name'],
+                                              email: trip['driverEmail'],
+                                              phoneNumber: trip['phoneNumber'],
+                                              emailP:widget.emailP,
+                                              nameP:widget.nameP,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        '${trip['name'] ?? 'N/A'}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: primaryColor2,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.phone,
-                                    color: primaryColor2,
-                                    size: 18,
                                   ),
                                   SizedBox(width: 4),
-                                  Text(
-                                    '${trip['phoneNumber'] ?? 'N/A'}',
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontSize: 14,
-                                    ),
+                                  // Text(
+                                  //   '${trip['phoneNumber'] ?? 'N/A'}',
+                                  //   style: TextStyle(
+                                  //     color: Colors.grey[700],
+                                  //     fontSize: 14,
+                                  //   ),
+                                  // ),
+                                  // عرض التقييم
+                                  FutureBuilder<Map<String, dynamic>?>(
+                                    future: getAverageRating(trip['driverEmail']), // استدعاء دالة الحصول على التقييم
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return Text(
+                                          'Loading...',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Color.fromARGB(230, 24, 83, 131),
+                                          ),
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return Text(
+                                          'Error: ${snapshot.error}',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Color.fromARGB(230, 24, 83, 131),
+                                          ),
+                                        );
+                                      } else if (snapshot.hasData) {
+                                        // تحويل قيمة التقييم من String إلى double
+                                        final averageRating = snapshot.data?['averageRating'];
+                                        if (averageRating != null) {
+                                          double rating = double.tryParse(averageRating.toString()) ?? 0.0;
+
+                                          int fullStars = rating.floor(); // النجوم الممتلئة
+                                          int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
+                                          int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
+
+                                          return Row(
+                                            children: [
+                                              // النجوم
+                                              Row(
+                                                children: [
+                                                  for (int i = 0; i < fullStars; i++)
+                                                    Icon(Icons.star, color: Colors.amber, size: 20),
+                                                  for (int i = 0; i < halfStars; i++)
+                                                    Icon(Icons.star_half, color: Colors.amber, size: 20),
+                                                  for (int i = 0; i < emptyStars; i++)
+                                                    Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                                ],
+                                              ),
+                                              SizedBox(width: 8), // مسافة بين النجوم والرقم
+                                              // التقييم كرقم
+                                              // Text(
+                                              //   '$rating', // عرض التقييم كرقم
+                                              //   style: TextStyle(
+                                              //     fontSize: 18,
+                                              //     fontWeight: FontWeight.bold,
+                                              //     color: Color.fromARGB(230, 24, 83, 131),
+                                              //   ),
+                                              // ),
+                                            ],
+                                          );
+                                        } else {
+                                          return Row(
+                                            children: [
+                                              for (int i = 0; i < 5; i++)
+                                                Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                            ],
+                                          );
+                                        }
+                                      } else {
+                                        return Row(
+                                          children: [
+                                            for (int i = 0; i < 5; i++)
+                                              Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                          ],
+                                        );
+                                      }
+
+                                    },
                                   ),
                                 ],
                               ),

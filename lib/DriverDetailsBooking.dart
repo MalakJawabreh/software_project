@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:project1/rating_driver_page.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+
 
 import 'chat_page.dart';
+import 'config.dart';
 import 'driver_data_model.dart';
 
 class DriverDetailsScreen extends StatelessWidget {
@@ -19,6 +25,29 @@ class DriverDetailsScreen extends StatelessWidget {
     required this.emailP,
     required this.nameP,
   }) : super(key: key);
+
+  Future<Map<String, dynamic>?> getAverageRating() async {
+    final String endpoint = '$average_rate/$email';
+
+    try {
+      final response = await http.get(Uri.parse(endpoint));
+      if (response.statusCode == 200) {
+        // تحويل الاستجابة إلى JSON
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        // لا توجد تقييمات
+        print('No reviews found for this user');
+        return null;
+      } else {
+        // طباعة أي خطأ آخر
+        print('Error: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,9 +202,100 @@ class DriverDetailsScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
+
                             ],
                           )
                               : SizedBox(),
+                          Text(
+                            "Review",
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: FutureBuilder<Map<String, dynamic>?>(
+                                  future: getAverageRating(), // استدعاء دالة الحصول على التقييم
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Text(
+                                        'Loading...',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          color: Color.fromARGB(230, 24, 83, 131),
+                                        ),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Text(
+                                        'Error: ${snapshot.error}',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          color: Color.fromARGB(230, 24, 83, 131),
+                                        ),
+                                      );
+                                    } else if (snapshot.hasData) {
+                                      // تحويل قيمة التقييم من String إلى double
+                                      final averageRating = snapshot.data?['averageRating'];
+                                      if (averageRating != null) {
+                                        double rating = double.tryParse(averageRating.toString()) ?? 0.0;
+
+                                        int fullStars = rating.floor(); // النجوم الممتلئة
+                                        int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
+                                        int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
+
+                                        return GestureDetector(
+                                          onTap: () {
+                                            // الانتقال إلى صفحة RatingDriverPage عند النقر
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => RatingDriverPage(rating:rating,email:email)),
+                                            );
+                                          },
+                                          child: Row(
+                                            children: [
+                                              // عرض النجوم
+                                              Row(
+                                                children: [
+                                                  for (int i = 0; i < fullStars; i++)
+                                                    Icon(Icons.star, color: Colors.amber, size: 30),
+                                                  for (int i = 0; i < halfStars; i++)
+                                                    Icon(Icons.star_half, color: Colors.amber, size: 30),
+                                                  for (int i = 0; i < emptyStars; i++)
+                                                    Icon(Icons.star_border, color: Colors.amber, size: 30),
+                                                ],
+                                              ),
+                                              SizedBox(width: 10), // المسافة بين النجوم والرقم
+                                              // عرض الرقم
+                                              Text(
+                                                '$rating', // عرض التقييم
+                                                style: TextStyle(
+                                                  fontSize: 25,
+                                                  color: Color.fromARGB(230, 24, 83, 131),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      } else {
+                                        return Text('No rating available');
+                                      }
+                                    } else {
+                                      return Text('No data available');
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(
+                            height: 32, // المسافة الرأسية حول الديفايدر
+                            thickness: 2, // سماكة الخط
+                            color: Colors.grey, // لون الديفايدر
+                          ),
+
                         ],
                       ),
                       SizedBox(height: 30),

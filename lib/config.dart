@@ -1,4 +1,4 @@
-final url = 'http://192.168.1.7:3000/';
+final url = 'http://192.168.1.5:3000/';
 final registeration = url + "registeration";
 final login = url + "login";
 final change_password = url + "change-password";
@@ -32,3 +32,11 @@ final all_driver=url + "all_driver";
 
 final review_post=url + "review_post";
 final getTripsByGender=url + "getTripsByGender";
+final average_rate=url + "average_rate";
+final get_rev_from_to = url +"get_rev_from_to";
+
+
+
+
+
+

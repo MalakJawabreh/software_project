@@ -93,6 +93,29 @@ class _ProfileDriverState extends State<ProfileDriver> {
     }
   }
 
+  Future<Map<String, dynamic>?> getAverageRating() async {
+    final String endpoint = '$average_rate/${widget.email}';
+
+    try {
+      final response = await http.get(Uri.parse(endpoint));
+      if (response.statusCode == 200) {
+        // تحويل الاستجابة إلى JSON
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        // لا توجد تقييمات
+        print('No reviews found for this user');
+        return null;
+      } else {
+        // طباعة أي خطأ آخر
+        print('Error: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return null;
+    }
+  }
+
   String? convertImageToBase64(File? imageFile) {
     if (imageFile == null) return null;
 
@@ -229,59 +252,96 @@ class _ProfileDriverState extends State<ProfileDriver> {
                    ),
                  ),
                 SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.username,
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.username,
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: 8), // مسافة بين الاسم والتقييم
+            FutureBuilder<Map<String, dynamic>?>(
+              future: getAverageRating(), // استدعاء دالة الحصول على التقييم
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text(
+                    'Loading...',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(230, 24, 83, 131),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text(
+                    'Error: ${snapshot.error}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(230, 24, 83, 131),
+                    ),
+                  );
+                } else if (snapshot.hasData) {
+                  // تحويل قيمة التقييم من String إلى double
+                  final averageRating = snapshot.data?['averageRating'];
+                  if (averageRating != null) {
+                    double rating = double.tryParse(averageRating.toString()) ?? 0.0;
+
+                    int fullStars = rating.floor(); // النجوم الممتلئة
+                    int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
+                    int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
+
+                    return Row(
+                      children: [
+                        // النجوم
+                        Row(
+                          children: [
+                            for (int i = 0; i < fullStars; i++)
+                              Icon(Icons.star, color: Colors.amber, size: 20),
+                            for (int i = 0; i < halfStars; i++)
+                              Icon(Icons.star_half, color: Colors.amber, size: 20),
+                            for (int i = 0; i < emptyStars; i++)
+                              Icon(Icons.star_border, color: Colors.amber, size: 20),
+                          ],
                         ),
-                      ),
-                      SizedBox(height: 1),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _isEditing
-                                ? TextField(
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: 'Enter your bio',
-                                border: OutlineInputBorder(),
-                              ),
-                            )
-                                : Text(
-                              _bioText,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        SizedBox(width: 8), // مسافة بين النجوم والرقم
+                        // التقييم كرقم
+                        Text(
+                          '$rating', // عرض التقييم كرقم
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(230, 24, 83, 131),
                           ),
-                          IconButton(
-                            icon: Icon(
-                              _isEditing ? Icons.check : Icons.edit,
-                              color: Colors.orange,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                if (_isEditing) {
-                                  _bioText = _controller.text; // حفظ النص المُعدل
-                                }
-                                _isEditing = !_isEditing; // التبديل بين التعديل والعرض
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Row(
+                      children: [
+                        for (int i = 0; i < 5; i++)
+                          Icon(Icons.star_border, color: Colors.amber, size: 20),
+                      ],
+                    );
+                  }
+                } else {
+                  return Row(
+                    children: [
+                      for (int i = 0; i < 5; i++)
+                        Icon(Icons.star_border, color: Colors.amber, size: 20),
                     ],
-                  ),
-                ),
-              ],
+                  );
+                }
+
+              },
+            ),
+          ],
+        ),
+      )
+      ],
             ),
           ),
           Divider(),

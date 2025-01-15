@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'chat_page.dart';
 import 'driver_data_model.dart';
 

@@ -11,6 +11,7 @@ import 'package:project1/search.dart';
 import 'package:project1/test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Reviews_driver_profile.dart';
 import 'chatList.dart';
 import 'config.dart';
 import 'creat_trip_page.dart';
@@ -725,7 +726,16 @@ class _DriverState extends State<Driver> {
                     color: Color.fromARGB(230, 41, 84, 115),
                   ),
                 ),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ReviewsForDriver(
+                        email: email,
+                      ),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: Icon(Icons.report_problem, size: 30),

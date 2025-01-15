@@ -172,7 +172,6 @@ class _PassengerState extends State<Passenger> {
       print("Error fetching profile picture: $e");
       return null;
     }
-
   }
 
   Widget base64ToImage(String base64String) {
