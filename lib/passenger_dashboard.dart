@@ -1039,19 +1039,30 @@ class SettingsPage extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: primaryColor, // استخدام اللون الأساسي
+            fontSize: 24,
           ),
         ),
-        backgroundColor: SecondryColor, // تدرج أفتح من اللون الأساسي لــ AppBar
+        backgroundColor: Colors.white, // تدرج أفتح من اللون الأساسي لــ AppBar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار فقط
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0), // إزاحة إضافية لليسار
+                child: Text(
+                  isArabic ? 'من يمكنه رؤية المحتوى الخاص بك' : 'your App and Media',
+                  style: TextStyle(color:Colors.grey[600],fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
             ListTile(
               leading: Icon(Icons.language, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'اختر اللغة' : 'Select Language',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // إظهار مربع حوار لاختيار اللغة
@@ -1092,18 +1103,35 @@ class SettingsPage extends StatelessWidget {
               leading: Icon(Icons.palette, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'تغيير الثيم' : 'Change Theme',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // تغيير الثيم
                 Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
               },
             ),
+            SizedBox(height: 15,),
+            Divider(
+              thickness: 2.0, // عرض الـ Divider (السماكة)
+              height: 1, // تحديد ارتفاع الـ Divider
+              color: Color(0xE6617383), // اللون السكني (لون رمادي فاتح)
+            ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار فقط
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0), // إزاحة إضافية لليسار
+                child: Text(
+                  isArabic ? 'من يمكنه رؤية المحتوى الخاص بك' : 'Security Checks',
+                  style: TextStyle(color:Colors.grey[600],fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
             ListTile(
               leading: Icon(Icons.email, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'عنوان البريد الإلكتروني' : 'Email address',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 Navigator.push(
@@ -1116,7 +1144,7 @@ class SettingsPage extends StatelessWidget {
               leading: Icon(Icons.privacy_tip, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'التحقق بخطوتين' : 'Two-step verification',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 Navigator.push(
@@ -1127,11 +1155,28 @@ class SettingsPage extends StatelessWidget {
                 );
               },
             ),
+            SizedBox(height: 15,),
+            Divider(
+              thickness: 3.0, // عرض الـ Divider (السماكة)
+              height: 1, // تحديد ارتفاع الـ Divider
+              color: Color(0xE6617383), // اللون السكني (لون رمادي فاتح)
+            ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار فقط
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0), // إزاحة إضافية لليسار
+                child: Text(
+                  isArabic ? 'من يمكنه رؤية المحتوى الخاص بك' : 'How you use App',
+                  style: TextStyle(color:Colors.grey[600],fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
             ListTile(
               leading: Icon(Icons.notifications, size: 30, color: primaryColor2), // تغيير لون الأيقونة
               title: Text(
                 isArabic ? 'الإشعارات' : 'Notifications',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
               ),
               onTap: () {
                 // التعامل مع الإشعارات هنا
@@ -1163,33 +1208,30 @@ class PrivacyPage extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: primaryColor, // استخدام اللون الأساسي للعنوان
+            fontSize: 24,
           ),
         ),
-        backgroundColor: SecondryColor, // تدرج أفتح من اللون الأساسي لــ AppBar
+        backgroundColor: Colors.white, // تدرج أفتح من اللون الأساسي لــ AppBar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ListTile(
-              leading: Icon(Icons.lock_outline, size: 30, color: primaryColor2), // تغيير لون الأيقونة
-              title: Text(
-                isArabic ? 'تغيير كلمة السر' : 'Change password',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار فقط
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0), // إزاحة إضافية لليسار
+                child: Text(
+                  isArabic ? 'من يمكنه رؤية المحتوى الخاص بك' : 'Who can see your content',
+                  style: TextStyle(color:Colors.grey[600],fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-              onTap: () {
-                // الانتقال إلى صفحة تغيير كلمة السر
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChangePasswordPage()),
-                );
-              },
             ),
             ListTile(
               leading: Icon(Icons.visibility, size: 30, color: primaryColor2),
               title: Text(
                 isArabic ? 'رؤية الحساب' : 'Visibility',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold),
               ),
               onTap: () {
                 // الانتقال إلى صفحة إعدادات الرؤية
@@ -1200,20 +1242,10 @@ class PrivacyPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.security, size: 30, color: primaryColor2), // تغيير لون الأيقونة
-              title: Text(
-                isArabic ? 'المصادقة' : 'Authentication',
-                style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
-              ),
-              onTap: () {
-                // التعامل مع المصادقة هنا
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.block, size: 30, color: primaryColor2),
               title: Text(
                 isArabic ? 'جهات اتصال محظورة' : 'Blocked Contact',
-                style: TextStyle(fontSize: 20, color: SecondryColor2, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, color: primaryColor2, fontWeight: FontWeight.bold),
               ),
               onTap: () {
                 // تمرير الـ token والمعلومات إلى صفحة BlockedContactsScreen
@@ -1227,11 +1259,69 @@ class PrivacyPage extends StatelessWidget {
                 );
               },
             ),
+            SizedBox(height: 15,),
+            Divider(
+              thickness: 2.0, // عرض الـ Divider (السماكة)
+              height: 1, // تحديد ارتفاع الـ Divider
+              color: Color(0xE6617383), // اللون السكني (لون رمادي فاتح)
+            ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار فقط
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0), // إزاحة إضافية لليسار
+                child: Text(
+                  isArabic ? 'من يمكنه رؤية المحتوى الخاص بك' : 'Account Setting',
+                  style: TextStyle(color:Colors.grey[600],fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.security, size: 30, color: primaryColor2), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'المصادقة' : 'Authentication',
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+              ),
+              onTap: () {
+                // التعامل مع المصادقة هنا
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.lock_outline, size: 30, color: primaryColor2), // تغيير لون الأيقونة
+              title: Text(
+                isArabic ? 'تغيير كلمة السر' : 'Change password',
+                style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+              ),
+              onTap: () {
+                // الانتقال إلى صفحة تغيير كلمة السر
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangePasswordPage()),
+                );
+              },
+            ),
+            SizedBox(height: 15,),
+            Divider(
+              thickness: 3.0, // عرض الـ Divider (السماكة)
+              height: 1, // تحديد ارتفاع الـ Divider
+              color: Color(0xE6617383), // اللون السكني (لون رمادي فاتح)
+            ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.centerLeft, // محاذاة النص لليسار فقط
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0), // إزاحة إضافية لليسار
+                child: Text(
+                  isArabic ? 'من يمكنه رؤية المحتوى الخاص بك' : 'your location',
+                  style: TextStyle(color:Colors.grey[600],fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
             ListTile(
                 leading: Icon(Icons.location_on, size: 30, color: primaryColor2), // تغيير لون الأيقونة
                 title: Text(
                   isArabic ? 'الموقع المباشر' : 'Live Location',
-                  style: TextStyle(fontSize: 20, color: SecondryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
+                  style: TextStyle(fontSize: 20, color: primaryColor2,fontWeight: FontWeight.bold), // تغيير لون النص
                 ),
                 onTap: () {
                   Navigator.push(

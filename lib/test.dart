@@ -465,7 +465,7 @@ class _TestPageState extends State<TestPage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => DriverDetailsScreen(
+                                             builder: (context) => DriverDetailsScreen(
                                               name: trip['name'],
                                               email: trip['driverEmail'],
                                               phoneNumber: trip['phoneNumber'],

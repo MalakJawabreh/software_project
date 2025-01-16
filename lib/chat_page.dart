@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'chatservice.dart';
+import 'config.dart';
+import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
   final String currentUserEmail; // البريد الإلكتروني للمستخدم الحالي
@@ -25,6 +29,27 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final Chatservice _chatservice = Chatservice();
 
+  Future<String?> fetchProfilePicture(String email) async {
+    try {
+      final url = Uri.parse('$getuser?email=$email');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['status'] == true) {
+          return data['user']['profilePicture'] as String?;
+        } else {
+          throw Exception(data['error'] ?? 'Error fetching user details');
+        }
+      } else {
+        throw Exception('Failed to fetch user details');
+      }
+    } catch (e) {
+      print("Error: $e");
+      return null;
+    }
+  }
+
   void sendMessage() async {
     if (_messageController.text.trim().isNotEmpty) {
       await _chatservice.sendMessage(
@@ -46,15 +71,42 @@ class _ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            CircleAvatar(), // صورة المستخدم
+            // استخدام FutureBuilder للحصول على صورة البروفايل
+            FutureBuilder<String?>(
+              future: fetchProfilePicture(widget.recevEmail),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircleAvatar(
+                    radius: 20,
+                    child: Icon(Icons.person),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return const CircleAvatar(
+                    radius: 20,
+                    child: Icon(Icons.person),
+                  );
+                }
+
+                final profilePicture = snapshot.data;
+                return CircleAvatar(
+                  radius: 20,
+                  backgroundImage: profilePicture != null
+                      ? MemoryImage(base64Decode(profilePicture))
+                      : const AssetImage('assets/default_profile_picture.png') as ImageProvider, // صورة افتراضية
+                );
+              },
+            ),
             const SizedBox(width: 10),
-            Text(widget.recevuserName), // اسم المستخدم
+            Text(widget.recevuserName,style:TextStyle(fontSize:23,fontWeight:FontWeight.w700)), // اسم المستخدم
           ],
         ),
         actions: [

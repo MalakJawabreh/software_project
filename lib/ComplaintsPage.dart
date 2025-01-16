@@ -58,10 +58,11 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
           isArabic ? "تقديم الشكوى" : "Complaint Submission",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: Color(0xE609407A),
+            fontSize: 23,
           ),
         ),
-        backgroundColor: accentColor,
+        backgroundColor: Colors.white,
         elevation: 5,
       ),
       body: Column(
@@ -99,14 +100,14 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
     final isArabic = languageProvider.isArabic;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(3, (index) {
           bool isCompleted = index < currentStep;
           bool isCurrent = index == currentStep;
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 0.0),
             child: Column(
               mainAxisSize: MainAxisSize.min, // يجعل العمود بأقل ارتفاع ممكن
               children: [
@@ -115,9 +116,9 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                     CircleAvatar(
                       radius: 30, // زيادة حجم الدائرة
                       backgroundColor: isCompleted
-                          ? Color(0xFF00796B) // اللون الأخضر
+                          ? Color(0xE609407A) // اللون الأخضر
                           : (isCurrent
-                          ? Color(0xFF00796B) // اللون الأخضر الحالي
+                          ? Color(0xE609407A) // اللون الأخضر الحالي
                           : Colors.grey),
                       child: isCompleted
                           ? Icon(Icons.check, color: Colors.white)
@@ -126,10 +127,13 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    if (index < 2)
+                    // إضافة المسافة والخط بين الدائرة الأولى والثانية
+                    // if (index < 2) // هذا الشرط يضمن أن الخط يظهر فقط بين الدائرة الأولى والثانية وبين الثانية والثالثة
+                    //   SizedBox(width: 20), // إضافة مسافة بين الدائرة والخط
+                    if (index < 2) // هذا الشرط يضمن أن الخط يظهر فقط بين الدائرة الأولى والثانية وبين الثانية والثالثة
                       Container(
                         height: 3,
-                        width: 50, // جعل الخط أطول بين الدوائر
+                        width: 60, // جعل الخط أطول بين الدوائر
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: isCompleted ? Color(0xFF00796B) : Colors.grey,
@@ -185,18 +189,8 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
             ),
             SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (currentStep > 0)
-                  ElevatedButton(
-                    onPressed: () {
-                      _pageController.previousPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeIn,
-                      );
-                    },
-                    child: Text(isArabic ? "رجوع" : "Back"),
-                  ),
                 ElevatedButton(
                   onPressed: () {
                     if (_formKeyStep1.currentState!.validate()) {
@@ -206,7 +200,19 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                       );
                     }
                   },
-                  child: Text(isArabic ? "التالي" : "Next"),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Color(0xE609407A), // تغيير اللون الخلفي
+                    backgroundColor: secondaryColor, // تغيير لون النص
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20), // تعديل الحواف لجعلها دائرية
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32), // تعديل الحشو داخل الزر
+                    elevation: 5, // تأثير الظل
+                  ),
+                  child: Text(
+                    isArabic ? "التالي" : "Next",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold), // تعديل حجم الخط
+                  ),
                 ),
               ],
             ),
@@ -282,7 +288,16 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                         curve: Curves.easeIn,
                       );
                     },
-                    child: Text(isArabic ? "رجوع" : "Back"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Color(0xE609407A), // تغيير اللون الخلفي
+                      backgroundColor: secondaryColor, // تغيير لون النص
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // تعديل الحواف لجعلها دائرية
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32), // تعديل الحشو داخل الزر
+                      elevation: 5, // تأثير الظل
+                    ),
+                    child: Text(isArabic ? "رجوع" : "Back",style: TextStyle(fontSize: 18),),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -293,7 +308,16 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                         );
                       }
                     },
-                    child: Text(isArabic ? "التالي" : "Next"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: secondaryColor, // تغيير اللون الخلفي
+                      backgroundColor: Color(0xE609407A) , // تغيير لون النص
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // تعديل الحواف لجعلها دائرية
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32), // تعديل الحشو داخل الزر
+                      elevation: 5, // تأثير الظل
+                    ),
+                    child: Text(isArabic ? "التالي" : "Next",style: TextStyle(fontSize: 18)),
                   ),
                 ],
               ),
@@ -365,7 +389,16 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                         curve: Curves.easeIn,
                       );
                     },
-                    child: Text(isArabic ? "رجوع" : "Back"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Color(0xE609407A), // تغيير اللون الخلفي
+                      backgroundColor: secondaryColor, // تغيير لون النص
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // تعديل الحواف لجعلها دائرية
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32), // تعديل الحشو داخل الزر
+                      elevation: 5, // تأثير الظل
+                    ),
+                    child: Text(isArabic ? "رجوع" : "Back",style: TextStyle(fontSize: 18)),
                   ),
                   // Submit Button
                   ElevatedButton(
@@ -373,7 +406,16 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
                       // Call API to submit the complaint
                       _submitComplaint();
                     },
-                    child: Text(isArabic ? "تقديم الشكوى" : "Submit Complaint"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor:  secondaryColor , // تغيير اللون الخلفي
+                      backgroundColor: Color(0xE609407A), // تغيير لون النص
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // تعديل الحواف لجعلها دائرية
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32), // تعديل الحشو داخل الزر
+                      elevation: 5, // تأثير الظل
+                    ),
+                    child: Text(isArabic ? "تقديم الشكوى" : "Submit Complaint",style: TextStyle(fontSize: 18)),
                   ),
                 ],
               ),
@@ -530,7 +572,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
             color: primaryColor,
           ),
@@ -582,8 +624,8 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
               label: Text(
                 item,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : primaryColor,
-                  fontSize: 12,
+                  color: isSelected ? Colors.black:primaryColor,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -591,7 +633,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
               onSelected: (selected) {
                 onSelected(item);
               },
-              selectedColor: accentColor,
+              selectedColor: Color(0xE6A3C4ED),
               backgroundColor: secondaryColor,
               elevation: 3,
             );
@@ -600,9 +642,6 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
       ],
     );
   }
-
-
-
 
 _launchWhatsApp(String number) async {
     final whatsappUrl = "https://wa.me/$number?text=Hello%20I%20have%20a%20complaint.";

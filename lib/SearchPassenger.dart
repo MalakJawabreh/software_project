@@ -101,12 +101,35 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
   @override
   void initState() {
     super.initState();
-    fetchFilteredTrips().then((_) {
-      updateTripsBasedOnTime();
-    });
-    Timer.periodic(Duration(seconds: 20), (timer) {
-      updateTripsBasedOnTime();
-    });
+    // fetchFilteredTrips().then((_) {
+    //   updateTripsBasedOnTime();
+    // });
+    // Timer.periodic(Duration(seconds: 20), (timer) {
+    //   updateTripsBasedOnTime();
+    // });
+  }
+
+  Future<Map<String, dynamic>?> getAverageRating(String email) async {
+    final String endpoint = '$average_rate/$email';
+
+    try {
+      final response = await http.get(Uri.parse(endpoint));
+      if (response.statusCode == 200) {
+        // تحويل الاستجابة إلى JSON
+        return json.decode(response.body);
+      } else if (response.statusCode == 404) {
+        // لا توجد تقييمات
+        print('No reviews found for this user');
+        return null;
+      } else {
+        // طباعة أي خطأ آخر
+        print('Error: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return null;
+    }
   }
 
   String formatTimeToAMPM(DateTime selectedTime) {
@@ -123,56 +146,66 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     return DateTime(now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
   }
 
-  //نيو
-  Future<void> fetchFilteredTrips() async {
+
+  Future<void> fetchFilteredTrips(List<String> selectedFilters) async {
     try {
       // تحقق من الحقول قبل إرسال الطلب
       if (_departureController.text.isEmpty || _destinationController.text.isEmpty) {
         throw Exception("Both 'from' and 'to' fields must be filled.");
       }
-      final now = DateTime.now();
 
-      final formattedDate = "${_selectedDate?.toIso8601String()}+00:00";
-      final selectedDateTime = convertTimeOfDayToDateTime(_selectedTime!);
-      final formattedTime = formatTimeToAMPM(selectedDateTime);
-
-
-      final Uri url = Uri.parse(filtered_trips).replace(queryParameters: {
+      // إنشاء الفلاتر بناءً على الفلاتر الممرّرة
+      Map<String, String> queryParameters = {
         'from': _departureController.text,
         'to': _destinationController.text,
-        if (_priceController.text.isNotEmpty) ...{
-          'filterOption': 'Price',
-          'maxPrice': _priceController.text,
-        },
-        if (_selectedCarBrand != null) ...{
-          'filterOption': 'Car Type',
-          'filterValue': _selectedCarBrand!,
-        },
-        if (_selectedTime != null) ...{
-          'filterOption': 'Time',
-          // تحويل الوقت إلى تنسيق AM/PM
-          'filterValue': formattedTime,
-        },
+      };
 
-        if (_selectedDate != null) ...{
-          'filterOption': 'Date',
-          'filterValue': formattedDate,
-        },
-        if (_driverRatingController.text.isNotEmpty) ...{
-          'filterOption': 'Driver Rating',
-          'filterValue': _driverRatingController.text,
-        },
-        if (_driverNameController.text.isNotEmpty) ...{
-          'filterOption': 'Driver Name',
-          'filterValue': _driverNameController.text,
-        },
+      // إضافة الفلاتر بناءً على الاختيارات
+      if (_priceController.text.isNotEmpty && selectedFilters.contains('Price')) {
+        queryParameters['maxPrice'] = _priceController.text;
+      }
 
-      });
+      if (_selectedCarBrand != null && selectedFilters.contains('Car Type')) {
+        queryParameters['carBrand'] = _selectedCarBrand!;
+      }
+
+      if (_selectedTime != null && selectedFilters.contains('Time')) {
+        queryParameters['time'] = formatTimeToAMPM(convertTimeOfDayToDateTime(_selectedTime!));
+      }
+
+      if (_selectedDate != null && selectedFilters.contains('Date')) {
+        queryParameters['date'] = "${_selectedDate?.toIso8601String()}+00:00";
+      }
+
+      if (_driverRatingController.text.isNotEmpty && selectedFilters.contains('Driver Rating')) {
+        queryParameters['driverRating'] = _driverRatingController.text;
+      }
+
+      if (_driverNameController.text.isNotEmpty && selectedFilters.contains('Driver Name')) {
+        queryParameters['name'] = _driverNameController.text;
+      }
+
+      // إرسال الطلب
+      final Uri url = Uri.parse(filtered_trips).replace(queryParameters: queryParameters);
 
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final List<dynamic> fetchedTrips = json.decode(response.body)['trips'];
+
+        // إذا كان فلتر التقييم مفعلاً، يتم ترتيب الرحلات حسب التقييم من الأعلى إلى الأدنى
+        if (selectedFilters.contains('Driver Rating')) {
+          fetchedTrips.sort((a, b) {
+            double ratingA = double.tryParse(a['averageRating'].toString()) ?? 0.0;
+            double ratingB = double.tryParse(b['averageRating'].toString()) ?? 0.0;
+            return ratingB.compareTo(ratingA); // ترتيب التقييم من الأعلى إلى الأدنى
+          });
+        }
+
+        // إذا كان فلتر السعر مفعلاً، يتم ترتيب الرحلات حسب السعر بشكل تصاعدي
+        if (selectedFilters.contains('Price')) {
+          fetchedTrips.sort((a, b) => a['price'].compareTo(b['price']));
+        }
 
         setState(() {
           _trips = fetchedTrips;
@@ -188,7 +221,9 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     }
   }
 
-  void _searchTrips() async {
+
+
+  void _searchTrips(List<String> selectedFilters) async {
     try {
       // التحقق من الحقول قبل تنفيذ البحث
       if (_departureController.text.isEmpty || _destinationController.text.isEmpty) {
@@ -196,21 +231,20 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
         return; // إيقاف التنفيذ إذا كانت الحقول فارغة
       }
 
-      // جلب النتائج من الخادم
-      await fetchFilteredTrips(); // لا نحتاج لانتظار القيمة، لأن الدالة تقوم بتحديث _trips مباشرة
+      // تنفيذ البحث باستخدام الفلاتر المختارة
+      await fetchFilteredTrips(selectedFilters);
 
       // إذا كانت القائمة فارغة، يمكن عرض رسالة للمستخدم
       if (_trips.isEmpty) {
         _showMessage("No trips found matching your criteria.");
         return;
       }
-
-      // عرض النتائج في نافذة حوار
     } catch (e) {
       print('Error in _searchTrips: $e');
       _showMessage("Failed to fetch trips. Please try again.");
     }
   }
+
 
   void updateTripsBasedOnTime() {
     final now = DateTime.now();
@@ -409,28 +443,29 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(isArabic ? "البحث عن الرحلات" : "Search Trips", style: TextStyle(
-          color: Colors.white,
+          color: Colors.blueGrey,
+          fontSize: 26,
+          fontWeight: FontWeight.bold
         )),
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(
               Icons.save,
-              color: Colors.white, // تغيير لون الأيقونة إلى الأبيض
+              color: Colors.blueGrey,
             ),
             onPressed: _saveFiltersToPreferences,
           ),
           IconButton(
             icon: Icon(
               Icons.restore,
-              color: Colors.white, // تغيير لون الأيقونة إلى الأبيض
+              color: Colors.blueGrey,
             ),
             onPressed: _loadFiltersFromPreferences,
           ),
           IconButton(
             icon: Icon(Icons.delete,
-              color: Colors.white,
-            ),
+              color: Colors.blueGrey,            ),
             onPressed: _clearFiltersFromPreferences,
           ),
 
@@ -476,11 +511,12 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                     style: TextStyle(color:triadicPink), // لون النص في زر الموافقة
                   ),
                   dialogHeight: calculateDialogHeight(isArabic ? _filterOptionsArabic : _filterOptions),
-                  onConfirm: (results) {
-                    setState(() {
-                      _selectedFilters = List<String>.from(results);
-                    });
-                  },
+                    onConfirm: (results) {
+                      setState(() {
+                        _selectedFilters = List<String>.from(results);
+                        print("الفلاتر المختارة: $_selectedFilters"); // طباعة الفلاتر المختارة
+                      });
+                    },
                 ),
                 // فلتر نوع السيارة
                 if (_selectedFilters.contains(isArabic ? "نوع السيارة" : "Car Type"))
@@ -529,7 +565,6 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                                 ? "الوقت المفضل: ${_selectedTime!.hour}:${_selectedTime!.minute}"
                                 : "Preferred Time: ${_selectedTime!.hour}:${_selectedTime!.minute}"),
                           ),
-
                         ),
                         IconButton(
                           icon: Icon(Icons.access_time,color: triadicPink,),
@@ -538,7 +573,6 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                       ],
                     ),
                   ),
-
                 // فلتر التاريخ
                 if (_selectedFilters.contains(isArabic ?"التاريخ":"Date"))
                   Padding(
@@ -562,13 +596,6 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                       ],
                     ),
                   ),
-
-                // فلتر تقييم السائق
-                if (_selectedFilters.contains(isArabic ?"تقييم السائق":"Driver Rating"))
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: _buildTextField(_driverRatingController,   isArabic ? "تقييم السائق (1-5)" : "Driver Rating (1-5)", Icons.star),
-                  ),
 // داخل الكود الأساسي
                 if (_selectedFilters.contains(isArabic ? "اسم السائق" : "Driver Name"))
                   Padding(
@@ -582,7 +609,9 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
 
                 SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: _searchTrips,
+                  onPressed: () {
+                    _searchTrips(_selectedFilters); // استدعاء الدالة مع تمرير الفلاتر
+                  },
                   child: Row(
                     mainAxisSize: MainAxisSize.min, // بحيث يكون الزر بحجم النص والأيقونة معًا
                     children: [
@@ -622,7 +651,6 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                     final trip = _trips[index];
                     return GestureDetector(
                       onTap: () {
-                        // تنفيذ الإجراء عند النقر على البطاقة
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -630,7 +658,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                         );
                       },
                       child: Card(
-                        color:SecondryColor, // تحديد اللون الأسود للكارد
+                        color:Color.fromARGB(230, 217, 230, 241), // تحديد اللون الأسود للكارد
                         elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -661,22 +689,140 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          'Trip from ${trip['from']} to ${trip['to']}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            color: primaryColor2,
-                                          ),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // لتوزيع العناصر بين النصوص
+                                          children: [
+                                            Text(
+                                              '${trip['name']}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Color.fromARGB(
+                                                    230, 4, 49, 81),
+                                              ),
+                                            ),
+                                            FutureBuilder<Map<String, dynamic>?>(
+                                              future: getAverageRating(trip['driverEmail']), // استدعاء دالة الحصول على التقييم
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                                  return Text(
+                                                    'Loading...',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: Color.fromARGB(230, 24, 83, 131),
+                                                    ),
+                                                  );
+                                                } else if (snapshot.hasError) {
+                                                  return Text(
+                                                    'Error: ${snapshot.error}',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      color: Color.fromARGB(230, 24, 83, 131),
+                                                    ),
+                                                  );
+                                                } else if (snapshot.hasData) {
+                                                  // تحويل قيمة التقييم من String إلى double
+                                                  final averageRating = snapshot.data?['averageRating'];
+                                                  if (averageRating != null) {
+                                                    double rating = double.tryParse(averageRating.toString()) ?? 0.0;
+
+                                                    int fullStars = rating.floor(); // النجوم الممتلئة
+                                                    int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
+                                                    int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
+
+                                                    return Row(
+                                                      children: [
+                                                        // النجوم
+                                                        Row(
+                                                          children: [
+                                                            for (int i = 0; i < fullStars; i++)
+                                                              Icon(Icons.star, color: Colors.amber, size: 20),
+                                                            for (int i = 0; i < halfStars; i++)
+                                                              Icon(Icons.star_half, color: Colors.amber, size: 20),
+                                                            for (int i = 0; i < emptyStars; i++)
+                                                              Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                                          ],
+                                                        ),
+                                                        SizedBox(width: 8), // مسافة بين النجوم والرقم
+                                                        // التقييم كرقم
+                                                        // Text(
+                                                        //   '$rating', // عرض التقييم كرقم
+                                                        //   style: TextStyle(
+                                                        //     fontSize: 18,
+                                                        //     fontWeight: FontWeight.bold,
+                                                        //     color: Color.fromARGB(230, 24, 83, 131),
+                                                        //   ),
+                                                        // ),
+                                                      ],
+                                                    );
+                                                  } else {
+                                                    return Row(
+                                                      children: [
+                                                        for (int i = 0; i < 5; i++)
+                                                          Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                                      ],
+                                                    );
+                                                  }
+                                                } else {
+                                                  return Row(
+                                                    children: [
+                                                      for (int i = 0; i < 5; i++)
+                                                        Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                                    ],
+                                                  );
+                                                }
+
+                                              },
+                                            ),
+                                          ],
                                         ),
                                         SizedBox(height: 4),
-                                        Text(
-                                          'Price: ${trip['price']}',
-                                          style: TextStyle(
-                                            color: Colors.grey[700],
-                                            fontSize: 16,
-                                          ),
-                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // لتوزيع العناصر بين النصوص
+                                          children: [
+                                            Text.rich(
+                                              TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text: '${trip['from']} ', // النص الأول (من)
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Color.fromARGB(
+                                                          230, 50, 49, 49),
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: 'to ', // كلمة "to" بلون مختلف
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Colors.red, // تغيير اللون هنا
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: '${trip['to']}',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Color.fromARGB(
+                                                          230, 50, 49, 49),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Text(
+                                              'Price: ${trip['price']}',
+                                              style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+
                                       ],
                                     ),
                                   ),
