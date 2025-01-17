@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  flutter_stripe: ^9.3.0
   fl_chart: ^0.40.0
   table_calendar: ^3.0.7
   flutter_calendar_carousel: ^2.4.4

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -8,11 +9,13 @@ import 'theme_provider.dart'; // تأكد من استيراد ملف ThemeProvid
 import 'onbording_screen.dart'; // تأكد من استيراد ملف OnboardingScreen بشكل صحيح
 import 'language_provider.dart'; // استيراد الـ LanguageProvider
 import 'package:firebase_core/firebase_core.dart'; // استيراد Firebase
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // ضمان التهيئة الصحيحة للويدجت
   await Firebase.initializeApp(); // تهيئة Firebase
+// إعداد Stripe
 
+  Stripe.publishableKey ="pk_test_51QhdjdRtHpyhJq0TatCV5Bh2tDxu0rCmVQe9XhDGJ0OgK6RsIHjP579y9ovwusHnc6hPd5xxUBAoe60goiEP233v00pADsJo1U";
+  await Stripe.instance.applySettings();
   runApp(
     MultiProvider(
       providers: [
