@@ -465,7 +465,7 @@ class _TestPageState extends State<TestPage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                             builder: (context) => DriverDetailsScreen(
+                                            builder: (context) => DriverDetailsScreen(
                                               name: trip['name'],
                                               email: trip['driverEmail'],
                                               phoneNumber: trip['phoneNumber'],
@@ -611,15 +611,15 @@ class _TestPageState extends State<TestPage> {
                                               TextSpan(
                                                 text: 'From: ',
                                                 style: TextStyle(
-                                                  color: Colors.green, // اللون الأخضر للنص الثابت
-                                                  fontWeight: FontWeight.bold
+                                                    color: Colors.green, // اللون الأخضر للنص الثابت
+                                                    fontWeight: FontWeight.bold
                                                 ),
                                               ),
                                               TextSpan(
                                                 text: '${trip['from']}',
                                                 style: TextStyle(
                                                   color: Colors.black,
-                                                    fontWeight: FontWeight.bold,
+                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 13,
 
                                                 ),

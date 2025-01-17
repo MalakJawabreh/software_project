@@ -443,9 +443,9 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(isArabic ? "البحث عن الرحلات" : "Search Trips", style: TextStyle(
-          color: Colors.blueGrey,
-          fontSize: 26,
-          fontWeight: FontWeight.bold
+            color: Colors.blueGrey,
+            fontSize: 26,
+            fontWeight: FontWeight.bold
         )),
         backgroundColor: Colors.white,
         actions: [
@@ -511,12 +511,12 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                     style: TextStyle(color:triadicPink), // لون النص في زر الموافقة
                   ),
                   dialogHeight: calculateDialogHeight(isArabic ? _filterOptionsArabic : _filterOptions),
-                    onConfirm: (results) {
-                      setState(() {
-                        _selectedFilters = List<String>.from(results);
-                        print("الفلاتر المختارة: $_selectedFilters"); // طباعة الفلاتر المختارة
-                      });
-                    },
+                  onConfirm: (results) {
+                    setState(() {
+                      _selectedFilters = List<String>.from(results);
+                      print("الفلاتر المختارة: $_selectedFilters"); // طباعة الفلاتر المختارة
+                    });
+                  },
                 ),
                 // فلتر نوع السيارة
                 if (_selectedFilters.contains(isArabic ? "نوع السيارة" : "Car Type"))
@@ -654,7 +654,7 @@ class _SearchTripsPageState extends State<SearchTripsPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TripDetailsScreen(trip: trip,emailP:widget.emailP,nameP: widget.nameP,phoneP:widget.phoneP,)),
+                              builder: (context) => TripDetailsScreen(trip: trip,emailP:widget.emailP,nameP: widget.nameP,phoneP:widget.phoneP,)),
                         );
                       },
                       child: Card(

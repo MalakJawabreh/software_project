@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import 'BookingDetailsScreen.dart';
 import 'notifications_service.dart';
 import 'EditBookingScreen.dart';
+import 'PaymentPage.dart';
+import'payment_manager.dart';
 
 class BookingTripsPage extends StatefulWidget {
   final String emailP;
@@ -272,21 +274,41 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly, // لتقليل المسافات بين الأزرار
                               children: [
                                 TextButton(
-                                  onPressed: () {
-                                    // تأكيد الحجز
+                                  onPressed: () async {
+                                    final price = booking['price']; // الحصول على السعر من البيانات
+                                    if (price != null && price > 0) {
+                                      try {
+                                        await PaymentManager.makePayment(price, "ils"); // استخدام السعر الديناميكي
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text(isArabic ? 'تمت عملية الدفع بنجاح' : 'Payment successful'),
+                                          backgroundColor: Colors.green,
+                                        ));
+                                      } catch (error) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text(isArabic ? 'فشلت عملية الدفع' : 'Payment failed: $error'),
+                                          backgroundColor: Colors.red,
+                                        ));
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                        content: Text(isArabic ? 'السعر غير متوفر' : 'Price not available'),
+                                        backgroundColor: Colors.orange,
+                                      ));
+                                    }
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                    backgroundColor: primaryColor, // لون الزر
-                                    foregroundColor: Colors.white, // لون النص
+                                    backgroundColor: primaryColor,
+                                    foregroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      side: BorderSide(color: Colors.white, width: 1.5), // إضافة الحدود البيضاء حول الزر
+                                      side: BorderSide(color: Colors.white, width: 1.5),
                                     ),
-                                    elevation: 5, // إضافة ظل خفيف للزر
+                                    elevation: 5,
                                   ),
-                                  child: Text(isArabic ? 'ادفع الأن' : 'Pay Now'),
+                                  child: Text(isArabic ? 'ادفع الآن' : 'Pay Now'),
                                 ),
+
                                 TextButton(
                                   onPressed: () {
                                     showDialog(

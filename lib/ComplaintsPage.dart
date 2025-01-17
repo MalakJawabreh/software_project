@@ -643,7 +643,7 @@ class _ComplaintsPageState extends State<ComplaintsPage> {
     );
   }
 
-_launchWhatsApp(String number) async {
+  _launchWhatsApp(String number) async {
     final whatsappUrl = "https://wa.me/$number?text=Hello%20I%20have%20a%20complaint.";
     await canLaunch(whatsappUrl) ? await launch(whatsappUrl) : throw 'Could not launch $whatsappUrl';
   }

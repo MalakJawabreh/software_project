@@ -219,11 +219,11 @@ class _RatingPageState extends State<RatingPage> {
                           });
                           print("Rating: $selectedStars stars"); // طباعة درجة الريتنغ
                         },
-                            child: Icon(
-                              index < selectedStars ? Icons.star : Icons.star_border, // تغيير الأيقونة بناءً على التحديد
-                              color: Colors.yellow, // لون النجوم والحدود
-                              size: 30,
-                            ),
+                        child: Icon(
+                          index < selectedStars ? Icons.star : Icons.star_border, // تغيير الأيقونة بناءً على التحديد
+                          color: Colors.yellow, // لون النجوم والحدود
+                          size: 30,
+                        ),
                       ),
                     ),
                   ),
@@ -347,165 +347,165 @@ class _RatingPageState extends State<RatingPage> {
           ? Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(  // إضافة SingleChildScrollView هنا
-        child: Column(
-          children: [
-            Text(
-              isArabic
-                  ? "من فضلك قم باعطائنا رأيك لمساعدتنا في تطوير تطبيقنا وخدماتنا . نحن نسعى لأجلكم دائما."
-                  : "If you'd like to help us improve our service and app, we kindly ask you to rate the trips and drivers you have previously interacted with.",
-              style: TextStyle(
-                color: Colors.grey[600], // لون النص
-                fontSize: 16, // حجم الخط
-                fontWeight: FontWeight.bold, // جعل النص عريضًا
+          child: Column(
+            children: [
+              Text(
+                isArabic
+                    ? "من فضلك قم باعطائنا رأيك لمساعدتنا في تطوير تطبيقنا وخدماتنا . نحن نسعى لأجلكم دائما."
+                    : "If you'd like to help us improve our service and app, we kindly ask you to rate the trips and drivers you have previously interacted with.",
+                style: TextStyle(
+                  color: Colors.grey[600], // لون النص
+                  fontSize: 16, // حجم الخط
+                  fontWeight: FontWeight.bold, // جعل النص عريضًا
+                ),
               ),
-            ),
-            SizedBox(height: 16), // مسافة بين الجملة والقائمة
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(), // منع التمرير داخل القائمة
-              itemCount: expiredBookings.length,
-              itemBuilder: (context, index) {
-                final booking = expiredBookings[index];
-                final from = booking['from'] ?? (isArabic ? 'غير محدد' : 'Not specified');
-                final to = booking['to'] ?? (isArabic ? 'غير محدد' : 'Not specified');
-                final dateRaw = booking['date'];
-                final formattedDate = dateRaw != null && dateRaw.isNotEmpty
-                    ? formatDate(dateRaw)
-                    : (isArabic ? 'غير محدد' : 'Not specified');
-                final extractedTime = dateRaw != null && dateRaw.isNotEmpty
-                    ? formatTime(dateRaw)
-                    : (isArabic ? 'غير محدد' : 'Not specified');
-                final customTime = booking['time'] ?? extractedTime;
+              SizedBox(height: 16), // مسافة بين الجملة والقائمة
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(), // منع التمرير داخل القائمة
+                itemCount: expiredBookings.length,
+                itemBuilder: (context, index) {
+                  final booking = expiredBookings[index];
+                  final from = booking['from'] ?? (isArabic ? 'غير محدد' : 'Not specified');
+                  final to = booking['to'] ?? (isArabic ? 'غير محدد' : 'Not specified');
+                  final dateRaw = booking['date'];
+                  final formattedDate = dateRaw != null && dateRaw.isNotEmpty
+                      ? formatDate(dateRaw)
+                      : (isArabic ? 'غير محدد' : 'Not specified');
+                  final extractedTime = dateRaw != null && dateRaw.isNotEmpty
+                      ? formatTime(dateRaw)
+                      : (isArabic ? 'غير محدد' : 'Not specified');
+                  final customTime = booking['time'] ?? extractedTime;
 
-                return GestureDetector(
-                  onTap: () {
-                    // تنفيذ الإجراء عند النقر على البطاقة
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookingDetailsScreen(booking: booking),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            // complementaryPink, // اللون الزهري
-                            yellowColor2,
-                            yellowColor1,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  return GestureDetector(
+                    onTap: () {
+                      // تنفيذ الإجراء عند النقر على البطاقة
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingDetailsScreen(booking: booking),
                         ),
+                      );
+                    },
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
+                      margin: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              // complementaryPink, // اللون الزهري
+                              yellowColor2,
+                              yellowColor1,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
 
-                                ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  ),
+                                  SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          isArabic
+                                              ? 'من $from إلى $to'
+                                              : 'From $from To $to',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            color: primaryColor2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Divider(color: Colors.grey),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
                                     children: [
+                                      Icon(Icons.calendar_today, color: analogousPink),
+                                      SizedBox(width: 4),
                                       Text(
-                                        isArabic
-                                            ? 'من $from إلى $to'
-                                            : 'From $from To $to',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          color: primaryColor2,
+                                        formattedDate,
+                                        style: TextStyle(fontSize:17,color: Colors.black,fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time, color: analogousPink),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        customTime,
+                                        style: TextStyle(fontSize:17,color: Colors.black,fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          showRatingDialog(context,booking['nameD'],booking['EmailD'],booking['nameP']);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: analogousPink, // لون الزر
+                                          foregroundColor: Colors.white, // لون النص داخل الزر
+                                          padding: EdgeInsets.symmetric(horizontal: 50, vertical: 6), // حجم الزر
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20), // حواف مستديرة
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Rating",
+                                          style: TextStyle(
+                                            fontSize: 20, // حجم النص
+                                            //fontWeight: FontWeight.bold, // سماكة النص
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-                            Divider(color: Colors.grey),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.calendar_today, color: analogousPink),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      formattedDate,
-                                      style: TextStyle(fontSize:17,color: Colors.black,fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Icon(Icons.access_time, color: analogousPink),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      customTime,
-                                      style: TextStyle(fontSize:17,color: Colors.black,fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        showRatingDialog(context,booking['nameD'],booking['EmailD'],booking['nameP']);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: analogousPink, // لون الزر
-                                        foregroundColor: Colors.white, // لون النص داخل الزر
-                                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 6), // حجم الزر
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20), // حواف مستديرة
-                                        ),
-                                      ),
-                                      child: Text(
-                                        "Rating",
-                                        style: TextStyle(
-                                          fontSize: 20, // حجم النص
-                                          //fontWeight: FontWeight.bold, // سماكة النص
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
 
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                  ,
-                );
-              },
-            ),
-          ],
+                    )
+                    ,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-      ),
       )
           : Center(
         child: Text(
