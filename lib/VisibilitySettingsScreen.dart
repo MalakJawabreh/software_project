@@ -38,7 +38,7 @@ class _VisibilitySettingsScreenState extends State<VisibilitySettingsScreen> {
           isArabic ? 'إعدادات الرؤية' : 'Visibility Settings',
           style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: SecondryColor,
+        backgroundColor: Colors.white,
       ),
       body: Container(
         decoration: const BoxDecoration(),
@@ -48,7 +48,7 @@ class _VisibilitySettingsScreenState extends State<VisibilitySettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isArabic ? 'اختيارات الرؤية' : 'Visibility Options',
+                isArabic ? 'اختيارات الرؤية:' : 'Visibility Options:',
                 style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -98,7 +98,7 @@ class _VisibilitySettingsScreenState extends State<VisibilitySettingsScreen> {
                   child: Text(
                     isArabic ? 'حفظ' : 'Save',
                     style: const TextStyle(
-                      fontSize: 18, // حجم النص أكبر
+                      fontSize: 21, // حجم النص أكبر
                       fontWeight: FontWeight.bold,
                       color: SecondryColor,
                     ),
@@ -153,7 +153,7 @@ class _VisibilitySettingsScreenState extends State<VisibilitySettingsScreen> {
 
 //const Color SecondryColor = Color.fromARGB(230, 196, 209, 219);
 //const Color primaryColor = Color.fromARGB(230, 41, 84, 115);
-const Color primaryColor = Color(0xFF296873); // Color from your previous design
+const Color primaryColor = Color.fromARGB(230, 24, 83, 131); // Color from your previous design
 const Color accentColor = Color(0xFF00796B); // Accent color for action items like buttons
 const Color SecondryColor = Color(0xFFE1F5FE); // A lighter background color for cards and inputs
 

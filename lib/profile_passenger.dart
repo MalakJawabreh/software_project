@@ -11,19 +11,18 @@ import 'config.dart';
 import 'driver_data_model.dart';
 import 'income_overview.dart';
 
-class ProfileDriver extends StatefulWidget {
+class ProfilePassenger extends StatefulWidget {
   final String username;
   final String email;
-  final List<dynamic> completedTrips;
 
-  const ProfileDriver({required this.username, required this.email,required this.completedTrips, Key? key})
+  const ProfilePassenger({required this.username, required this.email, Key? key})
       : super(key: key);
 
   @override
-  _ProfileDriverState createState() => _ProfileDriverState();
+  _ProfilePassengerState createState() => _ProfilePassengerState();
 }
 
-class _ProfileDriverState extends State<ProfileDriver> {
+class _ProfilePassengerState extends State<ProfilePassenger> {
   String _bioText = "Enter Your Bio.";
   bool _isEditing = false; // لتحديد إذا كنا في وضع التعديل أم لا
   TextEditingController _controller = TextEditingController();
@@ -38,7 +37,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
     _controller.text = _bioText; // تعيين النص الحالي في الـ controller
     print(widget.email);
 
-      fetchProfilePicture();
+    fetchProfilePicture();
   }
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -56,9 +55,9 @@ class _ProfileDriverState extends State<ProfileDriver> {
   }
 
   void saveProfilepicture() {
-      Provider.of<DriverDataModel>(context, listen: false).setProfileImage(
+    Provider.of<DriverDataModel>(context, listen: false).setProfileImage(
         File(_profileImage!.path)
-      );
+    );
   }
   Future<void> _updateProfileImage(String imagePath) async {
 
@@ -130,38 +129,38 @@ class _ProfileDriverState extends State<ProfileDriver> {
       print("Error converting image to Base64: $e");
       return null;
     }
-}
+  }
 
   Future<String?> fetchProfilePicture() async {
 
-      try {
-        // URL الخاص بالـ API
-        final url = Uri.parse('$profile_picture?email=${widget.email}');
+    try {
+      // URL الخاص بالـ API
+      final url = Uri.parse('$profile_picture?email=${widget.email}');
 
-        // إرسال طلب GET
-        final response = await http.get(url);
+      // إرسال طلب GET
+      final response = await http.get(url);
 
-        if (response.statusCode == 200) {
-          // فك تشفير الـ JSON
-          final data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        // فك تشفير الـ JSON
+        final data = json.decode(response.body);
 
-          if (data['status'] == true) {
-            profilePicture = data['profilePicture'];
-            setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
-            print("Fetched profile picture URL: $profilePicture");
-            return profilePicture;
-          } else {
-            throw Exception(data['error']);
-          }
+        if (data['status'] == true) {
+          profilePicture = data['profilePicture'];
+          setState(() {}); // إعادة تعيين الحالة لتحديث الصورة الجديدة
+          print("Fetched profile picture URL: $profilePicture");
+          return profilePicture;
         } else {
-          throw Exception(
-              "Failed to fetch profile picture. Status code: ${response
-                  .statusCode}");
+          throw Exception(data['error']);
         }
-      } catch (e) {
-        print("Error fetching profile picture: $e");
-        return null;
+      } else {
+        throw Exception(
+            "Failed to fetch profile picture. Status code: ${response
+                .statusCode}");
       }
+    } catch (e) {
+      print("Error fetching profile picture: $e");
+      return null;
+    }
 
   }
 
@@ -230,16 +229,16 @@ class _ProfileDriverState extends State<ProfileDriver> {
             child: Row(
               children: [
                 GestureDetector(
-                   onTap: _pickImage,
-                   child: Stack(
-                     children: [
-                           CircleAvatar(
-                             radius: 35,
-                            backgroundImage:profilePicture.isNotEmpty
-                       ? MemoryImage(base64Decode(profilePicture))
-                       : null,
-                          ),
-                     Positioned(
+                  onTap: _pickImage,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 35,
+                        backgroundImage:profilePicture.isNotEmpty
+                            ? MemoryImage(base64Decode(profilePicture))
+                            : null,
+                      ),
+                      Positioned(
                         bottom: 0,
                         right: 0,
                         child: Icon(
@@ -248,102 +247,102 @@ class _ProfileDriverState extends State<ProfileDriver> {
                           color: Colors.black,
                           //backgroundColor: Colors.indigo,
                           //shape: BoxShape.circle,
-                         ),
-                       ),
-                     ],
-                   ),
-                 ),
-                SizedBox(width: 20),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.username,
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            SizedBox(height: 8), // مسافة بين الاسم والتقييم
-            FutureBuilder<Map<String, dynamic>?>(
-              future: getAverageRating(), // استدعاء دالة الحصول على التقييم
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text(
-                    'Loading...',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Color.fromARGB(230, 24, 83, 131),
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Text(
-                    'Error: ${snapshot.error}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Color.fromARGB(230, 24, 83, 131),
-                    ),
-                  );
-                } else if (snapshot.hasData) {
-                  // تحويل قيمة التقييم من String إلى double
-                  final averageRating = snapshot.data?['averageRating'];
-                  if (averageRating != null) {
-                    double rating = double.tryParse(averageRating.toString()) ?? 0.0;
-
-                    int fullStars = rating.floor(); // النجوم الممتلئة
-                    int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
-                    int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
-
-                    return Row(
-                      children: [
-                        // النجوم
-                        Row(
-                          children: [
-                            for (int i = 0; i < fullStars; i++)
-                              Icon(Icons.star, color: Colors.amber, size: 20),
-                            for (int i = 0; i < halfStars; i++)
-                              Icon(Icons.star_half, color: Colors.amber, size: 20),
-                            for (int i = 0; i < emptyStars; i++)
-                              Icon(Icons.star_border, color: Colors.amber, size: 20),
-                          ],
                         ),
-                        SizedBox(width: 8), // مسافة بين النجوم والرقم
-                        // التقييم كرقم
-                        Text(
-                          '$rating', // عرض التقييم كرقم
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(230, 24, 83, 131),
-                          ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return Row(
-                      children: [
-                        for (int i = 0; i < 5; i++)
-                          Icon(Icons.star_border, color: Colors.amber, size: 20),
-                      ],
-                    );
-                  }
-                } else {
-                  return Row(
-                    children: [
-                      for (int i = 0; i < 5; i++)
-                        Icon(Icons.star_border, color: Colors.amber, size: 20),
+                      ),
                     ],
-                  );
-                }
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.username,
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 8), // مسافة بين الاسم والتقييم
+                      FutureBuilder<Map<String, dynamic>?>(
+                        future: getAverageRating(), // استدعاء دالة الحصول على التقييم
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Text(
+                              'Loading...',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Color.fromARGB(230, 24, 83, 131),
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Text(
+                              'Error: ${snapshot.error}',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Color.fromARGB(230, 24, 83, 131),
+                              ),
+                            );
+                          } else if (snapshot.hasData) {
+                            // تحويل قيمة التقييم من String إلى double
+                            final averageRating = snapshot.data?['averageRating'];
+                            if (averageRating != null) {
+                              double rating = double.tryParse(averageRating.toString()) ?? 0.0;
 
-              },
-            ),
-          ],
-        ),
-      )
-      ],
+                              int fullStars = rating.floor(); // النجوم الممتلئة
+                              int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
+                              int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
+
+                              return Row(
+                                children: [
+                                  // النجوم
+                                  Row(
+                                    children: [
+                                      for (int i = 0; i < fullStars; i++)
+                                        Icon(Icons.star, color: Colors.amber, size: 20),
+                                      for (int i = 0; i < halfStars; i++)
+                                        Icon(Icons.star_half, color: Colors.amber, size: 20),
+                                      for (int i = 0; i < emptyStars; i++)
+                                        Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                    ],
+                                  ),
+                                  SizedBox(width: 8), // مسافة بين النجوم والرقم
+                                  // التقييم كرقم
+                                  Text(
+                                    '$rating', // عرض التقييم كرقم
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(230, 24, 83, 131),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Row(
+                                children: [
+                                  for (int i = 0; i < 5; i++)
+                                    Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                ],
+                              );
+                            }
+                          } else {
+                            return Row(
+                              children: [
+                                for (int i = 0; i < 5; i++)
+                                  Icon(Icons.star_border, color: Colors.amber, size: 20),
+                              ],
+                            );
+                          }
+
+                        },
+                      ),
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
           Divider(),
@@ -378,30 +377,9 @@ class _ProfileDriverState extends State<ProfileDriver> {
           ),
           SizedBox(height: 15),
           ListTile(
-            leading: Icon(Icons.attach_money, color:Color.fromARGB(230, 24, 83, 131), size: 31),
-            title: Text(
-              "Income Overview",
-              style: TextStyle(
-                fontSize: 23, // تحديد حجم الخط
-                color: Colors.blueGrey, // تغيير اللون
-                fontWeight: FontWeight.bold, // تغيير سمك الخط
-              ),
-            ),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => IncomeOverview(completedTrips:widget.completedTrips),
-                ),
-              );
-            },
-          ),
-          SizedBox(height: 15),
-          ListTile(
             leading: Icon(Icons.lightbulb_circle_rounded, color:Color.fromARGB(230, 24, 83, 131), size: 31),
             title: Text(
-              "Status",
+              "Status Profile",
               style: TextStyle(
                 fontSize: 23, // تحديد حجم الخط
                 color: Colors.blueGrey, // تغيير اللون
@@ -410,6 +388,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
             ),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -417,6 +396,7 @@ class _ProfileDriverState extends State<ProfileDriver> {
                   ),
                 ),
               );
+
             },
           ),
           SizedBox(height: 15),

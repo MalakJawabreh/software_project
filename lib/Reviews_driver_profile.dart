@@ -97,7 +97,7 @@ class _ReviewsForDriverState extends State<ReviewsForDriver> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Feedback Reviews',style: TextStyle(fontSize: 25),),
+        title: Text('Feedback Reviews',style: TextStyle(fontWeight:FontWeight.bold,fontSize: 25,color: Color.fromARGB(230, 24, 83, 131),),),
         centerTitle: true,
       ),
       body: Column(

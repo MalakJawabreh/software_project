@@ -397,11 +397,11 @@ class _DriverState extends State<Driver> {
   String getGreetingMessage(String username) {
     final hour = DateTime.now().hour; // الحصول على الساعة الحالية
     final firstName = username.split(" ").first; // الحصول على الاسم الأول فقط
-    if (hour >= 6 && hour < 18) {
-      // إذا كانت بين 6 صباحًا و6 مساءً
+    if (hour >= 0 && hour < 12) {
+      // إذا كانت بين منتصف الليل والظهر
       return "Good Morning, $firstName !";
     } else {
-      // إذا كانت بعد 6 مساءً أو قبل 6 صباحًا
+      // إذا كانت بعد الظهر وحتى منتصف الليل
       return "Good Evening, $firstName !";
     }
   }
@@ -707,6 +707,7 @@ class _DriverState extends State<Driver> {
                                 builder: (context) => ProfileDriver(
                                   email: email,
                                   username: username,
+                                    completedTrips:completedTrips
                                 ),
                               ),
                             );
@@ -1234,6 +1235,9 @@ class _DriverState extends State<Driver> {
                           itemCount: completedTrips.length,
                           itemBuilder: (context, index) {
                             final trip = completedTrips[index];
+                            // حساب السعر الكامل للرحلة
+                            final totalIncome = trip['currentPassengers'] * trip['price'];
+
                             return Card(
                               elevation: 4,
                               margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -1304,7 +1308,7 @@ class _DriverState extends State<Driver> {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Padding(
-                                                padding: const EdgeInsets.only(top: 1.0),  // المسافة من الأعلى
+                                                padding: const EdgeInsets.only(top: 12.0),  // المسافة من الأعلى
                                                 child: Row(
                                                   children: [
                                                     RichText(
@@ -1330,17 +1334,11 @@ class _DriverState extends State<Driver> {
                                                       ),
                                                     ),
                                                     Spacer(),  // هذا سيضمن أن الأيقونة تكون في أقصى اليمين
-                                                    IconButton(
-                                                      icon: Icon(Icons.map_outlined, color:Color.fromARGB(230, 41, 84, 115),),  // اختر الأيقونة المناسبة (مثل خريطة)
-                                                      onPressed: () {
-                                                        // أضف هنا الكود الذي سيعرض الخريطة أو يقوم بالإجراء الذي تريده
-                                                        print("Open map from ${trip['from']} to ${trip['to']}");
-                                                      },
-                                                    ),
+
                                                   ],
                                                 ),
                                               ),
-                                              const SizedBox(height: 7),
+                                              const SizedBox(height: 20),
                                               RichText(
                                                 text: TextSpan(
                                                   children: [
@@ -1372,7 +1370,7 @@ class _DriverState extends State<Driver> {
                                     SizedBox(height: 1),
                                     // Number of passengers
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Icon(Icons.person, color: Colors.black, size: 25), // الأيقونة
                                         SizedBox(width: 4),  // المسافة بين الأيقونة والنص
@@ -1401,6 +1399,30 @@ class _DriverState extends State<Driver> {
                                         SizedBox(width: 135),
                                         Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
 
+                                      ],
+                                    ),
+                                    SizedBox(height: 10,),
+                                    // عرض السعر الكامل للرحلة
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Total Income:",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        SizedBox(width: 10,),
+                                        Text(
+                                          "${totalIncome.toStringAsFixed(2)}  ILS",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.red,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ],

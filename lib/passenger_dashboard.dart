@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:project1/profile_passenger.dart';
 import 'package:project1/rating_page.dart';
 import 'package:project1/test.dart';
 import 'dart:async';
@@ -431,7 +432,7 @@ class _PassengerState extends State<Passenger> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProfileDriver(
+                              builder: (context) => ProfilePassenger(
                                 email: email,
                                 username: fullName,
                               ),
