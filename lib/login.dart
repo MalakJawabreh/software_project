@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:project1/register.dart';
 import 'package:http/http.dart' as http ;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'AdminDashboard.dart';
 import 'config.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dashboard.dart';
 import 'driver_dashboard.dart';
+import 'no.dart';
 import 'passenger_dashboard.dart';
 import 'professional_dashboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -71,6 +73,12 @@ class _LoginState extends State<Login> {
           body: jsonEncode(regbody));
 
       var jsonResponse = jsonDecode(response.body);
+
+      var response2 = await http.post(Uri.parse(loginadmin),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(regbody));
+
+      var jsonResponse2 = jsonDecode(response2.body);
       if (jsonResponse['status']) {
         var myToken = jsonResponse['token'];
         var userRole = jsonResponse['role'];
@@ -89,10 +97,19 @@ class _LoginState extends State<Login> {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => Professional(token: myToken)),
           );
-        } else {
-          print('Role not recognized');
         }
-      } else {
+      }
+      else  if (jsonResponse2['status']) {
+        var myToken = jsonResponse2['token'];
+        var userRole = jsonResponse2['role'];
+
+        if (userRole == 'admin') {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => AdminDashboardPage()),
+          );
+        }
+      }
+      else {
         // طباعة الرسالة الواردة من السيرفر في حالة وجود خطأ
         String errorMessage = jsonResponse['message'] ?? 'Unknown error occurred';
         if (errorMessage == 'Email does not exist') {

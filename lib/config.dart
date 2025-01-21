@@ -35,6 +35,10 @@ final getTripsByGender=url + "getTripsByGender";
 final average_rate=url + "average_rate";
 final get_rev_from_to = url +"get_rev_from_to";
 
+final loginadmin = url +"loginadmin";
+
+
+
 
 
 
