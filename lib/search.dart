@@ -580,7 +580,7 @@ class _SetDestinationPageState extends State<SetDestinationPage> {
                           icon: Icon(Icons.add,color: Color.fromARGB(230, 149, 117, 84),),
                           onPressed: () {
                             setState(() {
-                              if (maxPassengers < 100) {
+                              if (maxPassengers < 5) {
                                 maxPassengers++;
                                 _maxPassengersController.text = maxPassengers.toString(); // تحديث القيمة في الحقل
                               }

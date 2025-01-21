@@ -80,6 +80,11 @@ class DriverDataModel with ChangeNotifier {
   String? licenseExpirationDate;
   File? licenseImage;
 
+  // بيانات الرخصة
+  String? expirationDatecar;
+  File? licenseImagecar;
+
+
   // صورة البروفايل
   File? profileImage;
 
@@ -130,6 +135,17 @@ class DriverDataModel with ChangeNotifier {
   }) {
     this.licenseExpirationDate = expirationDate;
     this.licenseImage = licenseImage;
+    notifyListeners();
+  }
+
+  // تحديث بيانات الرخصة
+  void setLicenseDetailsCar({
+    required String expirationDatecar,
+    required File? licenseImagecar,
+
+  }) {
+    this.expirationDatecar = expirationDatecar;
+    this.licenseImagecar = licenseImagecar;
     notifyListeners();
   }
 

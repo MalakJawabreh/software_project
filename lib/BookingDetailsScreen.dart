@@ -47,6 +47,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
     final languageProvider = Provider.of<LanguageProvider>(context);
     final isArabic = languageProvider.isArabic;
 
+
     // استخراج البيانات من الحجز
     final nameP = widget.booking['nameP'] ?? (isArabic ? 'غير محدد' : 'Not specified');
     final emailP = widget.booking['EmailP'] ?? (isArabic ? 'غير محدد' : 'Not specified');
@@ -66,7 +67,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
     return Scaffold(
       appBar: AppBar(
 
-        backgroundColor: primaryColor,
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,15 +99,19 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
 
               // تفاصيل الرحلة
               _buildSectionTitle(isArabic ? 'تفاصيل الرحلة' : 'Trip Details'),
-              _buildDetailCard(isArabic, isArabic ? 'من:' : 'From:', from),
-              _buildDetailCard(isArabic, isArabic ? 'إلى:' : 'To:', to),
-              _buildDetailCard(isArabic, isArabic ? 'السعر:' : 'Price:', '\$${price.toString()}'),
-              _buildDetailCard(isArabic, isArabic ? 'التاريخ:' : 'Date:', date != null ? '${date.day}/${date.month}/${date.year}' : (isArabic ? 'غير محدد' : 'Not specified')),
-              _buildDetailCard(isArabic, isArabic ? 'الوقت:' : 'Time:', time),
-              _buildDetailCard(isArabic, isArabic ? 'عدد المقاعد:' : 'Seats:', seat.toString()),
-              SizedBox(height: 16),
 
-              _buildDetailCard(isArabic, isArabic ? 'ماركة السيارة:' : 'Car Brand:', carBrand),
+            _buildDetailCard2(isArabic,from, to),
+
+            _buildDetailCard3(
+              isArabic,
+              date != null ? '${date.day}/${date.month}/${date.year}' : (isArabic ? 'غير محدد' : 'Not specified'),
+              time,
+                '${price.toString()}\ ILS'
+            ),
+
+            _buildDetailCard(isArabic, isArabic ? 'عدد المقاعد:' : 'Seats:', seat.toString()),
+
+              _buildDetailCard4(isArabic, isArabic ? 'ماركة السيارة:' : 'Car Brand:', carBrand),
 
               // ملاحظات
               _buildSectionTitle(isArabic ? 'الملاحظات' : 'Notes'),
@@ -124,7 +129,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         title,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryColor),
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryColor),
       ),
     );
   }
@@ -137,7 +142,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
       child: GestureDetector(
         onTap: onTap,
         child: Card(
-          color: SecondryColor,
+          color: Color.fromARGB(230, 245, 249, 255),
           elevation: 5,
           margin: const EdgeInsets.only(bottom: 15),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -148,17 +153,17 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
               children: [
                 // إضافة الأيقونة بجانب الاسم فقط إذا كان هذا هو كارد السائق
                 if (label == "") ...[
-                  Icon(Icons.account_circle, color: Colors.black, size: 30),
+                  Icon(Icons.account_circle, color: Colors.grey[600], size: 30),
                   SizedBox(width: 8), // مسافة بين الأيقونة والاسم
                 ],
                 Text(
                   label,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                ),
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(
+                      150, 189, 10, 102)),                ),
                 Expanded(
                   child: Text(
                     value,
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
                     textAlign: isArabic ? TextAlign.right : TextAlign.left, // عرض النص حسب اللغة
                   ),
                 ),
@@ -169,6 +174,236 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
       ),
     );
   }
+  bool _isDetailVisible = false; // التحكم في عرض التفاصيل الإضافية
+
+
+  Widget _buildDetailCard4(bool isArabic, String label, String value, [VoidCallback? onTap]) {
+
+    return AnimatedOpacity(
+      opacity: 1.0,
+      duration: Duration(seconds: 1),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Card(
+          color: Color.fromARGB(230, 245, 249, 255),
+          elevation: 5,
+          margin: const EdgeInsets.only(bottom: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(150, 189, 10, 102)),
+                    ),
+                    Expanded(
+                      child: Text(
+                        value,
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                      ),
+                    ),
+                    // السهم في أقصى اليمين
+                    IconButton(
+                      icon: Icon(Icons.arrow_drop_down),
+                      onPressed: () {
+                        setState(() {
+                          _isDetailVisible = !_isDetailVisible; // تبديل القيمة عند الضغط على السهم
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                // توسيع الكارد عند تغيير _isDetailVisible إلى true
+                if (_isDetailVisible) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Car Number : 123456 ', style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold)),
+                        Row(
+                          children: [
+                            Text('Color : ', style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold)),
+                            Container(
+                              width: 20, // عرض المربع
+                              height: 20, // ارتفاع المربع
+                              color: Colors.red, // لون المربع
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+
+
+
+
+  Widget _buildDetailCard2(bool isArabic, String from, String to, [VoidCallback? onTap]) {
+    return AnimatedOpacity(
+      opacity: _isVisible ? 1.0 : 0.0, // استخدام متغير التحكم في التلاشي
+      duration: Duration(seconds: 1), // زمن التلاشي
+      child: GestureDetector(
+        onTap: onTap,
+        child: Card(
+          color: Color.fromARGB(230, 245, 249, 255),
+          elevation: 5,
+          margin: const EdgeInsets.only(bottom: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // "From" النص والقيمة
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(Icons.location_on, color: Colors.green, size: 20), // الأيقونة
+                    SizedBox(width: 8), // مسافة بين الأيقونة والنص
+                    Text(
+                      isArabic ? 'من:' : 'From: ',
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(
+                          150, 189, 10, 102)),
+                    ),
+                    Expanded(
+                      child: Text(
+                          from,
+                        style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold),
+                        textAlign: isArabic ? TextAlign.right : TextAlign.left, // عرض النص حسب اللغة
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5), // مسافة بين "From" و "To"
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0), // تحديد المسافة على اليسار
+                  child: Container(
+                    width: 2, // عرض الخط
+                    height: 20, // طول الخط
+                    color: Colors.grey, // لون الخط
+                  ),
+                ),
+                // "To" النص والقيمة
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(Icons.location_on, color: Colors.green, size: 20), // الأيقونة
+                    SizedBox(width: 8),
+                    Text(
+                      isArabic ? 'إلى:' : 'To: ',
+                      style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(
+                          150, 189, 10, 102)),
+                    ),
+                    Expanded(
+                      child: Text(
+                        to,
+                        style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold),
+                        textAlign: isArabic ? TextAlign.right : TextAlign.left, // عرض النص حسب اللغة
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailCard3(bool isArabic, String date, String time,String Price, [VoidCallback? onTap]) {
+    return AnimatedOpacity(
+      opacity: _isVisible ? 1.0 : 0.0, // استخدام متغير التحكم في التلاشي
+      duration: Duration(seconds: 1), // زمن التلاشي
+      child: GestureDetector(
+        onTap: onTap,
+        child: Card(
+          color: Color.fromARGB(230, 245, 249, 255),
+          elevation: 5,
+          margin: const EdgeInsets.only(bottom: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // توزيع العناصر بالتساوي
+              children: [
+                // التاريخ
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isArabic ? 'التاريخ:' : 'Date:',
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(
+                            150, 189, 10, 102)),
+                      ),
+                      Text(
+                        date,
+                        style: TextStyle(fontSize: 16, color: Colors.black,fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 20), // مسافة بين العمودين
+                // الوقت
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isArabic ? 'الوقت:' : 'Time:',
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(
+                            150, 189, 10, 102)),
+                      ),
+                      Text(
+                        time,
+                        style: TextStyle(fontSize: 16, color: Colors.black,fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 20), // مسافة بين العمودين
+                // الوقت
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isArabic ? 'السعر:' : 'Price:',
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color.fromARGB(
+                            150, 189, 10, 102)),
+                      ),
+                      Text(
+                        Price,
+                        style: TextStyle(fontSize: 16, color: Colors.black,fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
 
   // بناء الملاحظات في واجهة المستخدم
   Widget _buildNoteCard(String note) {
@@ -176,7 +411,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
       opacity: _isVisible ? 1.0 : 0.0,
       duration: Duration(seconds: 1),
       child: Card(
-        color: SecondryColor, // تحديد اللون الأسود للكارد
+        color: Color.fromARGB(230, 245, 249, 255),
         elevation: 5,
         margin: const EdgeInsets.only(bottom: 15),
         shape: RoundedRectangleBorder(
@@ -186,7 +421,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen>
           padding: const EdgeInsets.all(15.0),
           child: Text(
             note,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 17,fontWeight: FontWeight.bold),
           ),
         ),
       ),

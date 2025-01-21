@@ -52,6 +52,30 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
     });
   }
 
+  Future<void> updatePayStatus(String bookingId) async {
+    final url = Uri.parse('$update_booking/$bookingId'); // عدّل رابط الـ API الخاص بك
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    final body = json.encode({
+      'pay': true, // تحديث حالة `pay` إلى `true`
+    });
+
+    try {
+      final response = await http.put(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Booking updated successfully: $responseData');
+      } else {
+        print('Failed to update booking. Status code: ${response.statusCode}');
+        print('Response: ${response.body}');
+      }
+    } catch (error) {
+      print('Error updating booking: $error');
+    }
+  }
+
   void updateTripsBasedOnTime() {
     final now = DateTime.now();
     final dateFormat = DateFormat("yyyy-MM-ddTHH:mm:ss.SSS'Z' h:mm a");
@@ -157,13 +181,30 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
       appBar: AppBar(
         title: Text(
           isArabic ? "حجوزاتي" : "My bookings",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: primaryColor,
+            fontSize: 23,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor:primaryColor,
+        backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.settings, // أيقونة الإعدادات
+              color: primaryColor, // لون الأيقونة
+            ),
+            onPressed: () {
+              // الكود الذي يتم تنفيذه عند الضغط على الأيقونة
+              print("Settings button pressed");
+            },
+          ),
+        ],
       ),
       body: bookings.isNotEmpty
           ? Padding(
         padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView( // إضافة SingleChildScrollView
         child: Column(
           children: [
             ListView.builder(
@@ -194,6 +235,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                     );
                   },
                   child: Card(
+                    //color: Color.fromARGB(230, 246, 216, 239),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -203,9 +245,10 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                           // complementaryPink, // اللون الزهري
-                            softPink,
-                            SecondryColor                          ],
+                            // complementaryPink, // اللون الزهري
+                            Color.fromARGB(230, 244, 225, 233),
+                            Color.fromARGB(230, 246, 216, 239),
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -227,14 +270,73 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        isArabic
-                                            ? 'من $from إلى $to'
-                                            : 'From $from To $to',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                          color: primaryColor2,
+                                      Text.rich(
+                                        TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.location_on, // الأيقونة التي تشير إلى الموقع
+                                                color: Colors.green, // لون الأيقونة
+                                                size: 22, // حجم الأيقونة
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: ' $from ', // النص الأول (من)
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Color.fromARGB(
+                                                    230, 50, 49, 49),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 25), // مسافة من اليسار
+                              child: Container(
+                                width: 2, // عرض الخط
+                                height: 20, // طول الخط
+                                color: Colors.grey, // لون الخط
+                              ),
+                            ),
+                            SizedBox(height: 2,),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text.rich(
+                                        TextSpan(
+                                          children: [
+                                            WidgetSpan(
+                                              child: Icon(
+                                                Icons.location_on, // الأيقونة التي تشير إلى الموقع
+                                                color: Colors.green, // لون الأيقونة
+                                                size: 22, // حجم الأيقونة
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: '$to',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Color.fromARGB(
+                                                    230, 50, 49, 49),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
@@ -243,6 +345,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                               ],
                             ),
                             Divider(color: Colors.grey),
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -252,7 +355,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     SizedBox(width: 4),
                                     Text(
                                       formattedDate,
-                                      style: TextStyle(color: Colors.black),
+                                      style: TextStyle(fontSize:18,color: Colors.black),
                                     ),
                                   ],
                                 ),
@@ -262,7 +365,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     SizedBox(width: 4),
                                     Text(
                                       customTime,
-                                      style: TextStyle(color: Colors.black),
+                                      style: TextStyle(fontSize:18,color: Colors.black),
                                     ),
                                   ],
                                 ),
@@ -283,6 +386,9 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                           content: Text(isArabic ? 'تمت عملية الدفع بنجاح' : 'Payment successful'),
                                           backgroundColor: Colors.green,
                                         ));
+
+                                        final bookingId = booking['_id'].toString();
+                                        updatePayStatus(bookingId);
                                       } catch (error) {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                           content: Text(isArabic ? 'فشلت عملية الدفع' : 'Payment failed: $error'),
@@ -306,7 +412,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     ),
                                     elevation: 5,
                                   ),
-                                  child: Text(isArabic ? 'ادفع الآن' : 'Pay Now'),
+                                  child: Text(isArabic ? 'ادفع الآن' : 'Pay Now',style: TextStyle(fontSize: 17),),
                                 ),
 
                                 TextButton(
@@ -346,7 +452,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                    backgroundColor: primaryColor, // لون الزر
+                                    backgroundColor: Colors.red, // لون الزر
                                     foregroundColor: Colors.white, // لون النص
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
@@ -354,7 +460,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     ),
                                     elevation: 5, // إضافة ظل خفيف للزر
                                   ),
-                                  child: Text(isArabic ? 'حذف' : 'Delete'),
+                                  child: Text(isArabic ? 'حذف' : 'Delete',style: TextStyle(fontSize: 17),),
                                 ),
 
                                 TextButton(
@@ -377,7 +483,8 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                    backgroundColor: primaryColor, // لون الزر
+                                    backgroundColor:Color.fromARGB(
+                                        230, 234, 186, 49), // لون الزر
                                     foregroundColor: Colors.white, // لون النص
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
@@ -385,7 +492,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
                                     ),
                                     elevation: 5, // إضافة ظل خفيف للزر
                                   ),
-                                  child: Text(isArabic ? 'تعديل' : 'Edit'),
+                                  child: Text(isArabic ? 'تعديل' : 'Edit',style: TextStyle(fontSize: 18),),
                                 )
                                 ,
                               ],
@@ -401,6 +508,7 @@ class _BookingTripsPageState extends State<BookingTripsPage> {
               },
             ),
           ],
+        ),
         ),
       )
           : Center(

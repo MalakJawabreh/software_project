@@ -27,18 +27,23 @@ class TestPage extends StatefulWidget {
 
 }
 
-class _TestPageState extends State<TestPage> {
+class _TestPageState extends State<TestPage> with SingleTickerProviderStateMixin {
   List<dynamic> trips = [];
+  List<dynamic> tripNear = [];
   List<int> selectedSeats = [];
   List<String> notes = []; // لتخزين الملاحظات
+  String location="Asira ash-Shamaliya";
+  final List<dynamic> nearTrips = [];
 
   late DriverDataModel driverDataModel; // تعريف المتغير
   Map<String, double?> ratings = {};  // لحفظ التقييمات حسب البريد الإلكتروني
 
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     print(widget.id);
     print('User ID: ${widget.id}');
     driverDataModel = Provider.of<DriverDataModel>(context, listen: false);
@@ -226,15 +231,50 @@ class _TestPageState extends State<TestPage> {
       );
     }
   }
+
+
+// دالة للتحقق إذا كانت المواقع في نفس المدينة
+  bool isSameCity(String from, String userLocation) {
+    // قائمة تربط المناطق بالمدن
+    Map<String, String> locationToCity = {
+      'Nablus': 'Nablus',
+      'Asira Ash-Shamaliya': 'Nablus',
+      'Nablus': 'Asira Ash-Shamaliya',
+      'جنين': 'مخيم جنين',
+      'مخيم جنين': 'جنين',
+      'Ramallah': 'Ramallah',
+      'Birzeit': 'Ramallah',
+      // أضف المزيد من المناطق والمدن هنا
+    };
+
+    // الحصول على المدينة الخاصة بكل موقع
+    String? fromCity = locationToCity[from];
+    String? userCity = locationToCity[userLocation];
+
+    // تحقق إذا كان كلاهما في نفس المدينة
+    return fromCity != null && userCity != null && fromCity == userCity;
+  }
+
+
   Future<void> fetchTrips() async {
     try {
       final response = await http.get(Uri.parse('$getTripsByGender/${widget.id}'));
 
-
       if (response.statusCode == 200) {
         final List<dynamic> tripList = json.decode(response.body)['trips'];
+
+        for (var trip in tripList) {
+          String fromLocation = trip['from']; // موقع الرحلة "from"
+
+          // تحقق إذا كان from والموقع الحالي في نفس المدينة
+          if (isSameCity(fromLocation, "Nablus")) {
+            nearTrips.add(trip);
+          }
+        }
+
         setState(() {
           trips = tripList;
+          tripNear = nearTrips; // الرحلات القريبة
           selectedSeats = List.filled(trips.length, 1);
           notes = List.filled(trips.length, ''); // تهيئة الملاحظات
         });
@@ -379,9 +419,22 @@ class _TestPageState extends State<TestPage> {
             fontSize: 25,
           ),
         ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'All'),
+            Tab(text: 'Near of You'),
+          ],
+        ),
         backgroundColor:Colors.white,
       ),
-      body: trips.isEmpty
+      body:TabBarView(
+        controller: _tabController,
+        children: [
+
+          _tabController.index == 0
+
+     ? trips.isEmpty
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -417,7 +470,7 @@ class _TestPageState extends State<TestPage> {
             padding: const EdgeInsets.symmetric(
                 vertical: 8.0, horizontal: 16.0),
             child: Card(
-              color :Color.fromARGB(230, 251, 249, 247),
+              color :Color.fromARGB(230, 228, 238, 248),
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -866,7 +919,484 @@ class _TestPageState extends State<TestPage> {
             ),
           );
         },
-      ),
+      )
+        : Center(child: Text('No content for All')), // استبدل بهذا المحتوى المناسب عند اختيار All
+
+          // Body for Near of You category
+          // Center(
+          //   child: Text(
+          //     'Near of You',
+          //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          //   ),
+          // ),
+          ListView.builder(
+            itemCount: tripNear.length,
+            itemBuilder: (context, index) {
+              final trip = tripNear[index];
+              print(tripNear[index]);
+              print("hi");
+
+              if (selectedSeats.length <= index) {
+                return SizedBox();
+              }
+
+              final email = trip['email'];  // افترض أن البريد الإلكتروني موجود في الـ trip
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 8.0, horizontal: 16.0),
+                child: Card(
+                  color :Color.fromARGB(230, 228, 238, 248),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (trip['maxPassengers'] == trip['currentPassengers'])
+                          Text(
+                            'Seat Bookings is full !',
+                            style: TextStyle(
+                              color: Colors.red, // لون للتأكيد
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        SizedBox(height: 16,),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.teal.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.directions_car,
+                                color:primaryColor2,
+                                size: 40,
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => DriverDetailsScreen(
+                                                  name: trip['name'],
+                                                  email: trip['driverEmail'],
+                                                  phoneNumber: trip['phoneNumber'],
+                                                  emailP:widget.emailP,
+                                                  nameP:widget.nameP,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Text(
+                                            '${trip['name'] ?? 'N/A'}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                              color: primaryColor2,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      // Text(
+                                      //   '${trip['phoneNumber'] ?? 'N/A'}',
+                                      //   style: TextStyle(
+                                      //     color: Colors.grey[700],
+                                      //     fontSize: 14,
+                                      //   ),
+                                      // ),
+                                      // عرض التقييم
+                                      FutureBuilder<Map<String, dynamic>?>(
+                                        future: getAverageRating(trip['driverEmail']), // استدعاء دالة الحصول على التقييم
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return Text(
+                                              'Loading...',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                color: Color.fromARGB(230, 24, 83, 131),
+                                              ),
+                                            );
+                                          } else if (snapshot.hasError) {
+                                            return Text(
+                                              'Error: ${snapshot.error}',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                color: Color.fromARGB(230, 24, 83, 131),
+                                              ),
+                                            );
+                                          } else if (snapshot.hasData) {
+                                            // تحويل قيمة التقييم من String إلى double
+                                            final averageRating = snapshot.data?['averageRating'];
+                                            if (averageRating != null) {
+                                              double rating = double.tryParse(averageRating.toString()) ?? 0.0;
+
+                                              int fullStars = rating.floor(); // النجوم الممتلئة
+                                              int halfStars = (rating - fullStars) >= 0.5 ? 1 : 0; // النجوم نصف الممتلئة
+                                              int emptyStars = 5 - fullStars - halfStars; // النجوم الفارغة
+
+                                              return Row(
+                                                children: [
+                                                  // النجوم
+                                                  Row(
+                                                    children: [
+                                                      for (int i = 0; i < fullStars; i++)
+                                                        Icon(Icons.star, color: Colors.amber, size: 20),
+                                                      for (int i = 0; i < halfStars; i++)
+                                                        Icon(Icons.star_half, color: Colors.amber, size: 20),
+                                                      for (int i = 0; i < emptyStars; i++)
+                                                        Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                                    ],
+                                                  ),
+                                                  SizedBox(width: 8), // مسافة بين النجوم والرقم
+                                                  // التقييم كرقم
+                                                  // Text(
+                                                  //   '$rating', // عرض التقييم كرقم
+                                                  //   style: TextStyle(
+                                                  //     fontSize: 18,
+                                                  //     fontWeight: FontWeight.bold,
+                                                  //     color: Color.fromARGB(230, 24, 83, 131),
+                                                  //   ),
+                                                  // ),
+                                                ],
+                                              );
+                                            } else {
+                                              return Row(
+                                                children: [
+                                                  for (int i = 0; i < 5; i++)
+                                                    Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                                ],
+                                              );
+                                            }
+                                          } else {
+                                            return Row(
+                                              children: [
+                                                for (int i = 0; i < 5; i++)
+                                                  Icon(Icons.star_border, color: Colors.amber, size: 20),
+                                              ],
+                                            );
+                                          }
+
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Container(
+                                            width: 16,
+                                            height: 16,
+                                            decoration: BoxDecoration(
+                                              color: Colors.green,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          CustomPaint(
+                                            size: Size(1, 40),
+                                            painter: DashedLinePainter(),
+                                          ),
+                                          Icon(
+                                            Icons.location_on,
+                                            color: Colors.orange,
+                                            size: 24,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(width: 6),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text: 'From: ',
+                                                    style: TextStyle(
+                                                        color: Colors.green, // اللون الأخضر للنص الثابت
+                                                        fontWeight: FontWeight.bold
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: '${trip['from']}',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 13,
+
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            SizedBox(height: 38),
+                                            RichText(
+                                              text: TextSpan(
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                                children: [
+                                                  TextSpan(
+                                                    text: 'To: ',
+                                                    style: TextStyle(
+                                                        color: Colors.orange, // اللون الأخضر للنص الثابت
+                                                        fontWeight: FontWeight.bold
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text: '${trip['to']}',
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 13,
+
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Divider(color: Colors.grey),
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.calendar_today,
+                                        color: analogousPink, size: 20),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '${formatDate(trip['date'])}',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time,
+                                        color:analogousPink, size: 20),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '${trip['time'] ?? 'N/A'}',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Price: ${trip['price']}',
+                                  style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,fontSize: 16),
+                                ),
+
+                                Text(
+                                  'Seats: ${trip['maxPassengers'] ?? 'N/A'}',
+                                  style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,fontSize: 16),
+                                ),
+                                Text(
+                                  'Car Type: ${trip['carBrand']}',
+                                  style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,fontSize: 16),
+                                ),
+                                GestureDetector(
+                                  onTap: ()  async {
+                                    await showPassengersPopup(context, trip['driverEmail'], trip['from'], trip['to'], trip['date'], trip['time']);
+                                  },
+                                  child: Text(
+                                    'Passengers: ${trip['currentPassengers']}',
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        // حقل الملاحظات
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    notes[index] = value;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  labelText: 'Enter notes',
+                                  hintText: 'Any special requests or notes?',
+                                  labelStyle: TextStyle(
+                                    color:primaryColor2, // تغيير لون الـ label (النص الذي يظهر فوق الـ TextField)
+                                  ),
+                                  hintStyle: TextStyle(
+                                    color:SecondryColor2, // تغيير لون الـ hint (النص الذي يظهر في الداخل عندما لا يتم الكتابة)
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: primaryColor2, // تغيير لون الحدود
+                                      width: 2, // تحديد سمك الحدود
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: softPink, // تغيير لون الحدود عند التركيز (عندما يكون الـ TextField نشطًا)
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                                maxLines: 3,
+                              ),
+                            ),
+                          ],
+                        )
+                        ,
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.remove_circle_outline),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (selectedSeats[index] > 1) {
+                                            selectedSeats[index]--;
+                                          }
+                                        });
+                                      },
+                                      color: Colors.red,
+                                    ),
+                                    Text(
+                                      '${selectedSeats[index]}',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.add_circle_outline),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (selectedSeats[index] <
+                                              (trip['maxPassengers'] ?? 1)) {
+                                            selectedSeats[index]++;
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    'Cannot book more than ${trip['maxPassengers']} seats.'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          }
+                                        });
+                                      },
+                                      color: Colors.green,
+                                    ),
+                                  ],
+                                ),
+                                ElevatedButton(
+                                  onPressed: trip['maxPassengers'] == trip['currentPassengers']
+                                      ? null // يجعل الزر غير نشط
+                                      : () {
+                                    print(
+                                        'Booked ${selectedSeats[index]} seat(s) for trip from ${trip['from']} to ${trip['to']}');
+                                    print('Notes: ${notes[index]}'); // عرض الملاحظات
+                                    bookTrip(index);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryColor2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Book Now',
+                                    style: TextStyle(
+                                      color: trip['currentPassengers'] == trip['maxPassengers']
+                                          ? Colors.grey // تغيير لون النص للإشارة إلى أن الزر غير نشط
+                                          : triadicPink,
+                                    ),
+                                  ),
+                                ),
+
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+    ],
+    ),
     );
   }
 }

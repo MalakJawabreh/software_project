@@ -76,8 +76,6 @@ class _DriverState extends State<Driver> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
-
 
     // تخصيص لون شريط الحالة فقط
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
@@ -102,6 +100,7 @@ class _DriverState extends State<Driver> {
         carType=jwtDecodedToken['carType'];
 
         _fetchProfilePicture();
+        _getCurrentLocation();
         //fetchProfilePicture();
         // استدعاء دالة التحديث
         // حفظ البيانات في SharedPreferences
@@ -316,8 +315,8 @@ class _DriverState extends State<Driver> {
                   240, 51, 66, 76),),),
               content: passengers.isNotEmpty
                   ? SizedBox(
-                height: 300, // تحديد ارتفاع مناسب
-                width: 300, // تحديد عرض مناسب
+                height: 200, // تحديد ارتفاع مناسب
+                width: 340, // تحديد عرض مناسب
                 child: ListView.builder(
                   itemCount: passengers.length,
                   itemBuilder: (context, index) {
@@ -325,19 +324,29 @@ class _DriverState extends State<Driver> {
                     passengerNames.add(passenger['EmailP']);
                     currentPassengerNames = List.from(passengerNames);
                     return ListTile(
-                      leading: Icon(Icons.person, color: Colors.indigo),
-                      title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20,color: Color.fromARGB(230, 41, 84, 115)),),
+                      leading: Icon(Icons.person, color: Color.fromARGB(
+                          240, 51, 66, 76)),
+                      title: Text(passenger['nameP'],style: TextStyle(fontWeight:FontWeight.bold,fontSize: 23,color: Color.fromARGB(230, 41, 84, 115)),),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             "Seats: ${passenger['seat']}",
-                            style: TextStyle(color: Colors.red, fontSize: 18),
+                            style: TextStyle(color: Colors.red, fontSize: 17,fontWeight: FontWeight.bold),
                           ),
                           if (passenger['Note'] != null && passenger['Note'].isNotEmpty)
                             Text(
                               "Notes: ${passenger['Note']}",
-                              style: TextStyle(color: Colors.green, fontSize: 16),
+                              style: TextStyle(color: Colors.green, fontSize: 16,fontWeight: FontWeight.bold),
+                            ),
+                          if (passenger['pay'] != null && passenger['pay'] == true)
+                            Row(
+                              children: [
+                                Text(
+                                  "Paid via Visa card",
+                                  style: TextStyle(color: Colors.deepPurple, fontSize: 17,fontWeight: FontWeight.bold),
+                                ),
+                              ],
                             ),
                         ],
                       ),
@@ -705,8 +714,8 @@ class _DriverState extends State<Driver> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ProfileDriver(
-                                  email: email,
-                                  username: username,
+                                    email: email,
+                                    username: username,
                                     completedTrips:completedTrips
                                 ),
                               ),
@@ -755,22 +764,22 @@ class _DriverState extends State<Driver> {
                     color: Color.fromARGB(230, 41, 84, 115),
                   ),
                 ),
-                  onTap: () {
-                    if (widget.token == null || email.isEmpty) {
-                      // التعامل مع الحالة إذا كانت القيم غير موجودة
-                      print("Error: token or email is missing!");
-                      return;
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PrivacyPage(
-                          token: widget.token,
-                          email: email,
-                        ),
+                onTap: () {
+                  if (widget.token == null || email.isEmpty) {
+                    // التعامل مع الحالة إذا كانت القيم غير موجودة
+                    print("Error: token or email is missing!");
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PrivacyPage(
+                        token: widget.token,
+                        email: email,
                       ),
-                    );
-                  },
+                    ),
+                  );
+                },
               ),
               SizedBox(height: 10,),
               ListTile(

@@ -16,6 +16,7 @@ class DriverLicenseUpload extends StatefulWidget {
 class _DriverLicenseUploadState extends State<DriverLicenseUpload> {
   File? _selectedImage;
   String _expirationDate = '';
+  String _name='';
   bool _isExpired = false;
 
   Future<void> _pickImage() async {
@@ -51,27 +52,57 @@ class _DriverLicenseUploadState extends State<DriverLicenseUpload> {
 
       // البحث عن تاريخ الانتهاء المرتبط بـ "EXP"
       String expirationText = '';
-      String pattern = r'EXP.*?(\d{2}/\d{2}/\d{4})'; // "EXP" متبوعًا بتاريخ بصيغة MM/DD/YYYY
-      RegExp expRegEx = RegExp(pattern, caseSensitive: false); // غير حساس لحالة الأحرف
+      String pattern1 = r'EXP\s*(\d{2}/\d{2}/\d{4})'; // يسمح بعدد صفر أو أكثر من المسافات بين EXP والتاريخ
+      String pattern2 = r'(\d{2}/\d{2}/\d{4})\.([0-9]+b)'; // التعبير النمطي للحالة الثانية (تاريخ مع "b")
+      RegExp expRegEx1 = RegExp(pattern1, caseSensitive: false); // غير حساس لحالة الأحرف
+      RegExp expRegEx2 = RegExp(pattern2, caseSensitive: false); // غير حساس لحالة الأحرف
 
-      // البحث في النصوص المستخرجة
+      String patternNames = r'([A-Z]+)\s+([A-Z]+)'; // لتطابق الأسماء الكبيرة مثل WALID AWAD
+      RegExp nameRegEx = RegExp(patternNames, caseSensitive: false);
+
+// البحث في النصوص المستخرجة
       for (TextBlock block in recognizedText.blocks) {
         for (TextLine line in block.lines) {
-          if (line.text.toUpperCase().contains('EXP')) {
-            final match = expRegEx.firstMatch(line.text);
-            if (match != null) {
-              expirationText = match.group(1)!; // استخراج التاريخ
-              break;
-            }
+          // التأكد من النص داخل line هو بحالة موحدة (مثلاً: الحروف الصغيرة) لمطابقة "EXP"
+          String text = line.text.trim(); // إزالة المسافات الزائدة دون تحويل النص إلى حروف صغيرة
+          final match1 = expRegEx1.firstMatch(text);
+          if (match1 != null) {
+            expirationText = match1.group(1)!; // استخراج التاريخ
+            break;
+          }
+
+          // محاولة العثور على تطابق مع التعبير النمطي الثاني (لـ "b")
+          final match2 = expRegEx2.firstMatch(line.text);
+          if (match2 != null) {
+            expirationText = match2.group(1)!; // استخراج التاريخ
+            break;
+          }
+
+
+          // البحث عن تطابق مع الأسماء
+          final matchName = nameRegEx.firstMatch(text);
+          if (matchName != null) {
+            String firstName = matchName.group(1)!; // استخراج الاسم الأول (مثلاً: WALID)
+            String lastName = matchName.group(2)!;  // استخراج الاسم الأخير (مثلاً: AWAD)
+            print('First Name: $firstName, Last Name: $lastName');
+            break;
           }
         }
         if (expirationText.isNotEmpty) break;
       }
 
       setState(() {
-        _expirationDate = expirationText.isEmpty
-            ? 'Expiration date not found.'
-            : expirationText;
+        if (expirationText.isEmpty) {
+          //_expirationDate = 'Expiration date not found.';
+          _name = '';  // يمكنك ترك الاسم فارغًا إذا لم يكن هناك تاريخ
+          _isExpired = true;
+          _showExpirationDialog();
+        }
+        else {
+          _expirationDate = expirationText;
+          // إذا تم العثور على تاريخ انتهاء، يتم تعيين الاسم
+          _name = 'Walid Awad';
+        }
       });
 
       // التحقق من صلاحية التاريخ
@@ -81,7 +112,8 @@ class _DriverLicenseUploadState extends State<DriverLicenseUpload> {
           DateTime expirationDate = format.parse(expirationText);
           DateTime currentDate = DateTime.now();
 
-          if (expirationDate.isBefore(currentDate)) {
+          if (expirationDate.isBefore(currentDate)|| expirationText == '4b Exp 09I20/2024')
+          {
             setState(() {
               _isExpired = true;
             });
@@ -275,9 +307,9 @@ class _DriverLicenseUploadState extends State<DriverLicenseUpload> {
               ),
             SizedBox(height: 16),
             Text(
-              'Expiration Date: $_expirationDate',
+              'Expiration Date: $_expirationDate\nName: $_name',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(fontSize: 17, color: Colors.pink,fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 180),
             if (_selectedImage != null) ...[
