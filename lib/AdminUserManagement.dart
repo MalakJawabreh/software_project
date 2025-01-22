@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'Add_user_admin.dart';
 import 'Adminallusers.dart'; // استيراد صفحة All Users
 import 'AdminDriverspage.dart';
 import 'AdminPassengerpage.dart';
 
 class UserManagementPage extends StatefulWidget {
+  final String token; // أضف التوكن هنا
+
+  const UserManagementPage({required this.token});
+
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
 }
@@ -18,19 +23,19 @@ class _UserManagementPageState extends State<UserManagementPage> {
         title: Text(
           'User Management',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
+            color: Color.fromARGB(230, 41, 84, 115),
+            fontSize: 28 ,
             fontWeight: FontWeight.bold,
             shadows: [
               Shadow(
                 offset: Offset(2.0, 2.0),
                 blurRadius: 4.0,
-                color: Colors.pinkAccent,
+                color: Color.fromARGB(230, 41, 84, 115),
               ),
               Shadow(
                 offset: Offset(-2.0, -2.0),
                 blurRadius: 4.0,
-                color: Colors.pinkAccent,
+                color: Colors.white ,
               ),
             ],
           ),
@@ -45,12 +50,28 @@ class _UserManagementPageState extends State<UserManagementPage> {
           },
         )
             : null,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 30.0), // المسافة من اليمين
+            child: IconButton(
+              icon: Icon(Icons.add,size: 30,),
+              onPressed: () {
+                // الانتقال إلى صفحة إضافة مستخدم
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddUserPage(token:widget.token)),
+                );
+              },
+            ),
+          ),
+        ],
+
       ),
       body: IndexedStack(
         index: _currentPageIndex,
         children: [
           _buildMainGrid(context), // الصفحة الرئيسية
-          AllUsersPage(),         // صفحة All Users
+          AllUsersPage(token:widget.token),         // صفحة All Users
           AllDriversPage(),       // صفحة Drivers
           AllPassengersPage(),    // صفحة Passengers
         ],

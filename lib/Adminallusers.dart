@@ -6,6 +6,9 @@ import 'config.dart';
 import 'AdminUserManagement.dart';
 class AllUsersPage extends StatefulWidget {
   @override
+  final String token; // أضف التوكن هنا
+
+  const AllUsersPage({required this.token});
   _AllUsersPageState createState() => _AllUsersPageState();
 }
 
@@ -55,6 +58,25 @@ class _AllUsersPageState extends State<AllUsersPage> {
     }
   }
 
+
+  Future<void> deleteUser(String userId, String token) async {
+    final url = Uri.parse('$deleteUserEndpoint/$userId');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('User deleted successfully');
+    } else {
+      print('Failed to delete user: ${response.body}');
+    }
+  }
+
   void _viewImage(Uint8List imageBytes) {
     if (imageBytes.isNotEmpty) {
       Navigator.push(
@@ -64,6 +86,65 @@ class _AllUsersPageState extends State<AllUsersPage> {
         ),
       );
     }
+  }
+
+  void _showEditUserDialog(dynamic user) {
+    TextEditingController emailController = TextEditingController(text: user['email']);
+    TextEditingController phoneController = TextEditingController(text: user['phoneNumber']);
+    TextEditingController fullNameController = TextEditingController(text: user['fullName']);
+    TextEditingController locationController = TextEditingController(text: user['location']);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit User'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: fullNameController,
+                  decoration: InputDecoration(labelText: 'Full Name'),
+                ),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(labelText: 'Email'),
+                ),
+                TextField(
+                  controller: phoneController,
+                  decoration: InputDecoration(labelText: 'Phone Number'),
+                ),
+                TextField(
+                  controller: locationController,
+                  decoration: InputDecoration(labelText: 'Location'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // قم بتحديث البيانات هنا بعد التعديل (إما تحديث محلي أو إرسال إلى الـ API)
+                setState(() {
+                  user['fullName'] = fullNameController.text;
+                  user['email'] = emailController.text;
+                  user['phoneNumber'] = phoneController.text;
+                  user['location'] = locationController.text;
+                });
+                Navigator.pop(context);
+              },
+              child: Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void filterUsers(String query) {
@@ -96,8 +177,8 @@ class _AllUsersPageState extends State<AllUsersPage> {
         borderRadius: BorderRadius.circular(18),
       ),
       elevation: 8,
-      color: Color(0xFFFFF3E0),
-      shadowColor: Colors.pink.withOpacity(0.2),
+      color: Color(0xFFE6E7E8),
+      shadowColor: Colors.pink.withOpacity(0.6),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -138,8 +219,25 @@ class _AllUsersPageState extends State<AllUsersPage> {
                     _showEditUserDialog(user);
                   },
                 ),
+                //   final bookingId = booking['_id'].toString();
                 IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    deleteUser(user['_id'].toString(), widget.token).then((_) {
+                      // You can show a snackbar or a dialog here to confirm the deletion
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('User deleted successfully')),
+                      );
+                    }).catchError((error) {
+                      // Handle error
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to delete user')),
+                      );
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.chat, color: Colors.indigo),
                   onPressed: () {
                     _deleteUser(user);
                   },
@@ -150,30 +248,24 @@ class _AllUsersPageState extends State<AllUsersPage> {
             Row(
               children: [
                 Text(
-                  'Email: ',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pinkAccent),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    user['email'] ?? 'No Email',
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
+                  user['email'] ?? 'No Email',
+                  style: TextStyle(color:Colors.black),
                 ),
               ],
             ),
             Row(
               children: [
                 Text(
-                  'Phone: ',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+                  user['phoneNumber'] ?? 'No Phone Number',
+                  style: TextStyle(color: Colors.black),
                 ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    user['phoneNumber'] ?? 'No Phone Number',
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  user['gender'] ?? 'No gender',
+                  style: TextStyle(color: Colors.black),
                 ),
               ],
             ),
@@ -187,22 +279,7 @@ class _AllUsersPageState extends State<AllUsersPage> {
                 Expanded(
                   child: Text(
                     user['location'] ?? 'Not provided',
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Text(
-                  'Gender: ',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pinkAccent),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    user['gender'] ?? 'No gender',
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
               ],
@@ -217,7 +294,7 @@ class _AllUsersPageState extends State<AllUsersPage> {
                 Expanded(
                   child: Text(
                     user['role'] ?? 'No Role',
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
               ],
@@ -274,16 +351,13 @@ class _AllUsersPageState extends State<AllUsersPage> {
             ],
             SizedBox(height: 12),
             if (user['blockedUsers'] != null && user['blockedUsers'].isNotEmpty)
-              Text('Blocked Users: ${user['blockedUsers'].length}', style: TextStyle(color: Colors.grey[700])),
+              Text('Blocked Users: ${user['blockedUsers'].length}', style: TextStyle(color: Colors.black)),
           ],
         ),
       ),
     );
   }
 
-  void _showEditUserDialog(dynamic user) {
-    // محتوى نافذة التعديل
-  }
 
   void _deleteUser(dynamic user) {
     // محتوى نافذة الحذف
@@ -300,7 +374,7 @@ class _AllUsersPageState extends State<AllUsersPage> {
             child: TextField(
               decoration: InputDecoration(
                 labelText: 'Search by Name, Email, Phone, or Role',
-                labelStyle: TextStyle(color: Colors.pinkAccent),
+                labelStyle: TextStyle(color: Colors.grey[600]),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),

@@ -36,6 +36,17 @@ final average_rate=url + "average_rate";
 final get_rev_from_to = url +"get_rev_from_to";
 
 final loginadmin = url +"loginadmin";
+final count_user = url +"count_user";
+final getTripStatistics = url +"getTripStatistics";
+final BookingsCountByDate = url +"BookingsCountByDate";
+
+final addUserEndpoint = url + 'admin/add-user'; // دمج الـ URL الأساسي مع المسار
+final deleteUserEndpoint = url + 'admin/delete-user'; // دمج الـ URL الأساسي مع المسار
+
+
+
+
+
 
 
 

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'AdminBookhingMang.dart';
 import 'AdminComplaintManagement.dart';
 import 'AdminPassengerpage.dart';
@@ -7,26 +10,17 @@ import 'AdminUserManagement.dart';
 import 'AdminDriverspage.dart';
 import 'Adminallusers.dart';
 import 'AdminTripManagement.dart';
-void main() {
-  runApp(AdminDashboardApp());
-}
+import 'package:http/http.dart' as http;
 
-class AdminDashboardApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: Color(0xFF121212),
-        cardColor: Color(0xFF1E1E2C),
-        primaryColor: Colors.pinkAccent,
-      ),
-      home: AdminDashboardPage(),
-    );
-  }
-}
+import 'config.dart';
+
 
 class AdminDashboardPage extends StatefulWidget {
+
+  final String token;
+
+  const AdminDashboardPage({required this.token});
+
   @override
   _AdminDashboardPageState createState() => _AdminDashboardPageState();
 }
@@ -34,15 +28,31 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
   bool _isSidebarCollapsed = false;
+  late String adminName;
+  late List<Widget> _pages;
 
-  final List<Widget> _pages = [
-    DashboardOverviewPage(),
-    UserManagementPage(),
-    AdminTripManagementPage(),
-    BookingsPage(),
-    ComplaintsPage(),
-    PlaceholderWidget('General Settings'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    adminName = _extractAdminName(widget.token);
+    _pages = [
+      DashboardOverviewPage(adminName: adminName,token: widget.token),
+      UserManagementPage(token: widget.token),
+      AdminTripManagementPage(),
+      BookingsPage(),
+      ComplaintsPage(),
+      PlaceholderWidget('General Settings'),
+    ];
+  }
+  String _extractAdminName(String token) {
+    try {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['name'] ?? 'Admin'; // تأكد من أن الحقل "name" موجود في التوكن
+    } catch (e) {
+      return 'Admin';
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +178,84 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 }
 
 class DashboardOverviewPage extends StatelessWidget {
+  final String adminName;
+  final String token; // أضف التوكن هنا
+
+
+  const DashboardOverviewPage({required this.adminName,required this.token});
+
+  Future<int> fetchActiveUsers() async {
+    try {
+      final response = await http.get(Uri.parse(count_user));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['totalUsers'];
+      } else {
+        throw Exception('Failed to load active users');
+      }
+    } catch (e) {
+      print('Error fetching active users: $e');
+      throw e;
+    }
+  }
+
+  Future<int> fetchTripStatistics() async {
+    try {
+      // إرسال الطلب
+      final response = await http.get(
+        Uri.parse(getTripStatistics),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // التحقق من حالة الاستجابة
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body); // تحليل الاستجابة إلى JSON
+        if (data['status'] == true && data['stats'] != null) {
+          return data['stats']['totalTrips'] ?? 0; // إرجاع عدد الرحلات أو 0 إذا لم تكن موجودة
+        } else {
+          throw Exception('Failed to parse trip statistics');
+        }
+      } else {
+        throw Exception('Failed to fetch trip statistics: ${response.body}');
+      }
+    } catch (error) {
+      print('Error fetching trip statistics: $error');
+      throw error; // إرسال الخطأ للتعامل معه في أماكن أخرى
+    }
+  }
+
+
+// الدالة لجلب عدد الحجوزات الجديدة
+  Future<int> fetchNewBookingsCount() async {
+    try {
+      // إرسال الطلب
+      final response = await http.get(
+        Uri.parse(BookingsCountByDate),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // التحقق من حالة الاستجابة
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body); // تحليل الاستجابة إلى JSON
+        if (data['status'] == true && data['count'] != null) {
+          return data['count'] ?? 0; // إرجاع عدد الحجوزات أو 0 إذا لم تكن موجودة
+        } else {
+          throw Exception('Failed to parse new bookings count');
+        }
+      } else {
+        throw Exception('Failed to fetch new bookings count: ${response.body}');
+      }
+    } catch (error) {
+      print('Error fetching new bookings count: $error');
+      throw error; // إرسال الخطأ للتعامل معه في أماكن أخرى
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -176,7 +264,7 @@ class DashboardOverviewPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Hello, Admin',
+            'Hello, $adminName',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 16),
@@ -195,33 +283,92 @@ class DashboardOverviewPage extends StatelessWidget {
                 physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final cards = [
-                    DashboardCard(
-                      title: 'Active Users',
-                      value: '1,245',
-                      percentage: '+5%',
-                      color: Colors.pink,
-                      icon: Icons.people,
+                    FutureBuilder<int>(
+                      future: fetchActiveUsers(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return DashboardCard(
+                            title: 'Active Users',
+                            value: 'Loading...',
+                            color: Colors.pink,
+                            icon: Icons.people,
+                          );
+                        } else if (snapshot.hasError) {
+                          return DashboardCard(
+                            title: 'Active Users',
+                            value: 'Error',
+                            color: Colors.pink,
+                            icon: Icons.people,
+                          );
+                        } else {
+                          return DashboardCard(
+                            title: 'Active Users',
+                            value: '${snapshot.data}',
+                            color: Colors.pink,
+                            icon: Icons.people,
+                          );
+                        }
+                      },
                     ),
-                    DashboardCard(
-                      title: 'Completed Trips',
-                      value: '320',
-                      percentage: '+8%',
-                      color: Colors.purple,
-                      icon: Icons.directions_car,
+                    FutureBuilder<int>(
+                      future: fetchTripStatistics(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return DashboardCard(
+                            title: 'All Trips',
+                            value: 'Loading...',
+                            color: Colors.green,
+                            icon: Icons.car_crash,
+                          );
+                        } else if (snapshot.hasError) {
+                          return DashboardCard(
+                            title: 'All Trips',
+                            value: 'Error',
+                            color: Colors.green,
+                            icon: Icons.car_crash,
+                          );
+                        } else {
+                          return DashboardCard(
+                            title: 'All Trips',
+                            value: '${snapshot.data}',
+                            color: Colors.green,
+                            icon: Icons.car_crash,
+                          );
+                        }
+                      },
                     ),
                     DashboardCard(
                       title: 'Pending Complaints',
                       value: '12',
-                      percentage: '-3%',
                       color: Colors.red,
                       icon: Icons.report_problem,
                     ),
-                    DashboardCard(
-                      title: 'New Bookings',
-                      value: '980',
-                      percentage: '+12%',
-                      color: Colors.orange,
-                      icon: Icons.book_online,
+                    FutureBuilder<int>(
+                      future: fetchNewBookingsCount(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return DashboardCard(
+                            title: 'Current Booking',
+                            value: 'Loading...',
+                            color: Colors.orange,
+                            icon: Icons.book_online,
+                          );
+                        } else if (snapshot.hasError) {
+                          return DashboardCard(
+                            title: 'Current Booking',
+                            value: 'Error',
+                            color: Colors.orange,
+                            icon: Icons.book_online,
+                          );
+                        } else {
+                          return DashboardCard(
+                            title: 'Current Booking',
+                            value: '${snapshot.data}',
+                            color: Colors.orange,
+                            icon: Icons.book_online,
+                          );
+                        }
+                      },
                     ),
                   ];
                   return cards[index];
@@ -234,7 +381,7 @@ class DashboardOverviewPage extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: LineChartWidget(),
+                  child: GenderPieChartWidget(),
                 ),
                 SizedBox(width: 16),
                 Expanded(
@@ -249,7 +396,7 @@ class DashboardOverviewPage extends StatelessWidget {
   }
 }
 
-class LineChartWidget extends StatelessWidget {
+class GenderPieChartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -260,47 +407,61 @@ class LineChartWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'User Growth',
+              'User Gender Distribution',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
             Expanded(
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: true),
-                  borderData: FlBorderData(show: true),
-                  minX: 0,
-                  maxX: 7,
-                  minY: 0,
-                  maxY: 10,
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: [
-                        FlSpot(0, 3),
-                        FlSpot(1, 1),
-                        FlSpot(2, 4),
-                        FlSpot(3, 7),
-                        FlSpot(4, 6),
-                        FlSpot(5, 8),
-                        FlSpot(6, 10),
-                      ],
-                      isCurved: true,
-                      colors: [Colors.pinkAccent],
-                      barWidth: 2,
-                      isStrokeCapRound: true,
-                      belowBarData: BarAreaData(show: false),
+              child: PieChart(
+                PieChartData(
+                  sections: [
+                    PieChartSectionData(
+                      color: Colors.blue, // اللون المخصص للذكور
+                      value: 70,
+                      title: '70%',
+                      radius: 50,
+                      titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    PieChartSectionData(
+                      color: Colors.pink, // اللون المخصص للإناث
+                      value: 30,
+                      title: '30%',
+                      radius: 50,
+                      titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ],
                 ),
               ),
+            ),
+            SizedBox(height: 16),
+            // Adding a category explanation
+            Row(
+              children: [
+                _buildCategoryIndicator(Colors.blue, 'Male Users'),
+                SizedBox(width: 16),
+                _buildCategoryIndicator(Colors.pink, 'Female Users'),
+              ],
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildCategoryIndicator(Color color, String label) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 8,
+          backgroundColor: color,
+        ),
+        SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.black)),
+      ],
+    );
+  }
 }
+
 
 class PieChartWidget extends StatelessWidget {
   @override
@@ -371,7 +532,7 @@ class PieChartWidget extends StatelessWidget {
           backgroundColor: color,
         ),
         SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 14, color: Colors.white)),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.black)),
       ],
     );
   }
@@ -380,14 +541,12 @@ class PieChartWidget extends StatelessWidget {
 class DashboardCard extends StatelessWidget {
   final String title;
   final String value;
-  final String percentage;
   final Color color;
   final IconData icon;
 
   const DashboardCard({
     required this.title,
     required this.value,
-    required this.percentage,
     required this.color,
     required this.icon,
   });
@@ -431,16 +590,6 @@ class DashboardCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: constraints.maxWidth > 300 ? 20 : 16,
                           fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        percentage,
-                        style: TextStyle(
-                          fontSize: constraints.maxWidth > 300 ? 16 : 12,
-                          color: percentage.startsWith('+') ? Colors.green : Colors.red,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

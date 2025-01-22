@@ -105,7 +105,7 @@ class _LoginState extends State<Login> {
 
         if (userRole == 'admin') {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => AdminDashboardPage()),
+            MaterialPageRoute(builder: (context) => AdminDashboardPage(token: myToken)),
           );
         }
       }
