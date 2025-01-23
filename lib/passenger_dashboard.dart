@@ -601,7 +601,7 @@ class _PassengerState extends State<Passenger> {
             ),
             SizedBox(height: 20,),
             Container(
-              width: kIsWeb?900: 7, // تحديد العرض المطلوب
+              width: kIsWeb?900: 350, // تحديد العرض المطلوب
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Color(0xFF143C73), // لون الكحلي (يمكن تغييره حسب رغبتك)
