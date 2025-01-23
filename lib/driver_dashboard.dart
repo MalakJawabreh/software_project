@@ -1156,8 +1156,8 @@ class _DriverState extends State<Driver> {
                                             ],
                                           ),
                                         ),
-                                        SizedBox(width: 135),
                                         // Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25), // الأيقونة
+                                        Spacer(),  // هذا سيضمن أن الأيقونة تكون في أقصى اليمين
                                         IconButton(
                                           icon: Icon(Icons.visibility_outlined, color: Colors.indigo, size: 25),
                                           onPressed: () async {

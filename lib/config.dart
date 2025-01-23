@@ -42,6 +42,11 @@ final BookingsCountByDate = url +"BookingsCountByDate";
 
 final addUserEndpoint = url + 'admin/add-user'; // دمج الـ URL الأساسي مع المسار
 final deleteUserEndpoint = url + 'admin/delete-user'; // دمج الـ URL الأساسي مع المسار
+final registerAdminn = url + 'register'; // دمج الـ URL الأساسي مع المسار
+final getAdminn = url + 'admins'; // دمج الـ URL الأساسي مع المسار
+final deleteAdminn = url + 'adminsdelete'; // دمج الـ URL الأساسي مع المسار
+
+
 
 
 

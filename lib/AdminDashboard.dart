@@ -12,7 +12,10 @@ import 'Adminallusers.dart';
 import 'AdminTripManagement.dart';
 import 'package:http/http.dart' as http;
 
+import 'AdmingeneralSetting.dart';
+import 'chatList.dart';
 import 'config.dart';
+import 'login.dart';
 
 
 class AdminDashboardPage extends StatefulWidget {
@@ -29,25 +32,41 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   int _selectedIndex = 0;
   bool _isSidebarCollapsed = false;
   late String adminName;
+  late String adminemail;
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     adminName = _extractAdminName(widget.token);
+    adminemail = _extractAdminEmail(widget.token);
     _pages = [
-      DashboardOverviewPage(adminName: adminName,token: widget.token),
-      UserManagementPage(token: widget.token),
+      DashboardOverviewPage(adminName: adminName,token: widget.token,email:adminemail),
+      ChatListPage(
+        currentUserEmail:adminemail,
+        currentUserName:adminName,
+      ),
+      UserManagementPage(token: widget.token,name:adminName,email:adminemail),
       AdminTripManagementPage(),
       BookingsPage(),
       ComplaintsPage(),
-      PlaceholderWidget('General Settings'),
+      GeneralSetting(token: widget.token),
+      Login(),
     ];
   }
   String _extractAdminName(String token) {
     try {
       final decodedToken = JwtDecoder.decode(token);
       return decodedToken['name'] ?? 'Admin'; // تأكد من أن الحقل "name" موجود في التوكن
+    } catch (e) {
+      return 'Admin';
+    }
+  }
+
+  String _extractAdminEmail(String token) {
+    try {
+      final decodedToken = JwtDecoder.decode(token);
+      return decodedToken['email'] ?? 'name@gmail.com'; // تأكد من أن الحقل "name" موجود في التوكن
     } catch (e) {
       return 'Admin';
     }
@@ -115,12 +134,14 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             child: ListView(
               children: [
                 _buildCustomDrawerItem(Icons.dashboard, 'Dashboard Overview', 0),
+                _buildCustomDrawerItem(Icons.chat, 'Chatting', 1),
                 Divider(color: Colors.grey[700]),
-                _buildCustomDrawerItem(Icons.people, 'User Management', 1),
-                _buildCustomDrawerItem(Icons.directions_car, 'Trip Management', 2),
-                _buildCustomDrawerItem(Icons.event, 'Bookings Management', 3),
-                _buildCustomDrawerItem(Icons.report_problem, 'Complaint Management', 4),
-                _buildCustomDrawerItem(Icons.settings, 'General Settings', 5),
+                _buildCustomDrawerItem(Icons.people, 'User Management', 2),
+                _buildCustomDrawerItem(Icons.directions_car, 'Trip Management', 3),
+                _buildCustomDrawerItem(Icons.event, 'Bookings Management', 4),
+                _buildCustomDrawerItem(Icons.report_problem, 'Complaint Management', 5),
+                _buildCustomDrawerItem(Icons.settings, 'General Settings', 6),
+                _buildCustomDrawerItem(Icons.logout, 'LogOut', 7),
               ],
             ),
           ),
@@ -138,6 +159,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           ),
         ],
       ),
+    );
+  }
+
+  // دالة تسجيل الخروج
+  void _logout() {
+    // إزالة أي بيانات محفوظة (مثل الـ token)
+    // يمكنك استخدام `SharedPreferences` أو أي طريقة أخرى لحفظ البيانات
+    // مثال: await SharedPreferences.getInstance().remove('token');
+
+    // إعادة توجيه المستخدم إلى صفحة تسجيل الدخول
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => Login()),
     );
   }
 
@@ -167,10 +201,16 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             fontWeight: FontWeight.w500,
           ),
         ),
+        selected: _selectedIndex == index,
         onTap: () {
-          setState(() {
-            _selectedIndex = index;
-          });
+          if (index == 7) {
+            // إذا كان العنصر هو LogOut
+            _logout(); // استدعاء دالة تسجيل الخروج
+          } else {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
         },
       ),
     );
@@ -180,9 +220,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 class DashboardOverviewPage extends StatelessWidget {
   final String adminName;
   final String token; // أضف التوكن هنا
+  final String email; // أضف التوكن هنا
 
 
-  const DashboardOverviewPage({required this.adminName,required this.token});
+
+  const DashboardOverviewPage({required this.adminName,required this.token,required this.email});
 
   Future<int> fetchActiveUsers() async {
     try {
@@ -263,9 +305,28 @@ class DashboardOverviewPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Hello, $adminName',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // لتوزيع العناصر بين بداية ونهاية الصف
+            children: [
+              Text(
+                'Hello, $adminName',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                icon: Icon(Icons.message_outlined, color: Colors.blue), // أيقونة الشات
+                onPressed: ()  {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>
+                        ChatListPage(
+                            currentUserEmail:email,
+                            currentUserName:adminName,
+                        )
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           SizedBox(height: 16),
           LayoutBuilder(

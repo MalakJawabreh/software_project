@@ -6,6 +6,9 @@ import 'config.dart';
 
 class AllDriversPage extends StatefulWidget {
   @override
+  final String token; // أضف التوكن هنا
+
+  const AllDriversPage({required this.token});
   _AllDriversPageState createState() => _AllDriversPageState();
 }
 
@@ -55,6 +58,25 @@ class _AllDriversPageState extends State<AllDriversPage> {
     }
   }
 
+
+  Future<void> deleteUser(String userId, String token) async {
+    final url = Uri.parse('$deleteUserEndpoint/$userId');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('User deleted successfully');
+    } else {
+      print('Failed to delete user: ${response.body}');
+    }
+  }
+
   void _viewImage(Uint8List imageBytes) {
     if (imageBytes.isNotEmpty) {
       Navigator.push(
@@ -95,7 +117,7 @@ class _AllDriversPageState extends State<AllDriversPage> {
         borderRadius: BorderRadius.circular(18),
       ),
       elevation: 8,
-      color: Color(0xFFFFF3E0),
+      color: Color(0xFFE6E7E8),
       shadowColor: Colors.pink.withOpacity(0.2),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -142,7 +164,22 @@ class _AllDriversPageState extends State<AllDriversPage> {
                 IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    _deleteDriver(driver); // استدعاء دالة الحذف
+                    deleteUser(driver['_id'].toString(), widget.token).then((_) {
+                      // You can show a snackbar or a dialog here to confirm the deletion
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('User deleted successfully')),
+                      );
+                    }).catchError((error) {
+                      // Handle error
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to delete user')),
+                      );
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.chat, color: Colors.indigo),
+                  onPressed: () {
                   },
                 ),
               ],

@@ -157,12 +157,58 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
   }
 
 
+// الوظيفة المساعدة لتحديد حالة الرحلة
+  String getTripStatus(String tripDate, String tripTime) {
+    // تحويل النصوص إلى كائن DateTime
+    DateTime parsedDate = DateTime.parse(tripDate).toLocal();
+
+    // تحويل الوقت (8:07 PM) إلى كائن وقت
+    DateFormat timeFormat = DateFormat.jm(); // صيغة 12 ساعة مع AM/PM
+    DateTime parsedTime = timeFormat.parse(tripTime);
+
+    // إضافة الوقت إلى التاريخ
+    parsedDate = DateTime(
+      parsedDate.year,
+      parsedDate.month,
+      parsedDate.day,
+      parsedTime.hour,
+      parsedTime.minute,
+    );
+
+    DateTime now = DateTime.now(); // الوقت الحالي
+
+    // مقارنة التاريخ والوقت
+    if (parsedDate.isBefore(now)) {
+      return 'completed';
+    } else {
+      return 'upcoming';
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Trip Management'),
-        backgroundColor: Colors.black,
+        title: Text('Trip Management', style: TextStyle(
+          color: Color.fromARGB(230, 41, 84, 115),
+          fontSize: 28 ,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              offset: Offset(2.0, 2.0),
+              blurRadius: 4.0,
+              color: Color.fromARGB(230, 41, 84, 115),
+            ),
+            Shadow(
+              offset: Offset(-2.0, -2.0),
+              blurRadius: 4.0,
+              color: Colors.white ,
+            ),
+          ],
+        ),
+        ),
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.calendar_today, color: Colors.white),
@@ -170,7 +216,7 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
           ),
         ],
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
@@ -178,14 +224,15 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
             child: TextField(
               onChanged: (value) => filterTripsBySearch(value),
               decoration: InputDecoration(
-                hintText: 'Search by name, email, or phone',
-                hintStyle: TextStyle(color: Colors.white60),
-                prefixIcon: Icon(Icons.search, color: Colors.white),
-                filled: true,
-                fillColor: Colors.grey[800],
+                labelText: 'Search by Name, Email, Phone, or Role',
+                labelStyle: TextStyle(color: Colors.grey[600]),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                prefixIcon: Icon(Icons.search, color: Colors.pinkAccent),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.pinkAccent, width: 2),
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
               style: TextStyle(color: Colors.white),
@@ -219,22 +266,30 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0),
                   ),
-                  color: Colors.grey[900],
+                  color: Color(0xFFE6E7E8),
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // معلومات الرحلة
-                        Text(
-                          '${trip['from']} → ${trip['to']}',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.pinkAccent,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on, // أيقونة الموقع
+                              color: Colors.green,
+                            ),
+                            SizedBox(width: 8), // مسافة صغيرة بين الأيقونة والنص
+                            Text(
+                              '${trip['from']} → ${trip['to']}',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(230, 41, 84, 115),
+                              ),
+                            ),
+                          ],
                         ),
-                        Divider(color: Colors.pinkAccent),
+                        Divider(color: Colors.grey[400]),
                         _buildInfoRow('Driver Name:', trip['name']),
                         _buildInfoRow(
                             'Driver Email:', trip['driverEmail']),
@@ -250,90 +305,69 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
                         _buildInfoRow(
                             'Date:', formatDate(trip['date'])),
                         _buildInfoRow('Time:', trip['time']),
-
                         // حالة الرحلة
-                        Text(
-                          'Status: ${trip['status_trip']}',
-                          style: TextStyle(
-                            color: trip['status_trip'] == 'upcoming'
-                                ? Colors.green
-                                : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        // أزرار الصلاحيات
-                        Wrap(
-                          spacing: 10.0,
-                          runSpacing: 10.0,
-                          alignment: WrapAlignment.center,
+                        // حالة الرحلة
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end, // محاذاة المحتوى إلى أقصى اليمين
                           children: [
-                            ElevatedButton.icon(
-                              onPressed: () => editTrip(trip['id']),
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                backgroundColor: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(30.0),
-                                ),
-                                elevation: 5,
-                              ),
-                              icon: Icon(Icons.edit,
-                                  color: Colors.white),
-                              label: Text(
-                                'Edit',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () =>
-                                  deleteTrip(trip['id']),
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                backgroundColor: Colors.red,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(30.0),
-                                ),
-                                elevation: 5,
-                              ),
-                              icon: Icon(Icons.delete,
-                                  color: Colors.white),
-                              label: Text(
-                                'Delete',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () =>
-                                  changeTripStatus(trip['id']),
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                backgroundColor: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(30.0),
-                                ),
-                                elevation: 5,
-                              ),
-                              icon: Icon(Icons.sync,
-                                  color: Colors.white),
-                              label: Text(
-                                'Change Status',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                            Text(
+                              'Status: ${getTripStatus(trip['date'], trip['time'])}',
+                              style: TextStyle(
+                                color: getTripStatus(trip['date'], trip['time']) == 'upcoming'
+                                    ? Colors.green
+                                    : Colors.red,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
+                        ),
+                        SizedBox(height: 10),
+                        // أزرار الصلاحيات
+                        Center(
+                          child: Wrap(
+                            spacing: 10.0,
+                            runSpacing: 10.0,
+                            alignment: WrapAlignment.center, // محاذاة أفقية للمحتوى
+                            crossAxisAlignment: WrapCrossAlignment.center, // محاذاة رأسية
+                            children: getTripStatus(trip['date'], trip['time']) == 'upcoming'
+                                ? [
+                              ElevatedButton.icon(
+                                onPressed: () => editTrip(trip['id']),
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  backgroundColor: Colors.blue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                  ),
+                                  elevation: 5,
+                                ),
+                                icon: Icon(Icons.edit, color: Colors.white),
+                                label: Text(
+                                  'Edit',
+                                  style:
+                                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () => deleteTrip(trip['id']),
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                  ),
+                                  elevation: 5,
+                                ),
+                                icon: Icon(Icons.delete, color: Colors.white),
+                                label: Text(
+                                  'Delete',
+                                  style:
+                                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ]
+                                : [], // إذا لم تكن الحالة "upcoming"، لن يتم عرض الأزرار
+                          ),
                         ),
                       ],
                     ),
@@ -414,18 +448,18 @@ class _AdminTripManagementPageState extends State<AdminTripManagementPage> {
       child: Row(
         children: [
           Expanded(
-            flex: 3,
             child: Text(
               label,
               style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.pinkAccent),
+                  fontWeight: FontWeight.bold, color: Colors.grey[600],
+            ),
             ),
           ),
           Expanded(
-            flex: 5,
             child: Text(
               value,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Color.fromARGB(230, 41, 84, 115),fontWeight: FontWeight.bold
+            ),
             ),
           ),
         ],

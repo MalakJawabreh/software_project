@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:project1/profile_passenger.dart';
@@ -600,7 +601,7 @@ class _PassengerState extends State<Passenger> {
             ),
             SizedBox(height: 20,),
             Container(
-              width: 350, // تحديد العرض المطلوب
+              width: kIsWeb?900: 7, // تحديد العرض المطلوب
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Color(0xFF143C73), // لون الكحلي (يمكن تغييره حسب رغبتك)
@@ -639,7 +640,7 @@ class _PassengerState extends State<Passenger> {
                           ),
                           SizedBox(height: 16), // مسافة بين النصوص والزر
                           Padding(
-                            padding: EdgeInsets.only(left: 20.0), // إضافة padding من اليسار فقط
+                            padding: EdgeInsets.only(left: kIsWeb?500: 20.0), // إضافة padding من اليسار فقط
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -711,7 +712,7 @@ class _PassengerState extends State<Passenger> {
                   ),
                   SizedBox(width: 130), // مساحة بين النص والأيقونة
                   Text(
-                    'View all', // النص الذي تريد عرضه
+                    kIsWeb?"":'View all', // النص الذي تريد عرضه
                     style: TextStyle(
                       fontSize: 15, // حجم الخط كبير
                       fontWeight: FontWeight.bold, // خط عريض
@@ -741,7 +742,7 @@ class _PassengerState extends State<Passenger> {
                   borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:CrossAxisAlignment.start,
                   children: [
                     // صورة الكارد: PageView للصور المتحركة
                     ClipRRect(
@@ -750,7 +751,7 @@ class _PassengerState extends State<Passenger> {
                         topRight: Radius.circular(15),
                       ),
                       child: SizedBox(
-                        height: 150,
+                        height: kIsWeb?400:150,
                         width: double.infinity,
                         child: PageView.builder(
                           controller: _pageController,
@@ -836,7 +837,7 @@ class _PassengerState extends State<Passenger> {
                   borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:CrossAxisAlignment.start,
                   children: [
                     // صورة الكارد
                     ClipRRect(
@@ -846,8 +847,8 @@ class _PassengerState extends State<Passenger> {
                       ),
                       child: Image.asset(
                         'imagess/booking.jpg', // استبدل هذا بالمسار الصحيح للصورة
-                        height: 150,
-                        width: double.infinity,
+                        height:kIsWeb?400:150,
+                        width:double.infinity,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -909,7 +910,7 @@ class _PassengerState extends State<Passenger> {
                   borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:CrossAxisAlignment.start,
                   children: [
                     // صورة الكارد
                     ClipRRect(
@@ -919,8 +920,8 @@ class _PassengerState extends State<Passenger> {
                       ),
                       child: Image.asset(
                         'imagess/active.jpg', // استبدل هذا بالمسار الصحيح للصورة
-                        height: 150,
-                        width: double.infinity,
+                        height:kIsWeb?400:150,
+                        width:double.infinity,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -978,7 +979,7 @@ class _PassengerState extends State<Passenger> {
                   borderRadius: BorderRadius.circular(10), // نفس الخاصية لتدوير الزوايا
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:CrossAxisAlignment.start,
                   children: [
                     // صورة الكارد
                     ClipRRect(
@@ -988,8 +989,8 @@ class _PassengerState extends State<Passenger> {
                       ),
                       child: Image.asset(
                         'imagess/drive_pass.jpg', // استبدل هذا بالمسار الصحيح للصورة
-                        height: 150,
-                        width: double.infinity,
+                        height: kIsWeb?400:150,
+                        width:double.infinity,
                         fit: BoxFit.cover,
                       ),
                     ),

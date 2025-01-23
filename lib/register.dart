@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:project1/login.dart';
 import 'package:http/http.dart' as http ;
@@ -126,7 +127,9 @@ class _RegisterState extends State<Register> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 2.0,left: 100),
+                padding: const EdgeInsets.only(top: 2.0,
+                  left: kIsWeb ? 600 : 100, // إذا كان ويب، استخدم 100، وإلا استخدم 50
+                ),
                 child: Image.asset(
                   "imagess/signup_icon.png",
                   width: 220,

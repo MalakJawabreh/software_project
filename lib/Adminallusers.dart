@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'chat_page.dart';
 import 'config.dart';
 import 'AdminUserManagement.dart';
 class AllUsersPage extends StatefulWidget {
   @override
   final String token; // أضف التوكن هنا
 
-  const AllUsersPage({required this.token});
+  final String name; // أضف التوكن هنا
+  final String email; // أضف التوكن هنا
+  const AllUsersPage({required this.token,required this.name,required this.email});
   _AllUsersPageState createState() => _AllUsersPageState();
 }
 
@@ -239,7 +242,17 @@ class _AllUsersPageState extends State<AllUsersPage> {
                 IconButton(
                   icon: Icon(Icons.chat, color: Colors.indigo),
                   onPressed: () {
-                    _deleteUser(user);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                            currentUserEmail:widget.email,
+                            currentUserName:widget.name,
+                            recevuserName:user['fullName'],
+                            recevEmail:user['email']
+                        ), // استبدل CallPage بالصفحة التي تريد الانتقال إليها
+                      ),
+                    );
                   },
                 ),
               ],

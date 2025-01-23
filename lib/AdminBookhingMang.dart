@@ -3,6 +3,7 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'; // م
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'Admin_add_booking.dart';
 import 'config.dart';
 
 class BookingsPage extends StatefulWidget {
@@ -175,7 +176,17 @@ class _BookingsPageState extends State<BookingsPage> {
         title: Text('All Bookings'),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.white),
+            icon: Icon(Icons.add_circle_outline, color: Colors.pinkAccent),
+            onPressed: () {
+              // الانتقال إلى صفحة AddBookingPage
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddBookingPage()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_today, color: Colors.pinkAccent),
             onPressed: showCalendarDialog, // فتح التقويم عند النقر
           ),
           Padding(
@@ -227,14 +238,14 @@ class _BookingsPageState extends State<BookingsPage> {
               padding: const EdgeInsets.all(16.0),
               child: ExpansionTile(
                 title: Text(
-                  'Passenger: ${booking['nameP']}',
+                  '${booking['nameP']}',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.deepPurple,
                   ),
                 ),
-                leading: Icon(Icons.account_circle, color: Colors.deepPurple),
+                leading: Icon(Icons.account_circle, color: Colors.grey[500]),
                 trailing: Icon(Icons.expand_more),
                 children: [
                   _buildDetailRow('Driver: ${booking['nameD']}', Colors.blue),
@@ -248,8 +259,6 @@ class _BookingsPageState extends State<BookingsPage> {
                   _buildDetailRow('Note: ${booking['Note'] ?? 'N/A'}', Colors.grey),
                   _buildDetailRow('Date: ${formatDate(booking['date'])}', Colors.blueAccent),
                   _buildDetailRow('Time: ${booking['time']}', Colors.blueAccent),
-                  _buildDetailRow('Driver Rating: ${booking['driverRate'] ?? 'N/A'}', Colors.yellow),
-                  _buildDetailRow('Note Rate: ${booking['NoteRate'] ?? 'N/A'}', Colors.yellow),
                   SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

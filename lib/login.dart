@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:project1/register.dart';
 import 'package:http/http.dart' as http ;
@@ -227,7 +228,9 @@ class _LoginState extends State<Login> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 2.0, left: 50),
+                  padding: const EdgeInsets.only(top: 2.0,
+                    left: kIsWeb ? 600 : 50, // إذا كان ويب، استخدم 100، وإلا استخدم 50
+                  ),
                   child: Image.asset(
                     "imagess/login_icon.png",
                     width: 350,

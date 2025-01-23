@@ -6,8 +6,10 @@ import 'AdminPassengerpage.dart';
 
 class UserManagementPage extends StatefulWidget {
   final String token; // أضف التوكن هنا
+  final String name; // أضف التوكن هنا
+  final String email; // أضف التوكن هنا
 
-  const UserManagementPage({required this.token});
+  const UserManagementPage({required this.token,required this.name,required this.email});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
@@ -71,9 +73,9 @@ class _UserManagementPageState extends State<UserManagementPage> {
         index: _currentPageIndex,
         children: [
           _buildMainGrid(context), // الصفحة الرئيسية
-          AllUsersPage(token:widget.token),         // صفحة All Users
-          AllDriversPage(),       // صفحة Drivers
-          AllPassengersPage(),    // صفحة Passengers
+          AllUsersPage(token:widget.token,name:widget.name,email:widget.email),         // صفحة All Users
+          AllDriversPage(token:widget.token),       // صفحة Drivers
+          AllPassengersPage(token:widget.token),     // صفحة Passengers
         ],
       ),
     );
