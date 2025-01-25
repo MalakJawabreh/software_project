@@ -229,7 +229,7 @@ class _RegisterState extends State<Register> {
                   DropdownButton<String>(
                     value: selectedRole,
                     hint: Text("Select your role"),
-                    items: <String>['Passenger', 'Driver', 'Service Provider'].map((String value) {
+                    items: <String>['Passenger', 'Driver'].map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value),

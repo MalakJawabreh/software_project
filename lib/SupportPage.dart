@@ -413,15 +413,13 @@ class _SupportFormPageState extends State<SupportFormPage> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF006699),  // الأزرق الفاتح
-                    Color(0xFF3399CC),  // الأزرق السماوي
-                    Color(0x004266E7),  // الأزرق الداكن
-
+                    Color(0xFFFFC0CB), // لون زهري فاتح
+                    Color(0xFFFFC0CB), // زهري متوسط
+                    Color(0xFFFFA6C1), // زهري مائل للغامق قليلاً
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   stops: [0.2, 0.5, 0.8],
-                  tileMode: TileMode.mirror, // تأثير تكرار اللون
                 ),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
@@ -438,27 +436,27 @@ class _SupportFormPageState extends State<SupportFormPage> {
                 children: [
                   Text(
                     widget.isArabic ? 'يرجى ملء النموذج أدناه' : 'Please fill out the form below',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF800000)), // لون نص زهري غامق
                   ),
                   SizedBox(height: 16),
                   Text(
                     widget.isArabic ? 'الشكوى أو الاستفسار:' : 'Complaint or Inquiry:',
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFB03060)), // لون زهري داكن
                   ),
                   SizedBox(height: 8),
                   TextField(
                     controller: complaintController,
                     decoration: InputDecoration(
                       hintText: widget.isArabic ? 'اكتب شكواك هنا' : 'Write your complaint here',
-                      hintStyle: TextStyle(color: Colors.grey),
+                      hintStyle: TextStyle(color: Color(0xFFA67C9F)), // لون زهري خفيف
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.9),
+                      fillColor: Colors.white.withOpacity(0.8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF003366), width: 2), // Deep Blue
+                        borderSide: BorderSide(color: Color(0xFFB03060), width: 2), // زهري غامق
                       ),
                     ),
                     maxLines: 5,
@@ -466,13 +464,13 @@ class _SupportFormPageState extends State<SupportFormPage> {
                   SizedBox(height: 16),
                   Text(
                     widget.isArabic ? 'اختر الفئة:' : 'Choose a category:',
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFB03060)),
                   ),
                   SizedBox(height: 8),
                   Container(
                     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -484,20 +482,26 @@ class _SupportFormPageState extends State<SupportFormPage> {
                     ),
                     child: DropdownButton<String>(
                       value: selectedCategory,
-                      hint: Text(widget.isArabic ? 'اختر الفئة' : 'Select Category'),
+                      hint: Text(
+                        widget.isArabic ? 'اختر الفئة' : 'Select Category',
+                        style: TextStyle(color: Color(0xFF800000)),
+                      ),
                       onChanged: (String? newValue) {
                         setState(() {
                           selectedCategory = newValue;
                         });
                       },
                       isExpanded: true,
-                      icon: Icon(Icons.arrow_drop_down, color: Color(0xFF003366)), // Deep Blue
+                      icon: Icon(Icons.arrow_drop_down, color: Color(0xFF800000)),
                       underline: Container(),
                       items: <String>['دعم فني', 'شكاوى عامة', 'استفسار']
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
-                          child: Text(value, style: TextStyle(color: Color(0xFF003366))),
+                          child: Text(
+                            value,
+                            style: TextStyle(color: Color(0xFF800000)),
+                          ),
                         );
                       }).toList(),
                     ),
@@ -505,22 +509,22 @@ class _SupportFormPageState extends State<SupportFormPage> {
                   SizedBox(height: 16),
                   Text(
                     widget.isArabic ? 'البريد الإلكتروني (اختياري):' : 'Email (Optional):',
-                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFB03060)),
                   ),
                   SizedBox(height: 8),
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
                       hintText: widget.isArabic ? 'اكتب بريدك الإلكتروني هنا' : 'Enter your email here',
-                      hintStyle: TextStyle(color: Colors.white60),
+                      hintStyle: TextStyle(color: Color(0xFFA67C9F)),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.9),
+                      fillColor: Colors.white.withOpacity(0.8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Color(0xFF003366), width: 2), // Deep Blue
+                        borderSide: BorderSide(color: Color(0xFFB03060), width: 2),
                       ),
                     ),
                   ),
@@ -532,7 +536,6 @@ class _SupportFormPageState extends State<SupportFormPage> {
                         String category = selectedCategory!;
                         String email = emailController.text.isNotEmpty ? emailController.text : "Not Provided";
 
-                        // عرض رسالة تأكيد
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -551,7 +554,6 @@ class _SupportFormPageState extends State<SupportFormPage> {
                           ),
                         );
                       } else {
-                        // في حال كانت الحقول فارغة أو لم يتم اختيار الفئة
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -572,7 +574,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF003366), // Deep Blue
+                      backgroundColor: Color(0xFFB03060), // زهري غامق
                       padding: EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -580,8 +582,8 @@ class _SupportFormPageState extends State<SupportFormPage> {
                       textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     child: Text(
-                      widget.isArabic ? 'إرسال ' : 'Submit ',
-                      style: TextStyle(color: Colors.white), // جعل النص باللون الأبيض
+                      widget.isArabic ? 'إرسال' : 'Submit',
+                      style: TextStyle(color: Colors.white),
                     ),
 
                   ),
